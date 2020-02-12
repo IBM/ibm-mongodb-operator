@@ -1,0 +1,343 @@
+package mongodb
+
+const statefulset = `
+---
+# Source: icp-mongodb/templates/mongodb-statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: icp-mongodb
+    chart: icp-mongodb-3.4.2
+    release: mongodb
+  name: icp-mongodb
+  namespace: ibm-mongodb-operator
+spec:
+  serviceAccountName: ibm-mongodb-operator
+  selector:
+    matchLabels:
+      app: icp-mongodb
+      release: mongodb
+  serviceName: icp-mongodb
+  replicas: {{ .Replicas }}
+  template:
+    metadata:
+      labels:
+        app: icp-mongodb
+        release: mongodb
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9216"
+        prometheus.io/path: "/metrics"
+    spec:
+      terminationGracePeriodSeconds: 30
+      hostNetwork: false
+      hostPID: false
+      hostIPC: false
+      imagePullSecrets:
+        - name: {{.ImagePullSecret}}
+      initContainers:
+        - name: install
+          image: "{{ .ImageRepo }}/ibm-mongodb-install:3.3.2"
+          command:
+            - /install/install.sh
+          args:
+            - --work-dir=/work-dir
+            - --config-dir=/data/configdb
+          imagePullPolicy: "IfNotPresent"
+          resources:
+            limits:
+              memory: 8Gi
+            requests:
+              memory: 4Gi
+          volumeMounts:
+            - name: mongodbdir
+              subPath: workdir
+              mountPath: /work-dir
+            - name: configdir
+              mountPath: /data/configdb
+            - name: config
+              mountPath: /configdb-readonly
+            - name: install
+              mountPath: /install
+            - name: keydir
+              mountPath: /keydir-readonly
+            - name: ca
+              mountPath: /ca-readonly
+            - name: mongodbdir
+              subPath: datadir
+              mountPath: /data/db
+            - name: tmp-mongodb
+              mountPath: /tmp
+        - name: install-metrics
+          image: "{{ .ImageRepo }}/ibm-mongodb-install:3.3.2"
+          command:
+            - /bin/sh
+          args:
+            - -c
+            - chmod -R 777 /tmp
+          imagePullPolicy: "IfNotPresent"
+          resources:
+            limits:
+              cpu: 300m
+              memory: 256Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
+          volumeMounts:
+            - name: tmp-metrics
+              mountPath: /tmp
+        - name: bootstrap
+          image: "{{ .ImageRepo }}/ibm-mongodb:4.0.12-build.3"
+          command:
+            - /work-dir/peer-finder
+          args:
+            - -on-start=/init/on-start.sh
+            - "-service=icp-mongodb"
+          imagePullPolicy: "IfNotPresent"
+          resources:
+            limits:
+              memory: 8Gi
+            requests:
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: REPLICA_SET
+              value: rs0
+            - name: AUTH
+              value: "true"
+            - name: ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "icp-mongodb-admin"
+                  key: user
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "icp-mongodb-admin"
+                  key: password
+            - name: METRICS
+              value: "true"
+            - name: METRICS_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "icp-mongodb-metrics"
+                  key: user
+            - name: METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "icp-mongodb-metrics"
+                  key: password
+            - name: NETWORK_IP_VERSION
+              value: ipv4
+          volumeMounts:
+            - name: mongodbdir
+              subPath: workdir
+              mountPath: /work-dir
+            - name: configdir
+              mountPath: /data/configdb
+            - name: init
+              mountPath: /init
+            - name: mongodbdir
+              subPath: datadir
+              mountPath: /data/db
+            - name: tmp-mongodb
+              mountPath: /tmp
+      containers:
+        - name: icp-mongodb
+          image: "{{ .ImageRepo }}/ibm-mongodb:4.0.12-build.3"
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+          ports:
+            - name: peer
+              containerPort: 27017
+          resources:
+            limits:
+              memory: 8Gi
+            requests:
+              memory: 4Gi
+          command:
+            - mongod
+            - --config=/data/configdb/mongod.conf
+          env:
+            - name: AUTH
+              value: "true"
+            - name: ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "icp-mongodb-admin"
+                  key: user
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "icp-mongodb-admin"
+                  key: password
+          livenessProbe:
+            exec:
+              command:
+                - mongo
+                - --ssl
+                - --sslCAFile=/data/configdb/tls.crt
+                - --sslPEMKeyFile=/work-dir/mongo.pem
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+          readinessProbe:
+            exec:
+              command:
+                - mongo
+                - --ssl
+                - --sslCAFile=/data/configdb/tls.crt
+                - --sslPEMKeyFile=/work-dir/mongo.pem
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+          volumeMounts:
+            - name: mongodbdir
+              subPath: datadir
+              mountPath: /data/db
+            - name: configdir
+              mountPath: /data/configdb
+            - name: mongodbdir
+              subPath: workdir
+              mountPath: /work-dir
+            - name: tmp-mongodb
+              mountPath: /tmp
+    
+        - name: metrics
+          image: "{{ .ImageRepo }}/ibm-mongodb-exporter:3.3.2"
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+          command:
+            - sh
+            - -ec
+            - >-
+              /bin/mongodb_exporter
+              --mongodb.uri mongodb://$METRICS_USER:$METRICS_PASSWORD@localhost:27017
+              --mongodb.tls
+              --mongodb.tls-ca=/data/configdb/tls.crt
+              --mongodb.tls-cert=/work-dir/mongo.pem
+              --mongodb.socket-timeout=3s
+              --mongodb.sync-timeout=1m
+              --web.telemetry-path=/metrics
+              --web.listen-address=:9216
+          volumeMounts:
+            - name: configdir
+              mountPath: /data/configdb
+            - name: mongodbdir
+              subPath: workdir
+              mountPath: /work-dir
+            - name: tmp-metrics
+              mountPath: /tmp
+          env:
+            - name: METRICS_USER
+              valueFrom:
+                secretKeyRef:
+                  name: "icp-mongodb-metrics"
+                  key: user
+            - name: METRICS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "icp-mongodb-metrics"
+                  key: password
+          ports:
+            - name: metrics
+              containerPort: 9216
+          resources:
+            limits:
+              cpu: 300m
+              memory: 256Mi
+            requests:
+              cpu: 300m
+              memory: 256Mi
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -ec
+                - >-
+                  /bin/mongodb_exporter
+                  --mongodb.uri mongodb://$METRICS_USER:$METRICS_PASSWORD@localhost:27017
+                  --mongodb.tls
+                  --mongodb.tls-ca=/data/configdb/tls.crt
+                  --mongodb.tls-cert=/work-dir/mongo.pem
+                  --test
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -ec
+                - >-
+                  /bin/mongodb_exporter
+                  --mongodb.uri mongodb://$METRICS_USER:$METRICS_PASSWORD@localhost:27017
+                  --mongodb.tls
+                  --mongodb.tls-ca=/data/configdb/tls.crt
+                  --mongodb.tls-cert=/work-dir/mongo.pem
+                  --test
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      tolerations:
+        - effect: NoSchedule
+          key: dedicated
+          operator: Exists
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - effect: NoExecute
+          key: node.kubernetes.io/not-ready
+          operator: Exists
+        - effect: NoExecute
+          key: node.kubernetes.io/unreachable
+          operator: Exists
+      volumes:
+        - name: config
+          configMap:
+            name: icp-mongodb
+        - name: init
+          configMap:
+            defaultMode: 0755
+            name: icp-mongodb-init
+        - name: install
+          configMap:
+            defaultMode: 0755
+            name: icp-mongodb-install
+        - name: ca
+          secret:
+            defaultMode: 0400
+            secretName: cluster-ca-cert
+        - name: keydir
+          secret:
+            defaultMode: 0400
+            secretName: icp-mongodb-keyfile
+        - name: configdir
+          emptyDir: {}
+        - name: tmp-mongodb
+          emptyDir: {}
+        - name: tmp-metrics
+          emptyDir: {}
+        - name: mongodbdir
+          emptyDir: {}
+`
