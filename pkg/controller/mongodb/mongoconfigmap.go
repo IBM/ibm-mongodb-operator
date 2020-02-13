@@ -13,11 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 package mongodb
 
-const service = `
+const mongodbConfigMap =`
+---
+# Source: icp-mongodb/templates/mongodb-configmap.yaml
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
   labels:
     app.kubernetes.io/name: icp-mongodb
@@ -27,16 +30,22 @@ metadata:
     app.kubernetes.io/part-of: common-services-cloud-pak
     app.kubernetes.io/managed-by: operator
     release: mongodb
-  name: mongodb
+  name: icp-mongodb
   namespace: ibm-mongodb-operator
-spec:
-  serviceAccountName: ibm-mongodb-operator
-  type: ClusterIP
-  ports:
-  - port: 27017
-    protocol: TCP
-    targetPort: 27017
-  selector:
-    app: icp-mongodb
-    release: mongodb
-`
+data:
+  mongod.conf: |
+    storage:
+      dbPath: /data/db
+    net:
+      bindIpAll: true
+      port: 27017
+      ssl:
+        mode: requireSSL
+        CAFile: /data/configdb/tls.crt
+        PEMKeyFile: /work-dir/mongo.pem
+    replication:
+      replSetName: rs0
+    # Uncomment for TLS support or keyfile access control without TLS
+    security:
+      authorization: enabled
+      keyFile: /data/configdb/key.txt`
