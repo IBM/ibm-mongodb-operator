@@ -271,7 +271,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 				log "host for password upd ($mhost)"
 				mongo admin $mhost "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.changeUserPassword('$admin_user', '$ADMIN_PASSWORD')" >> /work-dir/log.txt 2>&1
 				sleep 10
-				log "mongo passwd change attempted; check and update creds file if successfull"
+				log "mongo passwd change attempted; check and update creds file if successfully"
 				update_creds_if_changed
 			  fi
 			}
@@ -475,7 +475,8 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 					log "User count is ${metric_user_count} "
 					if [[ "${metric_user_count}" == "0" ]]; then
 						log "Creating clusterMonitor user... user - ${metrics_user}  "
-						mongo admin --host "${primary}" "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.createUser({user: '${metrics_user}', pwd: '${metrics_password}', roles: [{role: 'clusterMonitor', db: 'admin'}, {role: 'read', db: 'local'}]})"
+						mongo admin --host "${primary}" "${admin_auth[@]}" "${ssl_args[@]}" \
+						--eval "db.createUser({user: '${metrics_user}', pwd: '${metrics_password}', roles: [{role: 'clusterMonitor', db: 'admin'}, {role: 'read', db: 'local'}]})"
 						log "User creation return code is $? "
 						metric_user_count=$(mongo admin --host "${primary}" "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.system.users.find({user: '${metrics_user}'}).count()" --quiet)
 						log "User count now is ${metric_user_count} "
