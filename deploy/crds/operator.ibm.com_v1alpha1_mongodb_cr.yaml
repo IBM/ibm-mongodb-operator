@@ -1,0 +1,9 @@
+apiVersion: operator.ibm.com/v1alpha1
+kind: MongoDB
+metadata:
+  name: example-mongodb
+spec:
+  replicas: 3
+  imageRegistry: quay.io/opencloudio
+
+
