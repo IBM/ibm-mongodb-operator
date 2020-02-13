@@ -23,7 +23,6 @@ kind: StatefulSet
 metadata:
   labels:
     app: icp-mongodb
-    chart: icp-mongodb-3.4.2
     release: mongodb
   name: icp-mongodb
   namespace: ibm-mongodb-operator
