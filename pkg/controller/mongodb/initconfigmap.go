@@ -15,7 +15,7 @@
 //
 package mongodb
 
-const initConfigMap =`
+const initConfigMap = `
 ---
 # Source: icp-mongodb/templates/mongodb-init-configmap.yaml
 apiVersion: v1
@@ -105,7 +105,7 @@ data:
         log "host for password upd ($mhost)"
         mongo admin $mhost "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.changeUserPassword('$admin_user', '$ADMIN_PASSWORD')" >> /work-dir/log.txt 2>&1
         sleep 10
-        log "mongo passwd change attempted; check and update creds file if successfull"
+        log "mongo passwd change attempted; check and update creds file if successful"
         update_creds_if_changed
       fi
     }

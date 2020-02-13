@@ -165,7 +165,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	if err := r.createFromYaml(instance, []byte(initConfigMap)); err != nil {
 		return reconcile.Result{}, err
 	}
-	
+
 	log.Info("creating icp mongodb install config map")
 
 	if err := r.createFromYaml(instance, []byte(installConfigMap)); err != nil {

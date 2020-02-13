@@ -15,7 +15,7 @@
 //
 package mongodb
 
-const installConfigMap =`
+const installConfigMap = `
 ---
 # Source: icp-mongodb/templates/mongodb-install-configmap.yaml
 apiVersion: v1
