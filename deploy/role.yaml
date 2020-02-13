@@ -1,5 +1,5 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
+kind: Role
 metadata:
   creationTimestamp: null
   name: ibm-mongodb-operator
@@ -79,4 +79,19 @@ rules:
   - patch
   - update
   - watch
-
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  resourceNames:
+  - mongodb-comfigmap
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  resourceNames:
+  - mongodb-secret
+  verbs:
+  - get
