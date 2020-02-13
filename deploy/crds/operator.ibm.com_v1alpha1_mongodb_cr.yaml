@@ -4,7 +4,6 @@ metadata:
   name: example-mongodb
 spec:
   replicas: 3
-  pullSecret: image-pull-secret
-  imageRegistry: hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64
+  imageRegistry: quay.io/opencloudio
 
 

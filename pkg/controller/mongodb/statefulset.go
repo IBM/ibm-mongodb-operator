@@ -49,8 +49,6 @@ spec:
       hostNetwork: false
       hostPID: false
       hostIPC: false
-      imagePullSecrets:
-        - name: {{.ImagePullSecret}}
       initContainers:
         - name: install
           image: "{{ .ImageRepo }}/ibm-mongodb-install:3.3.2"
