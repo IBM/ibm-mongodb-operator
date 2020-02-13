@@ -1,12 +1,17 @@
-kind: ClusterRoleBinding
+kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: ibm-mongodb-operator
 subjects:
 - kind: ServiceAccount
   name: ibm-mongodb-operator
-  namespace: ibm-mongodb-operator
+- kind: ServiceAccount
+  name: ibm-metering-operator
+  namespace: ibm-metering-operator
+- kind: ServiceAccount
+  name: ibm-iam-operator
+  namespace: ibm-iam-operator
 roleRef:
-  kind: ClusterRole
+  kind: Role
   name: ibm-mongodb-operator
   apiGroup: rbac.authorization.k8s.io
