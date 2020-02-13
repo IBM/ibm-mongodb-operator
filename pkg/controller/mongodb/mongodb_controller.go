@@ -131,11 +131,13 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	stsData := struct {
-		Replicas  int
-		ImageRepo string
+		Replicas     int
+		ImageRepo    string
+		StorageClass string
 	}{
-		Replicas:  instance.Spec.Replicas,
-		ImageRepo: instance.Spec.ImageRegistry,
+		Replicas:     instance.Spec.Replicas,
+		ImageRepo:    instance.Spec.ImageRegistry,
+		StorageClass: instance.Spec.StorageClass,
 	}
 
 	var stsYaml bytes.Buffer
