@@ -83,9 +83,9 @@ uninstall: ## Uninstall all that all performed in the $ make install
 	@echo ....... Deleting CRDs.......
 	- kubectl delete -f deploy/crds/operator.ibm.com_mongodbs_crd.yaml
 	@echo ....... Deleting Rules and Service Account .......
-	- kubectl delete -f deploy/role_binding.yaml
+	- kubectl delete -f deploy/role_binding.yaml -n ${NAMESPACE}
 	- kubectl delete -f deploy/service_account.yaml -n ${NAMESPACE}
-	- kubectl delete -f deploy/role.yaml
+	- kubectl delete -f deploy/role.yaml -n ${NAMESPACE}
 	@echo ....... Deleting namespace ${NAMESPACE}.......
 	- kubectl delete namespace ${NAMESPACE}
 

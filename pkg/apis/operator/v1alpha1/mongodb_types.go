@@ -29,6 +29,7 @@ type MongoDBSpec struct {
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
 	ImageRegistry string `json:"imageRegistry,omitempty"`
 	Replicas      int    `json:"replicas,omitempty"`
+	StorageClass  string `json:"storageClass,omitempty"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB

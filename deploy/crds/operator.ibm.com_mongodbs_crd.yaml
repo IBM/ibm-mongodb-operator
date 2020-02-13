@@ -39,6 +39,8 @@ spec:
               type: string
             replicas:
               type: integer
+            storageClass:
+              type: string
           type: object
         status:
           description: MongoDBStatus defines the observed state of MongoDB
