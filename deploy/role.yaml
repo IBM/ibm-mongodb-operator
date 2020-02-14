@@ -39,13 +39,6 @@ rules:
   - update
   - watch
 - apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - servicemonitors
-  verbs:
-  - get
-  - create
-- apiGroups:
   - apps
   resourceNames:
   - ibm-mongodb-operator
@@ -54,20 +47,8 @@ rules:
   verbs:
   - update
 - apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - get
-- apiGroups:
-  - apps
-  resources:
-  - replicasets
-  - deployments
-  verbs:
-  - get
-- apiGroups:
   - operator.ibm.com
+  - security.openshift.io
   resources:
   - '*'
   - mongodbs
