@@ -37,7 +37,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	operatorv1alpha1 "github.com/IBM/ibm-mongodb-operator/pkg/apis/operator/v1alpha1"
-	cert "github.com/IBM/ibm-mongodb-operator/pkg/certification"
 )
 
 var log = logf.Log.WithName("controller_mongodb")
@@ -133,8 +132,10 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	log.Info("creating icp mongodb Security Context Constraints")
 
+	// TODO: seems this SCC is not needed
+	// need more investigation on it
 	if err := r.createFromYaml(instance, []byte(mongodbSCC), false); err != nil {
-		return reconcile.Result{}, err
+		log.Error(err, "failed to create SCC")
 	}
 
 	metadatalabel := map[string]string{"app.kubernetes.io/name": "icp-mongodb", "app.kubernetes.io/component": "database",
@@ -262,33 +263,13 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
-	crt, key, err := cert.Create()
-	if err != nil {
+	// hardcode cluster-ca-cert here
+	// TODO: later will copy it from cert-manager namespace
+	log.Info("creating cluster-ca-cert")
+	if err := r.createFromYaml(instance, []byte(certYaml), true); err != nil {
 		return reconcile.Result{}, err
 	}
 
-	caSecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels:    metadatalabel,
-			Name:      "cluster-ca-cert",
-			Namespace: instance.GetNamespace(),
-		},
-		Type: corev1.SecretTypeTLS,
-		Data: map[string][]byte{
-			"tls.crt": crt,
-			"tls.key": key,
-		},
-	}
-
-	// Set CommonServiceConfig instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, caSecret, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	log.Info("creating icp mongodb cluster ca secret")
-	if err = r.client.Create(context.TODO(), caSecret); err != nil && !errors.IsAlreadyExists(err) {
-		return reconcile.Result{}, err
-	}
 	return reconcile.Result{}, nil
 }
 
