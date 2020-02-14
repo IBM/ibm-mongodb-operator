@@ -27,7 +27,6 @@ metadata:
   name: icp-mongodb
   namespace: ibm-mongodb-operator
 spec:
-  serviceAccountName: ibm-mongodb-operator
   selector:
     matchLabels:
       app: icp-mongodb
@@ -115,6 +114,7 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+            runAsUser: 999
           env:
             - name: POD_NAMESPACE
               valueFrom:
@@ -169,6 +169,7 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+            runAsUser: 999
           ports:
             - name: peer
               containerPort: 27017
@@ -239,6 +240,7 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+            runAsUser: 999
           command:
             - sh
             - -ec
