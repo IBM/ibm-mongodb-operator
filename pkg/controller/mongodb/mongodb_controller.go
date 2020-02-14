@@ -158,6 +158,67 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
+	var pass, user string
+	if instance.Spec.MongoDBPass == "" {
+		pass = "admin"
+	} else {
+		pass = instance.Spec.MongoDBPass
+	}
+
+	if instance.Spec.MongoDBUser == "" {
+		user = "admin"
+	} else {
+		user = instance.Spec.MongoDBUser
+	}
+
+	mongodbAdmin := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels: map[string]string{
+				"app": "icp-mongodb",
+			},
+			Name:      "icp-mongodb-admin",
+			Namespace: instance.GetNamespace(),
+		},
+		Type: corev1.SecretTypeOpaque,
+		StringData: map[string]string{
+			"user":     user,
+			"password": pass,
+		},
+	}
+
+	// Set CommonServiceConfig instance as the owner and controller
+	if err := controllerutil.SetControllerReference(instance, mongodbAdmin, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	log.Info("creating icp mongodb admin secret")
+	if err = r.client.Create(context.TODO(), mongodbAdmin); err != nil && !errors.IsAlreadyExists(err) {
+		return reconcile.Result{}, err
+	}
+
+	mongodbMetric := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:    metadatalabel,
+			Name:      "icp-mongodb-metrics",
+			Namespace: instance.GetNamespace(),
+		},
+		Type: corev1.SecretTypeOpaque,
+		StringData: map[string]string{
+			"user":     "metrics",
+			"password": "icpmetrics",
+		},
+	}
+
+	// Set CommonServiceConfig instance as the owner and controller
+	if err := controllerutil.SetControllerReference(instance, mongodbMetric, r.scheme); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	log.Info("creating icp mongodb metric secret")
+	if err = r.client.Create(context.TODO(), mongodbMetric); err != nil && !errors.IsAlreadyExists(err) {
+		return reconcile.Result{}, err
+	}
+
 	keyfileSecret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels:    metadatalabel,
@@ -165,8 +226,8 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 			Namespace: instance.GetNamespace(),
 		},
 		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{
-			"key.txt": []byte("aWNwdGVzdA=="),
+		StringData: map[string]string{
+			"key.txt": "icptest",
 		},
 	}
 

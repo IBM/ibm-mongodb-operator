@@ -30,6 +30,8 @@ type MongoDBSpec struct {
 	ImageRegistry string `json:"imageRegistry,omitempty"`
 	Replicas      int    `json:"replicas,omitempty"`
 	StorageClass  string `json:"storageClass,omitempty"`
+	MongoDBUser   string `json:"mongoDBUser,omitempty"`
+	MongoDBPass   string `json:"mongoDBPass,omitempty"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB

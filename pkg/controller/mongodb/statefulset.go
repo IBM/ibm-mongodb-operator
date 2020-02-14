@@ -114,7 +114,6 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            runAsNonRoot: true
             runAsUser: 999
           env:
             - name: POD_NAMESPACE
@@ -170,7 +169,6 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            runAsNonRoot: true
             runAsUser: 999
           ports:
             - name: peer
@@ -242,7 +240,6 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            runAsNonRoot: true
             runAsUser: 999
           command:
             - sh
