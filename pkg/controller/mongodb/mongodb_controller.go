@@ -23,6 +23,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -35,8 +36,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	storagev1 "k8s.io/api/storage/v1"
-
 
 	operatorv1alpha1 "github.com/IBM/ibm-mongodb-operator/pkg/apis/operator/v1alpha1"
 )
@@ -256,7 +255,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	fmt.Println(storageclass)
-	
+
 	stsData := struct {
 		Replicas     int
 		ImageRepo    string
