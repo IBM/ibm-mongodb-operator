@@ -241,8 +241,8 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 			Namespace: instance.GetNamespace(),
 		},
 		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{
-			"key.txt": []byte("aWNwdGVzdA=="),
+		StringData: map[string]string{
+			"key.txt": "icptest",
 		},
 	}
 
