@@ -35,6 +35,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	storagev1 "k8s.io/api/storage/v1"
+
 
 	operatorv1alpha1 "github.com/IBM/ibm-mongodb-operator/pkg/apis/operator/v1alpha1"
 )
@@ -242,6 +244,19 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
+	var storageclass string
+
+	if instance.Spec.StorageClass == "" {
+		storageclass, err = r.getstorageclass()
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+	} else {
+		storageclass = instance.Spec.StorageClass
+	}
+
+	fmt.Println(storageclass)
+	
 	stsData := struct {
 		Replicas     int
 		ImageRepo    string
@@ -249,7 +264,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}{
 		Replicas:     instance.Spec.Replicas,
 		ImageRepo:    instance.Spec.ImageRegistry,
-		StorageClass: instance.Spec.StorageClass,
+		StorageClass: storageclass,
 	}
 
 	var stsYaml bytes.Buffer
@@ -297,4 +312,30 @@ func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, ya
 	}
 
 	return nil
+}
+
+func (r *ReconcileMongoDB) getstorageclass() (string, error) {
+	scList := &storagev1.StorageClassList{}
+	err := r.client.List(context.TODO(), scList)
+	if err != nil {
+		return "", err
+	}
+	if len(scList.Items) == 0 {
+		return "", fmt.Errorf("could not storage class in the cluster")
+	}
+	for _, sc := range scList.Items {
+		if sc.Provisioner == "kubernetes.io/no-provisioner" {
+			continue
+		}
+		if sc.ObjectMeta.GetAnnotations()["storageclass.beta.kubernetes.io/is-default-class"] != "true" {
+			return sc.GetName(), nil
+		}
+	}
+	for _, sc := range scList.Items {
+		if sc.Provisioner == "kubernetes.io/no-provisioner" {
+			continue
+		}
+		return sc.GetName(), nil
+	}
+	return "", fmt.Errorf("could not dynamic provisioner storage class in the cluster")
 }
