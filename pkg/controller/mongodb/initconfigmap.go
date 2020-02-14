@@ -34,22 +34,24 @@ metadata:
 data:
   on-start.sh: |
     #!/bin/bash
-    
+
+    ## workaround https://serverfault.com/questions/713325/openshift-unable-to-write-random-state
+    export RANDFILE=/tmp/.rnd
     port=27017
     replica_set=$REPLICA_SET
     script_name=${0##*/}
     credentials_file=/work-dir/credentials.txt
     config_dir=/data/configdb
-    
+
     function log() {
         local msg="$1"
         local timestamp=$(date --iso-8601=ns)
         echo "[$timestamp] [$script_name] $msg"
         echo "[$timestamp] [$script_name] $msg" >> /work-dir/log.txt
     }
-    
+
     if [[ "$AUTH" == "true" ]]; then
-    
+
         if [ !  -f "$credentials_file" ]; then
             log "Creds File Not found!"
             echo $ADMIN_USER > $credentials_file
@@ -63,7 +65,7 @@ data:
             metrics_password="$METRICS_PASSWORD"
         fi
     fi
-    
+
     function shutdown_mongo() {
         if [[ $# -eq 1 ]]; then
             args="timeoutSecs: $1"
@@ -73,7 +75,7 @@ data:
         log "Shutting down MongoDB ($args)..."
         mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.shutdownServer({$args})"
     }
-    
+
     #Check if Password has change and updated in mongo , if so update Creds
     function update_creds_if_changed() {
       if [ "$admin_password" != "$ADMIN_PASSWORD" ]; then
@@ -91,7 +93,7 @@ data:
           fi
       fi
     }
-    
+
     function update_mongo_password_if_changed() {
       log "checking if mongo passwd needs to be  updated"
       if [[ "$passwd_changed" == "true" ]] && [[ "$passwd_updated" != "true" ]]; then
@@ -101,7 +103,7 @@ data:
         else
             mhost=""
         fi
-    
+
         log "host for password upd ($mhost)"
         mongo admin $mhost "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.changeUserPassword('$admin_user', '$ADMIN_PASSWORD')" >> /work-dir/log.txt 2>&1
         sleep 10
@@ -109,12 +111,12 @@ data:
         update_creds_if_changed
       fi
     }
-    
-    
-    
+
+
+
     my_hostname=$(hostname)
     log "Bootstrapping MongoDB replica set member: $my_hostname"
-    
+
     log "Reading standard input..."
     while read -ra line; do
         log "line is  ${line}"
@@ -123,12 +125,12 @@ data:
         fi
         peers=("${peers[@]}" "$line")
     done
-    
+
     # Move into /work-dir
     pushd /work-dir
     pwd >> /work-dir/log.txt
     ls -l  >> /work-dir/log.txt
-    
+
     # Generate the ca cert
     ca_crt=$config_dir/tls.crt
     if [ -f $ca_crt  ]; then
@@ -136,11 +138,11 @@ data:
         ca_key=$config_dir/tls.key
         pem=/work-dir/mongo.pem
         ssl_args=(--ssl --sslCAFile $ca_crt --sslPEMKeyFile $pem)
-    
+
         echo "ca stuff" >> /work-dir/log.txt
         cat $ca_crt >> /work-dir/log.txt
         cat $ca_key >> /work-dir/log.txt
-    
+
     cat >openssl.cnf <<EOL
     [req]
     req_extensions = v3_req
@@ -158,26 +160,26 @@ data:
     DNS.5 = 127.0.0.1
     DNS.6 = mongodb
     EOL
-    
+
         # Generate the certs
         echo "cnf stuff" >> /work-dir/log.txt
         cat openssl.cnf >> /work-dir/log.txt
         echo "genrsa " >> /work-dir/log.txt
         openssl genrsa -out mongo.key 2048 >> /work-dir/log.txt 2>&1
-    
+
         echo "req " >> /work-dir/log.txt
         openssl req -new -key mongo.key -out mongo.csr -subj "/CN=$my_hostname" -config openssl.cnf >> /work-dir/log.txt 2>&1
-    
+
         echo "x509 " >> /work-dir/log.txt
         openssl x509 -req -in mongo.csr \
             -CA $ca_crt -CAkey $ca_key -CAcreateserial \
             -out mongo.crt -days 3650 -extensions v3_req -extfile openssl.cnf >> /work-dir/log.txt 2>&1
-    
+
         echo "mongo stuff" >> /work-dir/log.txt
         cat mongo.csr >> /work-dir/log.txt
-    
+
         rm mongo.csr
-    
+
         echo "mongo key" >> /work-dir/log.txt
         cat mongo.key >> /work-dir/log.txt
         echo "mongo crt" >> /work-dir/log.txt
@@ -185,28 +187,28 @@ data:
         cat mongo.crt mongo.key > $pem
         rm mongo.key mongo.crt
     fi
-    
-    
+
+
     log "Peers: ${peers[@]}"
-    
+
     log "Starting a MongoDB instance..."
     mongod --config $config_dir/mongod.conf >> /work-dir/log.txt 2>&1 &
     pid=$!
     trap shutdown_mongo EXIT
-    
-    
+
+
     log "Waiting for MongoDB to be ready..."
     until [[ $(mongo "${ssl_args[@]}" --quiet --eval "db.adminCommand('ping').ok") == "1" ]]; do
         log "Retrying..."
         sleep 2
     done
-    
+
     log "Initialized."
-    
+
     if [[ "$AUTH" == "true" ]]; then
         update_creds_if_changed
     fi
-    
+
     iter_counter=0
     while [  $iter_counter -lt 5 ]; do
       log "primary check, iter_counter is $iter_counter"
@@ -214,7 +216,7 @@ data:
       for peer in "${peers[@]}"; do
           log "Checking if ${peer} is primary"
           mongo admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${ssl_args[@]}" --quiet --eval "rs.status()"  >> log.txt
-    
+
           # Check rs.status() first since it could be in primary catch up mode which db.isMaster() doesn't show
           if [[ $(mongo admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${ssl_args[@]}" --quiet --eval "rs.status().myState") == "1" ]]; then
               log "Found master ${peer}, wait while its in primary catch up mode "
@@ -226,23 +228,23 @@ data:
               break
           fi
       done
-    
+
       if [[ -z "${primary}" ]]  && [[ ${#peers[@]} -gt 1 ]] && (mongo "${ssl_args[@]}" --eval "rs.status()" | grep "no replset config has been received"); then
         log "waiting before creating a new replicaset, to avoid conflicts with other replicas"
         sleep 30
       else
         break
       fi
-    
+
       let iter_counter=iter_counter+1
     done
-    
-    
+
+
     if [[ "${primary}" = "${service_name}" ]]; then
         log "This replica is already PRIMARY"
-    
+
     elif [[ -n "${primary}" ]]; then
-    
+
         if [[ $(mongo admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${ssl_args[@]}" --quiet --eval "rs.conf().members.findIndex(m => m.host == '${service_name}:${port}')") == "-1" ]]; then
           log "Adding myself (${service_name}) to replica set..."
           if (mongo admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${ssl_args[@]}" --eval "rs.add('${service_name}')" | grep 'Quorum check failed'); then
@@ -251,58 +253,58 @@ data:
           fi
         fi
         log "Done,  Added myself to replica set."
-    
+
         sleep 3
         log 'Waiting for replica to reach SECONDARY state...'
         until printf '.'  && [[ $(mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --quiet --eval "rs.status().myState") == '2' ]]; do
             sleep 1
         done
         log '✓ Replica reached SECONDARY state.'
-    
+
     elif (mongo "${ssl_args[@]}" --eval "rs.status()" | grep "no replset config has been received"); then
-    
+
         log "Initiating a new replica set with myself ($service_name)..."
-    
+
         mongo "${ssl_args[@]}" --eval "rs.initiate({'_id': '$replica_set', 'members': [{'_id': 0, 'host': '$service_name'}]})"
         mongo "${ssl_args[@]}" --eval "rs.status()"
-    
+
         sleep 3
-    
+
         log 'Waiting for replica to reach PRIMARY state...'
-    
+
         log ' Waiting for rs.status state to become 1'
         until printf '.'  && [[ $(mongo "${ssl_args[@]}" --quiet --eval "rs.status().myState") == '1' ]]; do
             sleep 1
         done
-    
+
         log ' Waiting for master to complete primary catchup mode'
         until [[ $(mongo  "${ssl_args[@]}" --quiet --eval "db.isMaster().ismaster") == "true" ]]; do
             sleep 1
         done
-    
+
         primary="${service_name}"
         log '✓ Replica reached PRIMARY state.'
-    
-    
+
+
         if [[ "$AUTH" == "true" ]]; then
             # sleep a little while just to be sure the initiation of the replica set has fully
             # finished and we can create the user
             sleep 3
-    
+
             log "Creating admin user..."
             mongo admin "${ssl_args[@]}" --eval "db.createUser({user: '$admin_user', pwd: '$admin_password', roles: [{role: 'root', db: 'admin'}]})"
         fi
-    
+
         log "Done initiating replicaset."
-    
+
     fi
-    
+
     log "Primary: ${primary}"
-    
+
     if [[  -n "${primary}"   && "$AUTH" == "true" ]]; then
         # you r master and passwd has changed.. then update passwd
         update_mongo_password_if_changed $primary
-    
+
         if [[ "$METRICS" == "true" ]]; then
             log "Checking if metrics user is already created ..."
             metric_user_count=$(mongo admin --host "${primary}" "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.system.users.find({user: '${metrics_user}'}).count()" --quiet)
@@ -316,6 +318,6 @@ data:
             fi
         fi
     fi
-    
+
     log "MongoDB bootstrap complete"
     exit 0`
