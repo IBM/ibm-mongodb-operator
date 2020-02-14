@@ -1,0 +1,189 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "operator.ibm.com/v1alpha1",
+          "kind": "MongoDB",
+          "metadata": {
+            "name": "ibm-mongodb"
+          },
+          "spec": {
+            "imageRegistry": "quay.io/opencloudio",
+            "replicas": 3,
+            "storageClass": "rook-ceph-block-internal"
+          }
+        }
+      ]
+    capabilities: Basic Install
+    categories: Developer Tools, Database
+    certified: "false"
+    containerImage: quay.io/opencloudio/ibm-mongodb-operator:latest
+    createdAt: "2020-02-14T17:16:16Z"
+    description: The Mongodb operator provides a simple Kubernetes CRD-Based API to
+      manage the lifecycle of Mongodb. With this operator, you can simply deploy and
+      upgrade mongodb.
+    repository: https://github.com/IBM/ibm-mongodb-operator.git
+    support: IBM
+  name: ibm-mongodb-operator.v0.0.1
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: MongoDB is the Schema for the mongodbs API
+      displayName: MongoDB
+      kind: MongoDB
+      name: mongodbs.operator.ibm.com
+      specDescriptors:
+      - description: The desired number of MongoDB StatefulSet replica.
+        displayName: Replicas
+        path: replicas
+        x-descriptors:
+        - 'urn:alm:descriptor:com.tectonic.ui:podCount'
+      - description: The storage class for mongodb
+        displayName: StorageClass
+        path: storageClass
+        x-descriptors:
+          - 'urn:alm:descriptor:com.tectonic.ui:text'
+      version: v1alpha1
+  description: The Mongodb operator provides a simple Kubernetes CRD-Based API to
+    manage the lifecycle of Mongodb. With this operator, you can simply deploy and
+    upgrade mongodb.
+  displayName: IBM Mongodb Operator
+  install:
+    spec:
+      deployments:
+      - name: ibm-mongodb-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: ibm-mongodb-operator
+          strategy: {}
+          template:
+            metadata:
+              labels:
+                name: ibm-mongodb-operator
+            spec:
+              containers:
+              - command:
+                - ibm-mongodb-operator
+                env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: ibm-mongodb-operator
+                image: quay.io/opencloudio/ibm-mongodb-operator:latest
+                imagePullPolicy: Always
+                name: ibm-mongodb-operator
+                resources: {}
+              serviceAccountName: ibm-mongodb-operator
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - services/finalizers
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apps
+          resourceNames:
+          - ibm-mongodb-operator
+          resources:
+          - deployments/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - operator.ibm.com
+          - security.openshift.io
+          resources:
+          - '*'
+          - mongodbs
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - ""
+          resourceNames:
+          - mongodb-comfigmap
+          resources:
+          - configmaps
+          verbs:
+          - get
+        - apiGroups:
+          - ""
+          resourceNames:
+          - mongodb-secret
+          resources:
+          - secrets
+          verbs:
+          - get
+        serviceAccountName: ibm-mongodb-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: false
+    type: AllNamespaces
+  keywords:
+  - IBM
+  - Cloud
+  labels:
+    name: ibm-mongodb-operator
+  links:
+  - name: IBM MongoDB Operator Project
+    url: https://github.com/IBM/ibm-mongodb-operator
+  maintainers:
+  - email: supports@ibm.com
+    name: IBM Support
+  maturity: alpha
+  provider:
+    name: IBM
+  version: 0.0.1

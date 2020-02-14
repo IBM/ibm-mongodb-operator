@@ -99,6 +99,7 @@ code-dev: ## Run the default dev commands which are the go tidy, fmt, vet then e
 	- make code-fmt
 	- make code-vet
 	- make code-gen
+	- make csv-gen
 	@echo Running the common required commands for code delivery
 	- make check
 	- make test
