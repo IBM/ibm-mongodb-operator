@@ -122,33 +122,18 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	log.Info("creating mongodb service")
-	if err := r.createFromYaml(instance, []byte(service)); err != nil {
+	if err := r.createFromYaml(instance, []byte(service), true); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	log.Info("creating mongodb icp service")
-	if err := r.createFromYaml(instance, []byte(icpService)); err != nil {
+	if err := r.createFromYaml(instance, []byte(icpService), true); err != nil {
 		return reconcile.Result{}, err
 	}
 
-	stsData := struct {
-		Replicas     int
-		ImageRepo    string
-		StorageClass string
-	}{
-		Replicas:     instance.Spec.Replicas,
-		ImageRepo:    instance.Spec.ImageRegistry,
-		StorageClass: instance.Spec.StorageClass,
-	}
+	log.Info("creating icp mongodb Security Context Constraints")
 
-	var stsYaml bytes.Buffer
-	t := template.Must(template.New("statefulset").Parse(statefulset))
-	if err := t.Execute(&stsYaml, stsData); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	log.Info("creating mongodb statefulset")
-	if err := r.createFromYaml(instance, stsYaml.Bytes()); err != nil {
+	if err := r.createFromYaml(instance, []byte(mongodbSCC), false); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -157,19 +142,19 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	log.Info("creating icp mongodb config map")
 
-	if err := r.createFromYaml(instance, []byte(mongodbConfigMap)); err != nil {
+	if err := r.createFromYaml(instance, []byte(mongodbConfigMap), true); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	log.Info("creating icp mongodb init config map")
 
-	if err := r.createFromYaml(instance, []byte(initConfigMap)); err != nil {
+	if err := r.createFromYaml(instance, []byte(initConfigMap), true); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	log.Info("creating icp mongodb install config map")
 
-	if err := r.createFromYaml(instance, []byte(installConfigMap)); err != nil {
+	if err := r.createFromYaml(instance, []byte(installConfigMap), true); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -192,6 +177,27 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	log.Info("creating icp mongodb keyfile secret")
 	if err = r.client.Create(context.TODO(), keyfileSecret); err != nil && !errors.IsAlreadyExists(err) {
+		return reconcile.Result{}, err
+	}
+
+	stsData := struct {
+		Replicas     int
+		ImageRepo    string
+		StorageClass string
+	}{
+		Replicas:     instance.Spec.Replicas,
+		ImageRepo:    instance.Spec.ImageRegistry,
+		StorageClass: instance.Spec.StorageClass,
+	}
+
+	var stsYaml bytes.Buffer
+	t := template.Must(template.New("statefulset").Parse(statefulset))
+	if err := t.Execute(&stsYaml, stsData); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	log.Info("creating mongodb statefulset")
+	if err := r.createFromYaml(instance, stsYaml.Bytes(), true); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -225,7 +231,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, yamlContent []byte) error {
+func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, yamlContent []byte, setOwner bool) error {
 	obj := &unstructured.Unstructured{}
 	jsonSpec, err := yaml.YAMLToJSON(yamlContent)
 	if err != nil {
@@ -236,9 +242,11 @@ func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, ya
 		return fmt.Errorf("could not unmarshal resource: %v", err)
 	}
 
-	// Set CommonServiceConfig instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, obj, r.scheme); err != nil {
-		return err
+	if setOwner {
+		// Set CommonServiceConfig instance as the owner and controller
+		if err := controllerutil.SetControllerReference(instance, obj, r.scheme); err != nil {
+			return err
+		}
 	}
 
 	err = r.client.Create(context.TODO(), obj)
