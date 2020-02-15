@@ -34,7 +34,7 @@ metadata:
 data:
   install.sh: |
     #!/bin/bash
-    
+
     # Copyright 2016 The Kubernetes Authors. All rights reserved.
     #
     # Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,12 +48,12 @@ data:
     # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     # See the License for the specific language governing permissions and
     # limitations under the License.
-    
+
     # This volume is assumed to exist and is shared with the peer-finder
     # init container. It contains on-start/change configuration scripts.
     WORKDIR_VOLUME="/work-dir"
     CONFIGDIR_VOLUME="/data/configdb"
-    
+
     for i in "$@"
     do
     case $i in
@@ -70,19 +70,19 @@ data:
         ;;
     esac
     done
-    
+
     echo installing config scripts into "${WORKDIR_VOLUME}"
     mkdir -p "${WORKDIR_VOLUME}"
     cp /peer-finder "${WORKDIR_VOLUME}"/
-    
+
     cp /configdb-readonly/mongod.conf "${CONFIGDIR_VOLUME}"/mongod.conf
     cp /keydir-readonly/key.txt "${CONFIGDIR_VOLUME}"/
     cp /ca-readonly/tls.key "${CONFIGDIR_VOLUME}"/tls.key
     cp /ca-readonly/tls.crt "${CONFIGDIR_VOLUME}"/tls.crt
-    
+
     chmod 600 "${CONFIGDIR_VOLUME}"/key.txt
-    chown -R 999:999 /work-dir
-    chown -R 999:999 /data
-    
+    # chown -R 999:999 /work-dir
+    # chown -R 999:999 /data
+
     # Root file system is readonly but still need write and execute access to tmp
-    chmod -R 777 /tmp`
+    # chmod -R 777 /tmp`

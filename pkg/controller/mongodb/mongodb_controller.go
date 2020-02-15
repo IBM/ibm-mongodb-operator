@@ -122,41 +122,35 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	log.Info("creating mongodb service")
-	if err := r.createFromYaml(instance, []byte(service), true); err != nil {
+	if err := r.createFromYaml(instance, []byte(service)); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	log.Info("creating mongodb icp service")
-	if err := r.createFromYaml(instance, []byte(icpService), true); err != nil {
+	if err := r.createFromYaml(instance, []byte(icpService)); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	log.Info("creating icp mongodb Security Context Constraints")
-
-	// TODO: seems this SCC is not needed
-	// need more investigation on it
-	if err := r.createFromYaml(instance, []byte(mongodbSCC), false); err != nil {
-		log.Error(err, "failed to create SCC")
-	}
 
 	metadatalabel := map[string]string{"app.kubernetes.io/name": "icp-mongodb", "app.kubernetes.io/component": "database",
 		"app.kubernetes.io/managed-by": "operator", "app.kubernetes.io/instance": "icp-mongodb", "release": "mongodb"}
 
 	log.Info("creating icp mongodb config map")
 
-	if err := r.createFromYaml(instance, []byte(mongodbConfigMap), true); err != nil {
+	if err := r.createFromYaml(instance, []byte(mongodbConfigMap)); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	log.Info("creating icp mongodb init config map")
 
-	if err := r.createFromYaml(instance, []byte(initConfigMap), true); err != nil {
+	if err := r.createFromYaml(instance, []byte(initConfigMap)); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	log.Info("creating icp mongodb install config map")
 
-	if err := r.createFromYaml(instance, []byte(installConfigMap), true); err != nil {
+	if err := r.createFromYaml(instance, []byte(installConfigMap)); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -246,6 +240,8 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	var storageclass string
 
 	if instance.Spec.StorageClass == "" {
+		// TODO: weird because the storage class on OCP is opened for all
+		// Need to deploy an OCP cluster on AWS to verify
 		storageclass, err = r.getstorageclass()
 		if err != nil {
 			return reconcile.Result{}, err
@@ -273,21 +269,21 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	log.Info("creating mongodb statefulset")
-	if err := r.createFromYaml(instance, stsYaml.Bytes(), true); err != nil {
+	if err := r.createFromYaml(instance, stsYaml.Bytes()); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	// hardcode cluster-ca-cert here
 	// TODO: later will copy it from cert-manager namespace
 	log.Info("creating cluster-ca-cert")
-	if err := r.createFromYaml(instance, []byte(certYaml), true); err != nil {
+	if err := r.createFromYaml(instance, []byte(certYaml)); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, yamlContent []byte, setOwner bool) error {
+func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, yamlContent []byte) error {
 	obj := &unstructured.Unstructured{}
 	jsonSpec, err := yaml.YAMLToJSON(yamlContent)
 	if err != nil {
@@ -298,11 +294,9 @@ func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, ya
 		return fmt.Errorf("could not unmarshal resource: %v", err)
 	}
 
-	if setOwner {
-		// Set CommonServiceConfig instance as the owner and controller
-		if err := controllerutil.SetControllerReference(instance, obj, r.scheme); err != nil {
-			return err
-		}
+	// Set CommonServiceConfig instance as the owner and controller
+	if err := controllerutil.SetControllerReference(instance, obj, r.scheme); err != nil {
+		return err
 	}
 
 	err = r.client.Create(context.TODO(), obj)
@@ -330,7 +324,7 @@ func (r *ReconcileMongoDB) getstorageclass() (string, error) {
 		if sc.Provisioner == "kubernetes.io/no-provisioner" {
 			continue
 		}
-		if sc.ObjectMeta.GetAnnotations()["storageclass.beta.kubernetes.io/is-default-class"] == "true" {
+		if sc.ObjectMeta.GetAnnotations()["storageclass.kubernetes.io/is-default-class"] == "true" {
 			defaultSC = append(defaultSC, sc.GetName())
 			continue
 		}
