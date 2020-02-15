@@ -80,24 +80,6 @@ spec:
               mountPath: /data/db
             - name: tmp-mongodb
               mountPath: /tmp
-        - name: install-metrics
-          image: "{{ .ImageRepo }}/ibm-mongodb-install:3.3.2"
-          command:
-            - /bin/sh
-          args:
-            - -c
-            - chmod -R 777 /tmp
-          imagePullPolicy: "IfNotPresent"
-          resources:
-            limits:
-              cpu: 300m
-              memory: 256Mi
-            requests:
-              cpu: 300m
-              memory: 256Mi
-          volumeMounts:
-            - name: tmp-metrics
-              mountPath: /tmp
         - name: bootstrap
           image: "{{ .ImageRepo }}/ibm-mongodb:4.0.12-build.3"
           command:
@@ -114,7 +96,6 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            runAsUser: 999
           env:
             - name: POD_NAMESPACE
               valueFrom:
@@ -169,7 +150,6 @@ spec:
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            runAsUser: 999
           ports:
             - name: peer
               containerPort: 27017
@@ -233,14 +213,13 @@ spec:
               mountPath: /work-dir
             - name: tmp-mongodb
               mountPath: /tmp
-    
+
         - name: metrics
           image: "{{ .ImageRepo }}/ibm-mongodb-exporter:3.3.2"
           imagePullPolicy: "IfNotPresent"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
-            runAsUser: 999
           command:
             - sh
             - -ec
