@@ -12,8 +12,7 @@ metadata:
           },
           "spec": {
             "imageRegistry": "quay.io/opencloudio",
-            "replicas": 3,
-            "storageClass": "rook-ceph-block-internal"
+            "replicas": 3
           }
         }
       ]

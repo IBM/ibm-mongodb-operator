@@ -23,6 +23,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -242,6 +243,19 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
+	var storageclass string
+
+	if instance.Spec.StorageClass == "" {
+		storageclass, err = r.getstorageclass()
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+	} else {
+		storageclass = instance.Spec.StorageClass
+	}
+
+	fmt.Println(storageclass)
+
 	stsData := struct {
 		Replicas     int
 		ImageRepo    string
@@ -249,7 +263,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}{
 		Replicas:     instance.Spec.Replicas,
 		ImageRepo:    instance.Spec.ImageRegistry,
-		StorageClass: instance.Spec.StorageClass,
+		StorageClass: storageclass,
 	}
 
 	var stsYaml bytes.Buffer
@@ -297,4 +311,39 @@ func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, ya
 	}
 
 	return nil
+}
+
+func (r *ReconcileMongoDB) getstorageclass() (string, error) {
+	scList := &storagev1.StorageClassList{}
+	err := r.client.List(context.TODO(), scList)
+	if err != nil {
+		return "", err
+	}
+	if len(scList.Items) == 0 {
+		return "", fmt.Errorf("could not find storage class in the cluster")
+	}
+
+	var defaultSC []string
+	var nonDefaultSC []string
+
+	for _, sc := range scList.Items {
+		if sc.Provisioner == "kubernetes.io/no-provisioner" {
+			continue
+		}
+		if sc.ObjectMeta.GetAnnotations()["storageclass.beta.kubernetes.io/is-default-class"] == "true" {
+			defaultSC = append(defaultSC, sc.GetName())
+			continue
+		}
+		nonDefaultSC = append(nonDefaultSC, sc.GetName())
+	}
+
+	if len(defaultSC) != 0 {
+		return defaultSC[0], nil
+	}
+
+	if len(nonDefaultSC) != 0 {
+		return nonDefaultSC[0], nil
+	}
+
+	return "", fmt.Errorf("could not find dynamic provisioner storage class in the cluster")
 }

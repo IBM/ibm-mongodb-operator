@@ -5,6 +5,3 @@ metadata:
 spec:
   replicas: 3
   imageRegistry: quay.io/opencloudio
-  storageClass: rook-ceph-block-internal
-
-
