@@ -349,19 +349,14 @@ spec:
           emptyDir: {}
         - name: tmp-metrics
           emptyDir: {}
-        - name: mongodbdir
-          emptyDir: {}
-      volumeClaimTemplates:
-        - metadata:
-            creationTimestamp: null
-            name: mongodbdir
-          spec:
-            accessModes:
-            - ReadWriteOnce
-            resources:
-              requests:
-                storage: 20Gi
-            storageClassName: {{ .StorageClass }}
-            volumeMode: Filesystem
-
+  volumeClaimTemplates:
+    - metadata:
+        name: mongodbdir
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Gi
+        storageClassName: {{ .StorageClass }}
 `

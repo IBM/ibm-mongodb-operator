@@ -320,21 +320,30 @@ func (r *ReconcileMongoDB) getstorageclass() (string, error) {
 		return "", err
 	}
 	if len(scList.Items) == 0 {
-		return "", fmt.Errorf("could not storage class in the cluster")
+		return "", fmt.Errorf("could not find storage class in the cluster")
 	}
-	for _, sc := range scList.Items {
-		if sc.Provisioner == "kubernetes.io/no-provisioner" {
-			continue
-		}
-		if sc.ObjectMeta.GetAnnotations()["storageclass.beta.kubernetes.io/is-default-class"] != "true" {
-			return sc.GetName(), nil
-		}
+
+    var defaultSC []string
+	var nonDefaultSC []string
+	
+    for _, sc := range scList.Items {
+        if sc.Provisioner == "kubernetes.io/no-provisioner" {
+            continue
+        }
+        if sc.ObjectMeta.GetAnnotations()["storageclass.beta.kubernetes.io/is-default-class"] == "true" {
+            defaultSC = append(defaultSC, sc.GetName())
+            continue
+        }
+        nonDefaultSC = append(nonDefaultSC, sc.GetName())
+    }
+
+    if len(defaultSC) != 0 {
+        return defaultSC[0], nil
+    }
+
+    if len(nonDefaultSC) != 0 {
+        return nonDefaultSC[0], nil
 	}
-	for _, sc := range scList.Items {
-		if sc.Provisioner == "kubernetes.io/no-provisioner" {
-			continue
-		}
-		return sc.GetName(), nil
-	}
-	return "", fmt.Errorf("could not dynamic provisioner storage class in the cluster")
+	
+	return "", fmt.Errorf("could not find dynamic provisioner storage class in the cluster")
 }
