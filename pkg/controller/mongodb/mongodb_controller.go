@@ -288,8 +288,12 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	// hardcode cluster-ca-cert here
 	// TODO: later will copy it from cert-manager namespace
 	log.Info("creating cluster-ca-cert")
-	if err := r.createFromYaml(instance, []byte(certYaml)); err != nil {
-		return reconcile.Result{}, err
+	if err := r.createFromYaml(instance, []byte(clusterCertYaml)); err != nil {
+		log.Error(err, "create cluster-ca-cert fail")
+	}
+	log.Info("creating icp-mongodb-client-cert")
+	if err := r.createFromYaml(instance, []byte(mongoCertYaml)); err != nil {
+		log.Error(err, "create icp-mongodb-client-cert fail")
 	}
 
 	return reconcile.Result{}, nil
