@@ -46,9 +46,11 @@ LOCAL_ARCH := $(shell uname -m)
 ifeq ($(LOCAL_OS),Linux)
     TARGET_OS ?= linux
     XARGS_FLAGS="-r"
+	STRIP_FLAGS=
 else ifeq ($(LOCAL_OS),Darwin)
     TARGET_OS ?= darwin
     XARGS_FLAGS=
+	STRIP_FLAGS="-x"
 else
     $(error "This system's OS $(LOCAL_OS) isn't recognized/supported")
 endif
@@ -99,7 +101,6 @@ code-dev: ## Run the default dev commands which are the go tidy, fmt, vet then e
 	- make code-fmt
 	- make code-vet
 	- make code-gen
-	- make csv-gen
 	@echo Running the common required commands for code delivery
 	- make check
 	- make test
@@ -117,7 +118,7 @@ endif
 build:
 	@echo "Building the ibm-mongodb-operator binary"
 	@CGO_ENABLED=0 go build -o build/_output/bin/$(IMG) ./cmd/manager
-	@strip build/_output/bin/$(IMG)
+	@strip $(STRIP_FLAGS) build/_output/bin/$(IMG)
 
 build-image: build $(CONFIG_DOCKER_TARGET)
 	$(eval ARCH := $(shell uname -m|sed 's/x86_64/amd64/'))

@@ -239,15 +239,22 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	var storageclass string
 
-	if instance.Spec.StorageClass == "" {
-		// TODO: weird because the storage class on OCP is opened for all
-		// Need to deploy an OCP cluster on AWS to verify
-		storageclass, err = r.getstorageclass()
-		if err != nil {
-			return reconcile.Result{}, err
+	if instance.Status.StorageClass == "" {
+		if instance.Spec.StorageClass == "" {
+			// TODO: weird because the storage class on OCP is opened for all
+			// Need to deploy an OCP cluster on AWS to verify
+			storageclass, err = r.getstorageclass()
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+		} else {
+			storageclass = instance.Spec.StorageClass
 		}
 	} else {
-		storageclass = instance.Spec.StorageClass
+		if instance.Spec.StorageClass != "" && instance.Spec.StorageClass != instance.Status.StorageClass {
+			log.Info("You need to delete the monogodb cr before switch the storage class. Please note that this will lose all your datamake")
+		}
+		storageclass = instance.Status.StorageClass
 	}
 
 	fmt.Println(storageclass)
@@ -270,6 +277,11 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	log.Info("creating mongodb statefulset")
 	if err := r.createFromYaml(instance, stsYaml.Bytes()); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	instance.Status.StorageClass = storageclass
+	if err := r.client.Status().Update(context.TODO(), instance); err != nil {
 		return reconcile.Result{}, err
 	}
 
