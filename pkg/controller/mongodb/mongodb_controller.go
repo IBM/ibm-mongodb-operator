@@ -242,7 +242,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	if instance.Status.StorageClass == "" {
 		if instance.Spec.StorageClass == "" {
 			// TODO: weird because the storage class on OCP is opened for all
-			// Need to deploy an OCP cluster on AWS to verify		
+			// Need to deploy an OCP cluster on AWS to verify
 			storageclass, err = r.getstorageclass()
 			if err != nil {
 				return reconcile.Result{}, err
@@ -252,7 +252,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		}
 	} else {
 		if instance.Spec.StorageClass != "" && instance.Spec.StorageClass != instance.Status.StorageClass {
-			log.Error("You need to delete the monogodb cr before switch the storage class. Please note that this will lose all your data")
+			log.Info("You need to delete the monogodb cr before switch the storage class. Please note that this will lose all your datamake")
 		}
 		storageclass = instance.Status.StorageClass
 	}
