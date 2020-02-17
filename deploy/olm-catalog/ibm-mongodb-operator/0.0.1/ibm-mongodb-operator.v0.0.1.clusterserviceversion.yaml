@@ -67,6 +67,15 @@ spec:
     mediatype: image/png
   install:
     spec:
+      clusterPermissions:
+        - rules:
+          - apiGroups:
+            - storage.k8s.io
+            resources:
+            - storageclasses
+            verbs:
+            - '*'
+          serviceAccountName: ibm-mongodb-operator
       deployments:
       - name: ibm-mongodb-operator
         spec:
