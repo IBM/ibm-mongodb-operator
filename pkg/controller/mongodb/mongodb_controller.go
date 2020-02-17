@@ -239,19 +239,22 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	var storageclass string
 
-	if instance.Spec.StorageClass == "" {
-		// TODO: weird because the storage class on OCP is opened for all
-		// Need to deploy an OCP cluster on AWS to verify
-		if instance.Status.StorageClass == "" {
+	if instance.Status.StorageClass == "" {
+		if instance.Spec.StorageClass == "" {
+			// TODO: weird because the storage class on OCP is opened for all
+			// Need to deploy an OCP cluster on AWS to verify		
 			storageclass, err = r.getstorageclass()
 			if err != nil {
 				return reconcile.Result{}, err
 			}
 		} else {
-			storageclass = instance.Status.StorageClass
+			storageclass = instance.Spec.StorageClass
 		}
 	} else {
-		storageclass = instance.Spec.StorageClass
+		if instance.Spec.StorageClass != "" && instance.Spec.StorageClass != instance.Status.StorageClass {
+			log.Error("You need to delete the monogodb cr before switch the storage class. Please note that this will lose all your data")
+		}
+		storageclass = instance.Status.StorageClass
 	}
 
 	fmt.Println(storageclass)
