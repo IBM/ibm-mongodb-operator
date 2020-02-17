@@ -32,10 +32,6 @@ spec:
           description: MongoDBSpec defines the desired state of MongoDB
           properties:
             imageRegistry:
-              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                Important: Run "operator-sdk generate k8s" to regenerate code after
-                modifying this file Add custom validation using kubebuilder tags:
-                https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
               type: string
             mongoDBPass:
               type: string
@@ -48,6 +44,9 @@ spec:
           type: object
         status:
           description: MongoDBStatus defines the observed state of MongoDB
+          properties:
+            storageClass:
+              type: string
           type: object
       type: object
   version: v1alpha1

@@ -123,6 +123,13 @@ spec:
           - update
           - watch
         - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
           - apps
           resourceNames:
           - ibm-mongodb-operator
@@ -132,7 +139,6 @@ spec:
           - update
         - apiGroups:
           - operator.ibm.com
-          - security.openshift.io
           resources:
           - '*'
           - mongodbs
