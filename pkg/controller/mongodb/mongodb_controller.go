@@ -258,15 +258,20 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	fmt.Println(storageclass)
-
 	stsData := struct {
-		Replicas     int
-		ImageRepo    string
-		StorageClass string
+		Replicas       int
+		ImageRepo      string
+		StorageClass   string
+		InitImage      string
+		BootstrapImage string
+		MetricsImage   string
 	}{
-		Replicas:     instance.Spec.Replicas,
-		ImageRepo:    instance.Spec.ImageRegistry,
-		StorageClass: storageclass,
+		Replicas:       instance.Spec.Replicas,
+		ImageRepo:      instance.Spec.ImageRegistry,
+		StorageClass:   storageclass,
+		InitImage:      "ibm-mongodb-install:" + instance.Spec.InitImage.Tag,
+		BootstrapImage: "ibm-mongodb:" + instance.Spec.BootstrapImage.Tag,
+		MetricsImage:   "ibm-mongodb-exporter:" + instance.Spec.MetricsImage.Tag,
 	}
 
 	var stsYaml bytes.Buffer

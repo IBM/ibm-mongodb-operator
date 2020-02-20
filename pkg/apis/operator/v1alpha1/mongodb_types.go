@@ -22,13 +22,20 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
+type Image struct {
+	Tag string `json:"tag,omitempty"`
+}
+
 // MongoDBSpec defines the desired state of MongoDB
 type MongoDBSpec struct {
-	ImageRegistry string `json:"imageRegistry,omitempty"`
-	Replicas      int    `json:"replicas,omitempty"`
-	StorageClass  string `json:"storageClass,omitempty"`
-	MongoDBUser   string `json:"mongoDBUser,omitempty"`
-	MongoDBPass   string `json:"mongoDBPass,omitempty"`
+	ImageRegistry  string `json:"imageRegistry,omitempty"`
+	Replicas       int    `json:"replicas,omitempty"`
+	StorageClass   string `json:"storageClass,omitempty"`
+	MongoDBUser    string `json:"mongoDBUser,omitempty"`
+	MongoDBPass    string `json:"mongoDBPass,omitempty"`
+	InitImage      Image  `json:"initImage,omitempty"`
+	BootstrapImage Image  `json:"bootstrapImage,omitempty"`
+	MetricsImage   Image  `json:"metricsImage,omiempty"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB
