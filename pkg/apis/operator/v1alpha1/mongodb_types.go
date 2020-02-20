@@ -35,7 +35,7 @@ type MongoDBSpec struct {
 	MongoDBPass    string `json:"mongoDBPass,omitempty"`
 	InitImage      Image  `json:"initImage,omitempty"`
 	BootstrapImage Image  `json:"bootstrapImage,omitempty"`
-	MetricsImage   Image  `json:"metricsImage,omiempty"`
+	MetricsImage   Image  `json:"metricsImage,omitempty"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB
