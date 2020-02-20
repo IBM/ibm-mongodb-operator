@@ -316,7 +316,7 @@ func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, ya
 	}
 
 	obj.SetNamespace(instance.Namespace)
-	
+
 	// Set CommonServiceConfig instance as the owner and controller
 	if err := controllerutil.SetControllerReference(instance, obj, r.scheme); err != nil {
 		return err
