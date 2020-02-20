@@ -11,7 +11,16 @@ metadata:
             "name": "ibm-mongodb"
           },
           "spec": {
+            "bootstrapImage": {
+              "tag": "4.0.12-build.3"
+            },
             "imageRegistry": "quay.io/opencloudio",
+            "initImage": {
+              "tag": "3.3.2"
+            },
+            "metricsImage": {
+              "tag": "3.3.2"
+            },
             "replicas": 3
           }
         }

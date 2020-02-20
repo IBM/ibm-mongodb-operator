@@ -49,7 +49,7 @@ spec:
       hostIPC: false
       initContainers:
         - name: install
-          image: "{{ .ImageRepo }}/ibm-mongodb-install:3.3.2"
+          image: "{{ .ImageRepo }}/{{ .InitImage }}"
           command:
             - /install/install.sh
           args:
@@ -81,7 +81,7 @@ spec:
             - name: tmp-mongodb
               mountPath: /tmp
         - name: bootstrap
-          image: "{{ .ImageRepo }}/ibm-mongodb:4.0.12-build.3"
+          image: "{{ .ImageRepo }}/{{ .BootstrapImage }}"
           command:
             - /work-dir/peer-finder
           args:
@@ -145,7 +145,7 @@ spec:
               mountPath: /tmp
       containers:
         - name: icp-mongodb
-          image: "{{ .ImageRepo }}/ibm-mongodb:4.0.12-build.3"
+          image: "{{ .ImageRepo }}/{{ .BootstrapImage }}"
           imagePullPolicy: "IfNotPresent"
           securityContext:
             allowPrivilegeEscalation: false
@@ -215,7 +215,7 @@ spec:
               mountPath: /tmp
 
         - name: metrics
-          image: "{{ .ImageRepo }}/ibm-mongodb-exporter:3.3.2"
+          image: "{{ .ImageRepo }}/{{ .MetricsImage }}"
           imagePullPolicy: "IfNotPresent"
           securityContext:
             allowPrivilegeEscalation: false

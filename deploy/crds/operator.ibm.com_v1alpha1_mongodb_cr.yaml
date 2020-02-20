@@ -5,3 +5,10 @@ metadata:
 spec:
   replicas: 3
   imageRegistry: quay.io/opencloudio
+  initImage:
+    tag: 3.3.2
+  bootstrapImage:
+    tag: 4.0.12-build.3
+  metricsImage:
+    tag: 3.3.2
+
