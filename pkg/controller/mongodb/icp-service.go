@@ -29,7 +29,6 @@ metadata:
     app.kubernetes.io/managed-by: operator
     release: mongodb
   name: icp-mongodb
-  namespace: ibm-mongodb-operator
 spec:
   type: ClusterIP
   clusterIP: None

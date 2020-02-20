@@ -30,7 +30,6 @@ metadata:
     app.kubernetes.io/managed-by: operator
     release: mongodb
   name: icp-mongodb-install
-  namespace: ibm-mongodb-operator
 data:
   install.sh: |
     #!/bin/bash

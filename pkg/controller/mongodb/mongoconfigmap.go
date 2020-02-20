@@ -31,7 +31,6 @@ metadata:
     app.kubernetes.io/managed-by: operator
     release: mongodb
   name: icp-mongodb
-  namespace: ibm-mongodb-operator
 data:
   mongod.conf: |
     storage:

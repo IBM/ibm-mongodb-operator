@@ -25,7 +25,6 @@ metadata:
     app: icp-mongodb
     release: mongodb
   name: icp-mongodb
-  namespace: ibm-mongodb-operator
 spec:
   selector:
     matchLabels:
