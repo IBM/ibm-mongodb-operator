@@ -58,6 +58,7 @@ rules:
   resources:
   - mongodbs
   - mongodbs/finalizers
+  - mongodbs/status
   verbs:
   - create
   - delete
