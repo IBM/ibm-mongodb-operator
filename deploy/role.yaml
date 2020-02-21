@@ -56,7 +56,6 @@ rules:
 - apiGroups:
   - operator.ibm.com
   resources:
-  - '*'
   - mongodbs
   verbs:
   - create
@@ -66,19 +65,3 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  resourceNames:
-  - mongodb-comfigmap
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  resourceNames:
-  - mongodb-secret
-  verbs:
-  - get

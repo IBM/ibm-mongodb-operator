@@ -162,7 +162,6 @@ spec:
         - apiGroups:
           - operator.ibm.com
           resources:
-          - '*'
           - mongodbs
           verbs:
           - create
@@ -172,22 +171,6 @@ spec:
           - patch
           - update
           - watch
-        - apiGroups:
-          - ""
-          resourceNames:
-          - mongodb-comfigmap
-          resources:
-          - configmaps
-          verbs:
-          - get
-        - apiGroups:
-          - ""
-          resourceNames:
-          - mongodb-secret
-          resources:
-          - secrets
-          verbs:
-          - get
         serviceAccountName: ibm-mongodb-operator
     strategy: deployment
   installModes:
