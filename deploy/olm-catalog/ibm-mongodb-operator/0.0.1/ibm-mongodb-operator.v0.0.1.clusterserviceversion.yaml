@@ -163,6 +163,7 @@ spec:
           - operator.ibm.com
           resources:
           - mongodbs
+          - mongodbs/finalizers
           verbs:
           - create
           - delete
