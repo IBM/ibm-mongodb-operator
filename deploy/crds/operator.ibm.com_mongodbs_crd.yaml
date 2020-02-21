@@ -56,8 +56,6 @@ spec:
               type: integer
             storageClass:
               type: string
-          required:
-          - metricsImage
           type: object
         status:
           description: MongoDBStatus defines the observed state of MongoDB
