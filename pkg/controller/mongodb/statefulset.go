@@ -316,7 +316,7 @@ spec:
         - name: ca
           secret:
             defaultMode: 0400
-            secretName: cluster-ca-cert
+            secretName: mongodb-root-ca-cert
         - name: keydir
           secret:
             defaultMode: 0400
