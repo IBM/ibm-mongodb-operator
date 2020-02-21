@@ -3,14 +3,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: ibm-mongodb-operator
 subjects:
-- kind: ServiceAccount
-  name: ibm-mongodb-operator
-- kind: ServiceAccount
-  name: ibm-metering-operator
-  namespace: ibm-metering-operator
-- kind: ServiceAccount
-  name: ibm-iam-operator
-  namespace: ibm-iam-operator
+- kind: Group
+  name: system:serviceaccounts:ibm-common-services
+  apiGroup: rbac.authorization.k8s.io
+
 roleRef:
   kind: Role
   name: ibm-mongodb-operator
