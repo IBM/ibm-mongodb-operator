@@ -28,7 +28,6 @@ metadata:
     app.kubernetes.io/managed-by: operator
     release: mongodb
   name: mongodb
-  namespace: ibm-mongodb-operator
 spec:
   serviceAccountName: ibm-mongodb-operator
   type: ClusterIP

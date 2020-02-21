@@ -335,6 +335,8 @@ func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, ya
 		return fmt.Errorf("could not unmarshal resource: %v", err)
 	}
 
+	obj.SetNamespace(instance.Namespace)
+
 	// Set CommonServiceConfig instance as the owner and controller
 	if err := controllerutil.SetControllerReference(instance, obj, r.scheme); err != nil {
 		return err

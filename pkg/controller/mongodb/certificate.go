@@ -23,7 +23,6 @@ data:
 kind: Secret
 metadata:
   name: cluster-ca-cert
-  namespace: ibm-mongodb-operator
 type: kubernetes.io/tls
 `
 
@@ -35,6 +34,5 @@ data:
 kind: Secret
 metadata:
   name: icp-mongodb-client-cert
-  namespace: ibm-mongodb-operator
 type: kubernetes.io/tls
 `

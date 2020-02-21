@@ -30,7 +30,6 @@ metadata:
     app.kubernetes.io/managed-by: operator
     release: mongodb
   name: icp-mongodb-init
-  namespace: ibm-mongodb-operator
 data:
   on-start.sh: |
     #!/bin/bash
