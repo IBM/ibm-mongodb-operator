@@ -23,7 +23,7 @@ TARGET_GOOS=linux
 TARGET_GOARCH=amd64
 
 # The namespcethat operator will be deployed in
-NAMESPACE=ibm-mongodb-operator
+NAMESPACE=ibm-common-services
 
 # Image URL to use all building/pushing image targets;
 # Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
@@ -88,9 +88,7 @@ uninstall: ## Uninstall all that all performed in the $ make install
 	- kubectl delete -f deploy/role_binding.yaml -n ${NAMESPACE}
 	- kubectl delete -f deploy/service_account.yaml -n ${NAMESPACE}
 	- kubectl delete -f deploy/role.yaml -n ${NAMESPACE}
-	@echo ....... Deleting namespace ${NAMESPACE}.......
-	- kubectl delete namespace ${NAMESPACE}
-
+	
 ##@ Development
 
 check: lint-all ## Check all files lint error
