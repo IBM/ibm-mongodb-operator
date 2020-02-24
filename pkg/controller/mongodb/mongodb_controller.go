@@ -59,7 +59,7 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileMongoDB{client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	return &ReconcileMongoDB{client: mgr.GetClient(), reader: mgr.GetAPIReader(), scheme: mgr.GetScheme()}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -97,6 +97,7 @@ type ReconcileMongoDB struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
 	client client.Client
+	reader client.Reader
 	scheme *runtime.Scheme
 }
 
@@ -352,7 +353,7 @@ func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, ya
 
 func (r *ReconcileMongoDB) getstorageclass() (string, error) {
 	scList := &storagev1.StorageClassList{}
-	err := r.client.List(context.TODO(), scList)
+	err := r.reader.List(context.TODO(), scList)
 	if err != nil {
 		return "", err
 	}
