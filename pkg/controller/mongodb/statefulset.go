@@ -154,9 +154,9 @@ spec:
               containerPort: 27017
           resources:
             limits:
-              memory: 8Gi
+              memory: 5Gi
             requests:
-              memory: 4Gi
+              memory: 2Gi
           command:
             - mongod
             - --config=/data/configdb/mongod.conf

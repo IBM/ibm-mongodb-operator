@@ -35,6 +35,9 @@ data:
   mongod.conf: |
     storage:
       dbPath: /data/db
+      wiredTiger:
+        engineConfig:
+          cacheSizeGB: 2
     net:
       bindIpAll: true
       port: 27017
