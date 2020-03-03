@@ -67,12 +67,6 @@ spec:
         x-descriptors:
           - 'urn:alm:descriptor:com.tectonic.ui:text'
       version: v1alpha1
-    required:
-    - description: CertManager is the Schema for the certmanagers API
-      kind: CertManager
-      name: certmanagers.operator.ibm.com
-      version: v1alpha1
-      displayName: CertManager 
   description: The Mongodb operator provides a simple Kubernetes CRD-Based API to
     manage the lifecycle of Mongodb. With this operator, you can simply deploy and
     upgrade mongodb.
