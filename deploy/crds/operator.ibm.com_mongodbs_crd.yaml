@@ -36,26 +36,43 @@ spec:
                 tag:
                   type: string
               type: object
+              description: 'The mongoDB image name that will be used in the deployment.'
             imageRegistry:
               type: string
+              description: 'The image registry to pull the images from.'
             initImage:
               properties:
                 tag:
                   type: string
               type: object
+              description: 'The image used to initialize the environment which MongoDB will run in.'
             metricsImage:
               properties:
                 tag:
                   type: string
               type: object
+              description: 'The image used to send metrics data to grafana.'
             mongoDBPass:
               type: string
+              description: 'The Admin Password for the database.'
             mongoDBUser:
               type: string
+              description: 'The Admin User for the database.'
             replicas:
               type: integer
+              description: 'The number of replicas in the statefulset deployment. Each replica will get its own Persistent Volume.'
             storageClass:
               type: string
+              description: 'The storage class which the Persistent Volume will come from.'
+            mongoDBResourceMemoryLimit:
+              type: string
+              description: 'The maximum amount of RAM that mongoDB will be allowed to consume. The wiredTigerCacheSizeGB needs to be no more than 40% of this size.'
+              example: { mongoDBResourceMemoryLimit: "5Gi" }
+            wiredTigerCacheSizeGB:
+              type: integer
+              description: 'The maximum amount of of cache that wiredTiger can use. Must be no more than 40% of mongoDBResourceMemoryLimit.'
+              example: { wiredTigerCacheSizeGB: 2 }
+              minimum: 1
           type: object
         status:
           description: MongoDBStatus defines the observed state of MongoDB
