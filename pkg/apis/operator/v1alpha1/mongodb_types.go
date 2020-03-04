@@ -36,6 +36,8 @@ type MongoDBSpec struct {
 	InitImage      Image  `json:"initImage,omitempty"`
 	BootstrapImage Image  `json:"bootstrapImage,omitempty"`
 	MetricsImage   Image  `json:"metricsImage,omitempty"`
+	MongoDBResourceMemoryLimit string `json:"mongoDBResourceMemoryLimit,omitempty"`
+	WiredTigerCacheSizeGB int `json:"wiredTigerCacheSizeGB,omitempty"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB

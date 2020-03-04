@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"text/template"
 	"time"
+	"strings"
+	"strconv"
 
 	"github.com/ghodss/yaml"
 	appsv1 "k8s.io/api/apps/v1"
@@ -260,6 +262,33 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 			log.Info("You need to delete the monogodb cr before switch the storage class. Please note that this will lose all your datamake")
 		}
 		storageclass = instance.Status.StorageClass
+	}
+
+	// Determine the memory limits for the statefulset
+	// First check the Resource Memory Limit,
+	// then check the wiredTiger Cache Size.
+	// The wiredTiger cache size CANNOT be more than 40% of the memory limit.
+	var mongodbResourceMemoryLimit string
+	var wiredTigerCacheSizeGB int
+	var mongodbResourceMemoryLimitInt int
+
+	if instance.Spec.MongoDBResourceMemoryLimit == "" {
+		// Set Default Values
+		mongodbResourceMemoryLimit = "5Gi"
+		mongoDBResourceMemoryLimitInt = 5
+	} else {
+		// Set Memory Limit to Requested Amount, must be in Gi, enforced by CRD setting
+		mongodbResourceMemoryLimit = instance.Spec.MongoDBResourceMemoryLimit
+		indexOfGi := strings.Index(instance.Spec.MongoDBResourceMemoryLimit,"Gi")
+		mongoDBResourceMemoryLimitInt = strconv.Atoi(instance.Spec.MongoDBResourceMemoryLimit[:indexOfGi])
+	}
+
+	if instance.Spec.WiredTigerCacheSizeGB == 0 {
+		// GO does floor division with integers
+		// sets the wiredTigerCacheSizeGB to 40% of RAM
+		wiredTigerCacheSizeGB = (mongoDBResourceMemoryLimitInt * 100) / 40
+	} else {
+		wiredTigerCacheSizeGB = instance.Spec.WiredTigerCacheSizeGB
 	}
 
 	stsData := struct {
