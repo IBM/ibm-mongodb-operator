@@ -54,4 +54,6 @@ COPY LICENSE /licenses
 
 ENTRYPOINT ["/usr/local/bin/entrypoint"]
 
+RUN microdnf update -y && microdnf clean all
+
 USER ${USER_UID}
