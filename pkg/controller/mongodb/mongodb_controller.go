@@ -145,7 +145,46 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	log.Info("creating icp mongodb config map")
 
-	if err := r.createFromYaml(instance, []byte(mongodbConfigMap)); err != nil {
+	//TODO: insert logic to calculate wiredTigerCacheSizeGB and insert it into the mongodbConfigMap
+
+	// Determine the memory limits for the statefulset
+	// First check the Resource Memory Limit,
+	// then set the wiredTiger Cache Size.
+	// The wiredTiger cache size CANNOT be more than 40% of the memory limit.
+	var mongoDBResourceMemoryLimit string
+	var wiredTigerCacheSizeGB float64
+	var mongoDBResourceMemoryLimitInt int
+
+	if instance.Spec.MongoDBResourceMemoryLimit == "" {
+		// Set Default Values
+		mongoDBResourceMemoryLimit = "5Gi"
+		mongoDBResourceMemoryLimitInt = 5
+	} else {
+		// Set Memory Limit to Requested Amount, must be in Gi, enforced by CRD setting
+		mongoDBResourceMemoryLimit = instance.Spec.MongoDBResourceMemoryLimit
+		indexOfGi := strings.Index(instance.Spec.MongoDBResourceMemoryLimit,"Gi")
+		mongoDBResourceMemoryLimitInt, err = strconv.Atoi(instance.Spec.MongoDBResourceMemoryLimit[:indexOfGi])
+	}
+
+	// sets the wiredTigerCacheSizeGB to 40% of RAM
+	wiredTigerCacheSizeGB = float64(mongoDBResourceMemoryLimitInt) * 0.40
+
+	// Create Struct for configure parameters in the mongoDB ConfigMap.
+	// The mongoDB Configmap contains the mongod.conf file used to configure MongoDB
+	mongoDBConfigmapData := struct {
+		WiredTigerCacheSizeGB float64
+	}{
+		WiredTigerCacheSizeGB:	wiredTigerCacheSizeGB,
+	}
+
+	var mongoDBConfigmapYaml bytes.Buffer
+	configmapT := template.Must(template.New("mongoDBConfigmap").Parse(mongodbConfigMap))
+	if err := configmapT.Execute(&mongoDBConfigmapYaml, mongoDBConfigmapData); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	log.Info("creating mongodb configmap")
+	if err := r.createFromYaml(instance, mongoDBConfigmapYaml.Bytes()); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -264,33 +303,6 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		storageclass = instance.Status.StorageClass
 	}
 
-	// Determine the memory limits for the statefulset
-	// First check the Resource Memory Limit,
-	// then check the wiredTiger Cache Size.
-	// The wiredTiger cache size CANNOT be more than 40% of the memory limit.
-	var mongodbResourceMemoryLimit string
-	var wiredTigerCacheSizeGB int
-	var mongodbResourceMemoryLimitInt int
-
-	if instance.Spec.MongoDBResourceMemoryLimit == "" {
-		// Set Default Values
-		mongodbResourceMemoryLimit = "5Gi"
-		mongoDBResourceMemoryLimitInt = 5
-	} else {
-		// Set Memory Limit to Requested Amount, must be in Gi, enforced by CRD setting
-		mongodbResourceMemoryLimit = instance.Spec.MongoDBResourceMemoryLimit
-		indexOfGi := strings.Index(instance.Spec.MongoDBResourceMemoryLimit,"Gi")
-		mongoDBResourceMemoryLimitInt = strconv.Atoi(instance.Spec.MongoDBResourceMemoryLimit[:indexOfGi])
-	}
-
-	if instance.Spec.WiredTigerCacheSizeGB == 0 {
-		// GO does floor division with integers
-		// sets the wiredTigerCacheSizeGB to 40% of RAM
-		wiredTigerCacheSizeGB = (mongoDBResourceMemoryLimitInt * 100) / 40
-	} else {
-		wiredTigerCacheSizeGB = instance.Spec.WiredTigerCacheSizeGB
-	}
-
 	stsData := struct {
 		Replicas       int
 		ImageRepo      string
@@ -298,6 +310,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		InitImage      string
 		BootstrapImage string
 		MetricsImage   string
+		MongoDBResourceMemoryLimit string
 	}{
 		Replicas:       instance.Spec.Replicas,
 		ImageRepo:      instance.Spec.ImageRegistry,
@@ -305,6 +318,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		InitImage:      "ibm-mongodb-install:" + instance.Spec.InitImage.Tag,
 		BootstrapImage: "ibm-mongodb:" + instance.Spec.BootstrapImage.Tag,
 		MetricsImage:   "ibm-mongodb-exporter:" + instance.Spec.MetricsImage.Tag,
+		MongoDBResourceMemoryLimit:	mongoDBResourceMemoryLimit,
 	}
 
 	var stsYaml bytes.Buffer

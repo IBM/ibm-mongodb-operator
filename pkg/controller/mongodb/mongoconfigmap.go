@@ -37,7 +37,7 @@ data:
       dbPath: /data/db
       wiredTiger:
         engineConfig:
-          cacheSizeGB: 2
+          cacheSizeGB: {{ .WiredTigerCacheSizeGB }}
     net:
       bindIpAll: true
       port: 27017

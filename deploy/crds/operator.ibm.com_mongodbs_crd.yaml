@@ -68,11 +68,7 @@ spec:
               type: string
               description: 'The maximum amount of RAM that mongoDB will be allowed to consume. The wiredTigerCacheSizeGB needs to be no more than 40% of this size.'
               example: { mongoDBResourceMemoryLimit: "5Gi" }
-            wiredTigerCacheSizeGB:
-              type: integer
-              description: 'The maximum amount of of cache that wiredTiger can use. Must be no more than 40% of mongoDBResourceMemoryLimit.'
-              example: { wiredTigerCacheSizeGB: 2 }
-              minimum: 1
+              pattern: "^[1-9][0-9]*Gi$"
           type: object
         status:
           description: MongoDBStatus defines the observed state of MongoDB
