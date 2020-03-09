@@ -51,7 +51,7 @@ spec:
         version: v1
       - kind: StatefulSet
         name: ''
-        version: v1beta2
+        version: v1
       - kind: Pod
         name: ''
         version: v1
