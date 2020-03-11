@@ -39,7 +39,6 @@ spec:
         app: icp-mongodb
         release: mongodb
       annotations:
-        productID: "068a62892a1e4db39641342e592daa25"
         productName: "IBM Cloud Platform Common Services"
         productID: "068a62892a1e4db39641342e592daa25"
         productVersion: "3.3.0"
