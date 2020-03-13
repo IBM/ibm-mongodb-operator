@@ -1,3 +1,4 @@
+packageName: ibm-mongodb-operator-app
 channels:
 - currentCSV: ibm-mongodb-operator.v1.0.0
   name: stable-v1
