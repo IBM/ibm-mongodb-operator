@@ -88,7 +88,7 @@ uninstall: ## Uninstall all that all performed in the $ make install
 	- kubectl delete -f deploy/role_binding.yaml -n ${NAMESPACE}
 	- kubectl delete -f deploy/service_account.yaml -n ${NAMESPACE}
 	- kubectl delete -f deploy/role.yaml -n ${NAMESPACE}
-	
+
 ##@ Development
 
 check: lint-all ## Check all files lint error
@@ -165,7 +165,7 @@ coverage: ## Run code coverage test
 
 scorecard: ## Run scorecard test
 	@echo ... Running the scorecard test
-	- operator-sdk scorecard --verbose
+	- operator-sdk scorecard -b deploy/olm-catalog/ibm-mongodb-operator --verbose
 
 ##@ Release
 

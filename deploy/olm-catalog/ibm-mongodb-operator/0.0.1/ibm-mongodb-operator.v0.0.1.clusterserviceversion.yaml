@@ -42,37 +42,45 @@ spec:
   customresourcedefinitions:
     owned:
     - description: MongoDB is the Schema for the mongodbs API
-      displayName: MongoDB
       kind: MongoDB
       name: mongodbs.operator.ibm.com
+      version: v1alpha1
       resources:
-      - kind: Service
-        name: ''
-        version: v1
-      - kind: StatefulSet
-        name: ''
-        version: v1
-      - kind: Pod
-        name: ''
-        version: v1
+        - kind: Secret
+          name: ''
+          version: v1
+        - kind: ConfigMap
+          name: ''
+          version: v1
+        - kind: Pods
+          name: ''
+          version: v1
+        - kind: statefulsets
+          name: ''
+          version: v1
+        - kind: services
+          name: ''
+          version: v1
+        - kind: persistentvolumeclaims
+          name: ''
+          version: v1
+      required:
+      - description: CertManager is the Schema for the certmanagers API
+        displayName: CertManager
+        kind: CertManager
+        name: certmanagers.operator.ibm.com
+        version: v1alpha1
       specDescriptors:
-      - description: The desired number of MongoDB StatefulSet replica.
-        displayName: Replicas
-        path: replicas
+      - description: The image used to run the mongod process.
+        displayName: Bootstrap Image
+        path: bootstrapImage
         x-descriptors:
-        - 'urn:alm:descriptor:com.tectonic.ui:podCount'
-      - description: The storage class for mongodb
-        displayName: StorageClass
-        path: storageClass
+        - 'urn:alm:descriptor:com.tectonic.ui:label'
+      - description: The Image Registry where the images reside.
+        displayName: Image Registry
+        path: imageRegistry
         x-descriptors:
-          - 'urn:alm:descriptor:com.tectonic.ui:text'
-      version: v1alpha1
-    required:
-    - description: CertManager is the Schema for the certmanagers API
-      displayName: CertManager
-      kind: CertManager
-      name: certmanagers.operator.ibm.com
-      version: v1alpha1
+        - 'urn:alm:descriptor:com.tectonic.ui:label'
   description: The Mongodb operator provides a simple Kubernetes CRD-Based API to
     manage the lifecycle of Mongodb. With this operator, you can simply deploy and
     upgrade mongodb.

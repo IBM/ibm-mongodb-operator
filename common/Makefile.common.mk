@@ -83,20 +83,22 @@ csv-gen:
 
 bundle:
 	@echo --- Updating the bundle directory with latest yamls from olm-catalog ---
-	rm -rf bundle/*
-	cp -r deploy/olm-catalog/ibm-mongodb-operator/${CSV_VERSION}/* bundle/
-	cp deploy/olm-catalog/ibm-mongodb-operator/ibm-mongodb-operator.package.yaml bundle/
-	zip bundle/ibm-mongodb-metadata bundle/*.yaml
+	rm -rf manifest/*
+	cp deploy/olm-catalog/ibm-mongodb-operator/${CSV_VERSION}/*crd.yaml manifests/
+	cp deploy/olm-catalog/ibm-mongodb-operator/${CSV_VERSION}/*clusterserviceversion.yaml manifests/
+	#cp deploy/olm-catalog/ibm-mongodb-operator/ibm-mongodb-operator.package.yaml bundle/
+	#zip bundle/ibm-mongodb-metadata bundle/*
 
 install-operator-courier:
 	@echo --- Installing Operator Courier ---
 	pip3 install operator-courier
 
-verify-bundle:
+verify-bundle: bundle
 	@echo --- Verify Bundle is Redhat Certify ready ---
 	operator-courier --verbose verify --ui_validate_io bundle/
 
 redhat-certify-ready: bundle install-operator-courier verify-bundle
+
 
 
 .PHONY: code-vet code-fmt code-tidy code-gen csv-gen lint-copyright-banner lint-go lint-all config-docker install-operator-sdk bundle install-operator-courier verify-bundle redhat-certify-ready

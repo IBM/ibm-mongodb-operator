@@ -1,5 +1,6 @@
+packageName: ibm-mongodb-operator-app
 channels:
-- currentCSV: ibm-mongodb-operator.v0.0.1
+  - name: alpha
+currentCSV: ibm-mongodb-operator.v0.0.1
   name: alpha
 defaultChannel: alpha
-packageName: ibm-mongodb-operator-app
