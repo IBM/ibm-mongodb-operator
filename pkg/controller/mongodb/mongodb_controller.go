@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math/rand"
 	"text/template"
 	"time"
 
@@ -161,7 +162,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	var pass, user string
 	if instance.Spec.MongoDBPass == "" {
-		pass = "admin"
+		pass = createRandomAlphaNumeric(13)
 	} else {
 		pass = instance.Spec.MongoDBPass
 	}
@@ -409,4 +410,17 @@ func (r *ReconcileMongoDB) addControlleronPVC(instance *operatorv1alpha1.MongoDB
 		}
 	}
 	return nil
+}
+
+// Create Random String
+func createRandomAlphaNumeric(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+
+	byteString := make([]byte, length)
+	for i := range byteString {
+		byteString[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(byteString)
 }
