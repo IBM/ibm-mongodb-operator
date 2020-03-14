@@ -415,7 +415,7 @@ func (r *ReconcileMongoDB) addControlleronPVC(instance *operatorv1alpha1.MongoDB
 // Create Random String
 func createRandomAlphaNumeric(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	var seededRand *rand.Rand = rand.New(
+	var seededRand = rand.New(
 		rand.NewSource(time.Now().UnixNano()))
 
 	byteString := make([]byte, length)
