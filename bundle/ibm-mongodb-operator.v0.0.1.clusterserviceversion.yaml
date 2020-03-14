@@ -37,7 +37,7 @@ metadata:
       upgrade mongodb.
     repository: https://github.com/IBM/ibm-mongodb-operator.git
     support: IBM
-  name: ibm-mongodb-operator.v1.0.0
+  name: ibm-mongodb-operator.v0.0.1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -210,16 +210,6 @@ spec:
           - patch
           - update
           - watch
-        - apiGroups:
-          - certmanager.k8s.io
-          resources:
-          - certificates
-          - certificaterequests
-          - orders
-          - challenges
-          - issuers
-          verbs:
-          - '*'
         serviceAccountName: ibm-mongodb-operator
     strategy: deployment
   installModes:
@@ -245,4 +235,4 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  version: 1.0.0
+  version: 0.0.1
