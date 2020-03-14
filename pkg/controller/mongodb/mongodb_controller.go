@@ -19,9 +19,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math/rand"
 	"text/template"
 	"time"
-	"math/rand"
 
 	"github.com/ghodss/yaml"
 	appsv1 "k8s.io/api/apps/v1"
@@ -416,7 +416,7 @@ func (r *ReconcileMongoDB) addControlleronPVC(instance *operatorv1alpha1.MongoDB
 func createRandomAlphaNumeric(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	var seededRand *rand.Rand = rand.New(
-  rand.NewSource(time.Now().UnixNano()))
+		rand.NewSource(time.Now().UnixNano()))
 
 	byteString := make([]byte, length)
 	for i := range byteString {
