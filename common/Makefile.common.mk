@@ -86,7 +86,7 @@ bundle:
 	mkdir -p bundle/
 	cp deploy/olm-catalog/ibm-mongodb-operator/${CSV_VERSION}/* bundle/
 	cp deploy/olm-catalog/ibm-mongodb-operator/ibm-mongodb-operator.package.yaml bundle/
-	cd bundle; zip ibm-mongodb-metadata *
+	cd deploy/olm-catalog/ibm-mongodb-operator/; zip -r ibm-mongodb-metadata *
 
 
 install-operator-courier:
