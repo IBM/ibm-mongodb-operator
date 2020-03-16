@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math/rand"
 	"text/template"
 	"time"
 
@@ -161,7 +162,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	var pass, user string
 	if instance.Spec.MongoDBPass == "" {
-		pass = "admin"
+		pass = createRandomAlphaNumeric(13)
 	} else {
 		pass = instance.Spec.MongoDBPass
 	}
@@ -294,15 +295,26 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
-	// hardcode cluster-ca-cert here
-	// TODO: later will copy it from cert-manager namespace
-	log.Info("creating cluster-ca-cert")
-	if err := r.createFromYaml(instance, []byte(clusterCertYaml)); err != nil {
-		log.Error(err, "create cluster-ca-cert fail")
+	// sign certificate
+	log.Info("creating root-ca-cert")
+	if err := r.createFromYaml(instance, []byte(godIssuerYaml)); err != nil {
+		log.Error(err, "create god-issuer fail")
+		return reconcile.Result{}, err
+	}
+	log.Info("creating root-ca-cert")
+	if err := r.createFromYaml(instance, []byte(rootCertYaml)); err != nil {
+		log.Error(err, "create root-ca-cert fail")
+		return reconcile.Result{}, err
+	}
+	log.Info("creating root-issuer")
+	if err := r.createFromYaml(instance, []byte(rootIssuerYaml)); err != nil {
+		log.Error(err, "create root-issuer fail")
+		return reconcile.Result{}, err
 	}
 	log.Info("creating icp-mongodb-client-cert")
-	if err := r.createFromYaml(instance, []byte(mongoCertYaml)); err != nil {
+	if err := r.createFromYaml(instance, []byte(clientCertYaml)); err != nil {
 		log.Error(err, "create icp-mongodb-client-cert fail")
+		return reconcile.Result{}, err
 	}
 
 	// Get the StatefulSet
@@ -409,4 +421,17 @@ func (r *ReconcileMongoDB) addControlleronPVC(instance *operatorv1alpha1.MongoDB
 		}
 	}
 	return nil
+}
+
+// Create Random String
+func createRandomAlphaNumeric(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+
+	byteString := make([]byte, length)
+	for i := range byteString {
+		byteString[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(byteString)
 }
