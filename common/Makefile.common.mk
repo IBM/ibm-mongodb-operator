@@ -83,9 +83,6 @@ csv-gen:
 
 bundle:
 	@echo --- Updating the ibm-mongodb-metadata.zip with latest yamls from olm-catalog for Red Hat Certification ---
-	mkdir -p bundle/
-	cp deploy/olm-catalog/ibm-mongodb-operator/${CSV_VERSION}/* bundle/
-	cp deploy/olm-catalog/ibm-mongodb-operator/ibm-mongodb-operator.package.yaml bundle/
 	cd deploy/olm-catalog/ibm-mongodb-operator/; zip -r ibm-mongodb-metadata *
 
 
