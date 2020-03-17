@@ -67,3 +67,13 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - certmanager.k8s.io
+  resources:
+  - certificates
+  - certificaterequests
+  - orders
+  - challenges
+  - issuers
+  verbs:
+  - '*'
