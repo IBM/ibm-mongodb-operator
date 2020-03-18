@@ -62,9 +62,9 @@ spec:
           imagePullPolicy: "IfNotPresent"
           resources:
             limits:
-              memory: 8Gi
+              memory: 5Gi
             requests:
-              memory: 4Gi
+              memory: 2Gi
           volumeMounts:
             - name: mongodbdir
               subPath: workdir
@@ -94,10 +94,12 @@ spec:
           imagePullPolicy: "IfNotPresent"
           resources:
             limits:
-              memory: 8Gi
+              memory: 5Gi
             requests:
-              memory: 4Gi
+              memory: 2Gi
           securityContext:
+            runAsUser: 999
+            runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
           env:
@@ -152,6 +154,8 @@ spec:
           image: "{{ .ImageRepo }}/{{ .BootstrapImage }}"
           imagePullPolicy: "IfNotPresent"
           securityContext:
+            runAsUser: 999
+            runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
           ports:
@@ -217,11 +221,12 @@ spec:
               mountPath: /work-dir
             - name: tmp-mongodb
               mountPath: /tmp
-
         - name: metrics
           image: "{{ .ImageRepo }}/{{ .MetricsImage }}"
           imagePullPolicy: "IfNotPresent"
           securityContext:
+            runAsUser: 999
+            runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
           command:

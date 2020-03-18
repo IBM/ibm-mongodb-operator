@@ -80,8 +80,8 @@ data:
     cp /ca-readonly/tls.crt "${CONFIGDIR_VOLUME}"/tls.crt
 
     chmod 600 "${CONFIGDIR_VOLUME}"/key.txt
-    # chown -R 999:999 /work-dir
-    # chown -R 999:999 /data
+    chown -R 999:999 /work-dir
+    chown -R 999:999 /data
 
     # Root file system is readonly but still need write and execute access to tmp
-    # chmod -R 777 /tmp`
+    chmod -R 777 /tmp`
