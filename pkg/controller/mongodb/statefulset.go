@@ -98,7 +98,7 @@ spec:
             requests:
               memory: 2Gi
           securityContext:
-            runAsUser: 999
+            runAsUser: 1000571999
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -154,7 +154,7 @@ spec:
           image: "{{ .ImageRepo }}/{{ .BootstrapImage }}"
           imagePullPolicy: "IfNotPresent"
           securityContext:
-            runAsUser: 999
+            runAsUser: 1000571999
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -225,7 +225,7 @@ spec:
           image: "{{ .ImageRepo }}/{{ .MetricsImage }}"
           imagePullPolicy: "IfNotPresent"
           securityContext:
-            runAsUser: 999
+            runAsUser: 1000571999
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
