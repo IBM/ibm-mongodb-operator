@@ -22,7 +22,7 @@ metadata:
               "tag": "3.4.0"
             },
             "replicas": 3,
-            "mongoDBUser": "ChangeMeAdmin"
+            "mongoDBUser": "ChangeMeAdmin",
             "mongoDBPass": "ChangeMePass"
           }
         }
