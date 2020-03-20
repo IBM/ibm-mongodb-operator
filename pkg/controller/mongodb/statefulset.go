@@ -48,8 +48,8 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9216"
         prometheus.io/path: "/metrics"
-        openshift.io/scc: ibm-mongodb-scc
     spec:
+      serviceAccountName: ibm-mongodb-operator
       terminationGracePeriodSeconds: 30
       hostNetwork: false
       hostPID: false
