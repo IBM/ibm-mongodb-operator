@@ -56,6 +56,9 @@ spec:
               type: integer
             storageClass:
               type: string
+          required:
+            - mongoDBUser
+            - mongoDBPass
           type: object
         status:
           description: MongoDBStatus defines the observed state of MongoDB
