@@ -25,6 +25,8 @@ metadata:
     app: icp-mongodb
     release: mongodb
   name: icp-mongodb
+  annotations:
+    kubernetes.io/service-account.name: ibm-mongodb-operator
 spec:
   selector:
     matchLabels:
