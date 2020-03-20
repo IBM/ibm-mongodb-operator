@@ -48,7 +48,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9216"
         prometheus.io/path: "/metrics"
-        kubernetes.io/service-account.name: ibm-mongodb-operator
+        openshift.io/scc: ibm-mongodb-scc
     spec:
       terminationGracePeriodSeconds: 30
       hostNetwork: false
