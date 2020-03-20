@@ -168,7 +168,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	if instance.Spec.MongoDBUser == "" {
-		user = "admin"
+		user = createRandomAlphaNumeric(8)
 	} else {
 		user = instance.Spec.MongoDBUser
 	}
