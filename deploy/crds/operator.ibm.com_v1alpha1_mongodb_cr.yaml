@@ -11,3 +11,5 @@ spec:
     tag: 4.0.12-build.3
   metricsImage:
     tag: 3.4.0
+  mongoDBUser: ChangeMeAdmin
+  mongoDBPass: ChangeMePass
