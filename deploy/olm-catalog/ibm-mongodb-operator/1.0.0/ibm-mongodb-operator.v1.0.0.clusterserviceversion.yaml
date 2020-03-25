@@ -1,0 +1,154 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "operator.ibm.com/v1alpha1",
+          "kind": "MongoDB",
+          "metadata": {
+            "name": "ibm-mongodb"
+          },
+          "spec": {
+            "bootstrapImage": {
+              "tag": "4.0.12-build.3"
+            },
+            "imageRegistry": "quay.io/opencloudio",
+            "initImage": {
+              "tag": "3.4.0"
+            },
+            "metricsImage": {
+              "tag": "3.4.0"
+            },
+            "replicas": 3
+          }
+        }
+      ]
+    capabilities: Basic Install
+  name: ibm-mongodb-operator.v1.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: MongoDB is the Schema for the mongodbs API
+      kind: MongoDB
+      name: mongodbs.operator.ibm.com
+      version: v1alpha1
+  description: Placeholder description
+  displayName: Ibm Mongodb Operator
+  install:
+    spec:
+      deployments:
+      - name: ibm-mongodb-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: ibm-mongodb-operator
+          strategy: {}
+          template:
+            metadata:
+              labels:
+                name: ibm-mongodb-operator
+            spec:
+              containers:
+              - command:
+                - ibm-mongodb-operator
+                env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: ibm-mongodb-operator
+                image: quay.io/opencloudio/ibm-mongodb-operator:1.0.0
+                imagePullPolicy: Always
+                name: ibm-mongodb-operator
+                resources: {}
+              serviceAccountName: ibm-mongodb-operator
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - services/finalizers
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - apps
+          resourceNames:
+          - ibm-mongodb-operator
+          resources:
+          - deployments/finalizers
+          verbs:
+          - update
+        - apiGroups:
+          - operator.ibm.com
+          resources:
+          - mongodbs
+          - mongodbs/finalizers
+          - mongodbs/status
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        serviceAccountName: ibm-mongodb-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  maturity: alpha
+  provider: {}
+  replaces: ibm-mongodb-operator.v0.0.0
+  version: 1.0.0
