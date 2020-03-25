@@ -11,12 +11,17 @@ spec:
     metadata:
       labels:
         name: ibm-mongodb-operator
+      annotations:
+        productName: IBM Cloud Platform Common Services
+        productID: "068a62892a1e4db39641342e592daa25"
+        productVersion: "3.3.0"
+        productMetric: FREE
     spec:
       serviceAccountName: ibm-mongodb-operator
       containers:
         - name: ibm-mongodb-operator
           # Replace this with the built image name
-          image: quay.io/opencloudio/ibm-mongodb-operator:latest
+          image: quay.io/opencloudio/ibm-mongodb-operator:1.0.0
           command:
           - ibm-mongodb-operator
           imagePullPolicy: Always

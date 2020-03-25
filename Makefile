@@ -29,7 +29,7 @@ NAMESPACE=ibm-common-services
 # Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
 IMG ?= ibm-mongodb-operator
 REGISTRY ?= quay.io/opencloudio
-CSV_VERSION ?= 0.0.1
+CSV_VERSION ?= 1.0.0
 
 QUAY_USERNAME ?=
 QUAY_PASSWORD ?=
@@ -176,6 +176,7 @@ ifeq ($(LOCAL_ARCH),x86_64)
 	@chmod +x /tmp/manifest-tool
 	/tmp/manifest-tool push from-args --platforms linux/amd64,linux/ppc64le,linux/s390x --template $(REGISTRY)/$(IMG)-ARCH:$(VERSION) --target $(REGISTRY)/$(IMG) --ignore-missing
 	/tmp/manifest-tool push from-args --platforms linux/amd64,linux/ppc64le,linux/s390x --template $(REGISTRY)/$(IMG)-ARCH:$(VERSION) --target $(REGISTRY)/$(IMG):$(VERSION) --ignore-missing
+	/tmp/manifest-tool push from-args --platforms linux/amd64,linux/ppc64le,linux/s390x --template $(REGISTRY)/$(IMG)-ARCH:$(VERSION) --target $(REGISTRY)/$(IMG):$(CSV_VERSION) --ignore-missing
 endif
 endif
 
