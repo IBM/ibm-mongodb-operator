@@ -160,9 +160,8 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
-
 	// Create admin user and password as random string
-	// TODO: allow user to give a Secret 
+	// TODO: allow user to give a Secret
 	var pass, user string
 	user = createRandomAlphaNumeric(8)
 	pass = createRandomAlphaNumeric(13)
