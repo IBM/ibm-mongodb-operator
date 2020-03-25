@@ -31,8 +31,8 @@ type MongoDBSpec struct {
 	ImageRegistry  string `json:"imageRegistry,omitempty"`
 	Replicas       int    `json:"replicas,omitempty"`
 	StorageClass   string `json:"storageClass,omitempty"`
-	MongoDBUser    string `json:"mongoDBUser,omitempty"`
-	MongoDBPass    string `json:"mongoDBPass,omitempty"`
+	MongoDBUser    string `json:"mongoDBUser"`
+	MongoDBPass    string `json:"mongoDBPass"`
 	InitImage      Image  `json:"initImage,omitempty"`
 	BootstrapImage Image  `json:"bootstrapImage,omitempty"`
 	MetricsImage   Image  `json:"metricsImage,omitempty"`
