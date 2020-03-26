@@ -48,17 +48,10 @@ spec:
                 tag:
                   type: string
               type: object
-            mongoDBPass:
-              type: string
-            mongoDBUser:
-              type: string
             replicas:
               type: integer
             storageClass:
               type: string
-          required:
-          - mongoDBPass
-          - mongoDBUser
           type: object
         status:
           description: MongoDBStatus defines the observed state of MongoDB

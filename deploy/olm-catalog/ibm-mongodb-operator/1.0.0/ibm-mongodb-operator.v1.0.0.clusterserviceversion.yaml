@@ -21,8 +21,6 @@ metadata:
             "metricsImage": {
               "tag": "3.4.0"
             },
-            "mongoDBPass": "ChangeMePass",
-            "mongoDBUser": "ChangeMeAdmin",
             "replicas": 3
           }
         }
