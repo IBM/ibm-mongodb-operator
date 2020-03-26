@@ -160,19 +160,11 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
+	// Create admin user and password as random string
+	// TODO: allow user to give a Secret
 	var pass, user string
-	if instance.Spec.MongoDBPass == "" {
-		pass = createRandomAlphaNumeric(13)
-	} else {
-		pass = instance.Spec.MongoDBPass
-	}
-
-	if instance.Spec.MongoDBUser == "" {
-		user = createRandomAlphaNumeric(8)
-	} else {
-		user = instance.Spec.MongoDBUser
-	}
-
+	user = createRandomAlphaNumeric(8)
+	pass = createRandomAlphaNumeric(13)
 	mongodbAdmin := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels: map[string]string{
