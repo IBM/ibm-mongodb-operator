@@ -140,7 +140,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-mongodb-operator
-                image: quay.io/opencloudio/ibm-mongodb-operator:latest
+                image: quay.io/opencloudio/ibm-mongodb-operator:1.0.0
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator
                 resources: {}
