@@ -81,5 +81,21 @@ csv-gen:
 	@echo Updating the CSV files with the changes in the CRD
 	operator-sdk generate csv --csv-version ${CSV_VERSION} --update-crds
 
+bundle:
+	@echo --- Updating the ibm-mongodb-metadata.zip with latest yamls from olm-catalog for Red Hat Certification ---
+	cd deploy/olm-catalog/ibm-mongodb-operator/; zip -r ibm-mongodb-metadata *
 
-.PHONY: code-vet code-fmt code-tidy code-gen csv-gen lint-copyright-banner lint-go lint-all config-docker install-operator-sdk
+
+install-operator-courier:
+	@echo --- Installing Operator Courier ---
+	pip3 install operator-courier
+
+verify-bundle: scorecard
+	@echo --- Verify Bundle is Redhat Certify ready ---
+	operator-courier --verbose verify --ui_validate_io deploy/olm-catalog/ibm-mongodb-operator/
+
+redhat-certify-ready: bundle install-operator-courier verify-bundle
+
+
+
+.PHONY: code-vet code-fmt code-tidy code-gen csv-gen lint-copyright-banner lint-go lint-all config-docker install-operator-sdk bundle install-operator-courier verify-bundle redhat-certify-ready
