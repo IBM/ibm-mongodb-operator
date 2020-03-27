@@ -78,14 +78,25 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 
 	// TODO(user): Modify this to be the types you create that are owned by the primary resource
 	// Watch for changes to secondary resource Pods and requeue the owner MongoDB
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &operatorv1alpha1.MongoDB{},
-	})
-	if err != nil {
-		return err
+	// IBMDev: Done
+	secondaryResourceTypes := []runtime.Object{
+		&appsv1.Statefulset{},
+		&corev1.Service{},
+		&corev1.Secret{},
+		&corev1.ConfigMap{},
 	}
-
+	for _, restype := range secondaryResourceTypes {
+		log.Info("Watching", "restype", restype)
+		//err = c.Watch(&kind, &handler.EnqueueRequestForOwner{
+		err = c.Watch(&source.Kind{Type: restype}, &handler.EnqueueRequestForOwner{
+			IsController: true,
+			OwnerType:    &operatorv1alpha1.MongoDB{},
+		})
+		if err != nil {
+			return err
+		}
+	}
+	
 	return nil
 }
 
