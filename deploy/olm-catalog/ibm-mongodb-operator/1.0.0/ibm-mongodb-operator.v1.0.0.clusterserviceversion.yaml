@@ -44,6 +44,7 @@ spec:
   customresourcedefinitions:
     owned:
     - description: MongoDB is the Schema for the mongodbs API
+      displayName: MongoDB
       kind: MongoDB
       name: mongodbs.operator.ibm.com
       version: v1alpha1
