@@ -84,10 +84,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		&corev1.Service{},
 		&corev1.Secret{},
 		&corev1.ConfigMap{},
+		&corev1.Pod{},
 	}
 	for _, restype := range secondaryResourceTypes {
 		log.Info("Watching", "restype", restype)
-		//err = c.Watch(&kind, &handler.EnqueueRequestForOwner{
 		err = c.Watch(&source.Kind{Type: restype}, &handler.EnqueueRequestForOwner{
 			IsController: true,
 			OwnerType:    &operatorv1alpha1.MongoDB{},
