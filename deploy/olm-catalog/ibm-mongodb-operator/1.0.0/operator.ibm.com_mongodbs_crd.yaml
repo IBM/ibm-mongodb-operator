@@ -35,7 +35,7 @@ spec:
               properties:
                 tag:
                   type: string
-              description: The image used to run the mongod process.
+              description: The image used to run the mongoDB process.
               type: object
             imageRegistry:
               type: string
