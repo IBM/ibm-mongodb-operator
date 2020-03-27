@@ -80,7 +80,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource Pods and requeue the owner MongoDB
 	// IBMDev: Done
 	secondaryResourceTypes := []runtime.Object{
-		&appsv1.Statefulset{},
+		&appsv1.StatefulSet{},
 		&corev1.Service{},
 		&corev1.Secret{},
 		&corev1.ConfigMap{},
@@ -96,7 +96,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
