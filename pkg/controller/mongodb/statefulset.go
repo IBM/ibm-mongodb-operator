@@ -322,11 +322,11 @@ spec:
             name: icp-mongodb-install
         - name: ca
           secret:
-            defaultMode: 0400
+            defaultMode: 0755
             secretName: mongodb-root-ca-cert
         - name: keydir
           secret:
-            defaultMode: 0400
+            defaultMode: 0755
             secretName: icp-mongodb-keyfile
         - name: configdir
           emptyDir: {}
