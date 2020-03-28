@@ -74,8 +74,7 @@ data:
     mkdir -p "${WORKDIR_VOLUME}"
     cp /peer-finder "${WORKDIR_VOLUME}"/
     echo "I am running as " $(whoami)
-    ls -al /ca-readonly/..data/
-    sleep 600
+
     cp /configdb-readonly/mongod.conf "${CONFIGDIR_VOLUME}"/mongod.conf
     cp /keydir-readonly/key.txt "${CONFIGDIR_VOLUME}"/
     cp /ca-readonly/tls.key "${CONFIGDIR_VOLUME}"/tls.key
