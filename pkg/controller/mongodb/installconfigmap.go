@@ -74,6 +74,9 @@ data:
     mkdir -p "${WORKDIR_VOLUME}"
     cp /peer-finder "${WORKDIR_VOLUME}"/
 
+    ls -l /configdb-readonly/
+    ls -l /keydir-readonly/
+    ls -l /ca-readonly/
     cp /configdb-readonly/mongod.conf "${CONFIGDIR_VOLUME}"/mongod.conf
     cp /keydir-readonly/key.txt "${CONFIGDIR_VOLUME}"/
     cp /ca-readonly/tls.key "${CONFIGDIR_VOLUME}"/tls.key
