@@ -21,7 +21,7 @@ spec:
       containers:
         - name: ibm-mongodb-operator
           # Replace this with the built image name
-          image: quay.io/opencloudio/ibm-mongodb-operator-amd64:c233d2e6
+          image: quay.io/opencloudio/ibm-mongodb-operator:1.0.0
           command:
           - ibm-mongodb-operator
           imagePullPolicy: Always
