@@ -73,6 +73,7 @@ data:
     echo installing config scripts into "${WORKDIR_VOLUME}"
     mkdir -p "${WORKDIR_VOLUME}"
     cp /peer-finder "${WORKDIR_VOLUME}"/
+    echo "I am running as " $(whoami)
 
     cp /configdb-readonly/mongod.conf "${CONFIGDIR_VOLUME}"/mongod.conf
     cp /keydir-readonly/key.txt "${CONFIGDIR_VOLUME}"/
