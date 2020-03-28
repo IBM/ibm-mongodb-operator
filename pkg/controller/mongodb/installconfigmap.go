@@ -73,7 +73,7 @@ data:
     echo installing config scripts into "${WORKDIR_VOLUME}"
     mkdir -p "${WORKDIR_VOLUME}"
     cp /peer-finder "${WORKDIR_VOLUME}"/
-
+    echo "I am running as " $(whoami)
     ls -l /configdb-readonly/
     ls -l /keydir-readonly/
     ls -l /ca-readonly/
