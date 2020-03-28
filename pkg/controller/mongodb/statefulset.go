@@ -48,7 +48,7 @@ spec:
         prometheus.io/path: "/metrics"
     spec:
       securityContext:
-        runAsUser: 1000570000
+        runAsUser: 1000570002
       terminationGracePeriodSeconds: 30
       hostNetwork: false
       hostPID: false
