@@ -157,6 +157,7 @@ spec:
           - pods
           - services
           - services/finalizers
+          - serviceaccounts
           - endpoints
           - persistentvolumeclaims
           - events
