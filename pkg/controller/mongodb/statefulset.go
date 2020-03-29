@@ -47,8 +47,7 @@ spec:
         prometheus.io/port: "9216"
         prometheus.io/path: "/metrics"
     spec:
-      securityContext:
-        runAsUser: 1000570000
+      serviceAccountName: ibm-mongodb-operand
       terminationGracePeriodSeconds: 30
       hostNetwork: false
       hostPID: false

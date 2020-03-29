@@ -127,6 +127,11 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
+	log.Info("creating mongodb service account")
+	if err := r.createFromYaml(instance, []byte(mongoSA)); err != nil {
+		return reconcile.Result{}, err
+	}
+
 	log.Info("creating mongodb service")
 	if err := r.createFromYaml(instance, []byte(service)); err != nil {
 		return reconcile.Result{}, err
@@ -136,8 +141,6 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	if err := r.createFromYaml(instance, []byte(icpService)); err != nil {
 		return reconcile.Result{}, err
 	}
-
-	log.Info("creating icp mongodb Security Context Constraints")
 
 	metadatalabel := map[string]string{"app.kubernetes.io/name": "icp-mongodb", "app.kubernetes.io/component": "database",
 		"app.kubernetes.io/managed-by": "operator", "app.kubernetes.io/instance": "icp-mongodb", "release": "mongodb"}
