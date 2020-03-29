@@ -47,6 +47,8 @@ spec:
         prometheus.io/port: "9216"
         prometheus.io/path: "/metrics"
     spec:
+      securityContext:
+        runAsUser: 1000570000
       terminationGracePeriodSeconds: 30
       hostNetwork: false
       hostPID: false
@@ -320,11 +322,11 @@ spec:
             name: icp-mongodb-install
         - name: ca
           secret:
-            defaultMode: 0400
+            defaultMode: 0755
             secretName: mongodb-root-ca-cert
         - name: keydir
           secret:
-            defaultMode: 0400
+            defaultMode: 0755
             secretName: icp-mongodb-keyfile
         - name: configdir
           emptyDir: {}
