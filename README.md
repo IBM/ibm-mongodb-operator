@@ -28,6 +28,6 @@ When deploying MongoDB, it is better to use 3 replicas, especially if you are no
 ### Developer guide
 
 Information about building and testing the operator.
-- Dev quick start
-- Debugging the operator
+- Dev quick start (TO-DO)
+- Debugging the operator (TO-DO)
 
