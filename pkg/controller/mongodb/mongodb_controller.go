@@ -166,7 +166,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	// Create admin user and password as random string
 	// TODO: allow user to give a Secret
 	var pass, user string
-	user = createRandomAlphaNumeric(8)
+	user = commonAdmin
 	pass = createRandomAlphaNumeric(13)
 	mongodbAdmin := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -184,9 +184,9 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	// Set CommonServiceConfig instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, mongodbAdmin, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
+	//if err := controllerutil.SetControllerReference(instance, mongodbAdmin, r.scheme); err != nil {
+	//	return reconcile.Result{}, err
+	//}
 
 	log.Info("creating icp mongodb admin secret")
 	if err = r.client.Create(context.TODO(), mongodbAdmin); err != nil && !errors.IsAlreadyExists(err) {
