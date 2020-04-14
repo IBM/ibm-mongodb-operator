@@ -10,6 +10,7 @@ This is supported on amd64, ppc64le, and s390x.
 
 | Version | Date | Details |
 | ----- | ---- | ----------------- |
+| 1.1.0 | TDB (In Development) | Allow user to bring their own admin secret
 | 1.0.0 | March 2020 | Initial Offering of MongoDB operator
 
 ## Prerequisites
@@ -20,7 +21,13 @@ This operator requires cert-manager, https://github.com/IBM/ibm-cert-manager-ope
 
 For installation and configuration, see the [IBM Knowledge Center](http://ibm.biz/cpcsdocs).
 
-Some notes.
+#### Highlighted Features
+
+**_Admin Secret_**
+
+Starting with version 1.1.0 you can now supply your own `icp-mongodb-admin` secret. The secret must have a `user` field and a `password` field and be in the same namespace that mongoDB is going to be created in. If the user chooses not to supply a secret, a random user and password will be created and used. The `icp-mongodb-admin` secret will persist after uninstalling/removing the MongoDB custom resource so that uninstall and re-install is possible using the same Persistent Volumes. 
+
+#### Notes
 The operator does not support updating the CR in version 1.0.0. To make changes to a deployed MongoDB instance it is best to edit the statefulset directly.
 
 When deploying MongoDB, it is better to use 3 replicas, especially if you are not backing up your data. It is possible for the data to become corrupt and recovering from a 3 replica deployment is much easier. 
