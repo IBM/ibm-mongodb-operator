@@ -27,6 +27,19 @@ For installation and configuration, see the [IBM Knowledge Center](http://ibm.bi
 
 Starting with version 1.1.0 you can now supply your own `icp-mongodb-admin` secret. The secret must have a `user` field and a `password` field and be in the same namespace that mongoDB is going to be created in. If the user chooses not to supply a secret, a random user and password will be created and used. The `icp-mongodb-admin` secret will persist after uninstalling/removing the MongoDB custom resource so that uninstall and re-install is possible using the same Persistent Volumes. 
 
+Example Yaml for creating your own admin secret before installation. The user and password are base64 encrypted. 
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: icp-mongodb-admin
+  namespace: ibm-common-services
+type: Opaque
+data:
+  password: SFV6a2NYMkdKa2tBZA==
+  user: dGpOcDR5Unc=
+```
+
 #### Notes
 The operator does not support updating the CR in version 1.0.0. To make changes to a deployed MongoDB instance it is best to edit the statefulset directly.
 
