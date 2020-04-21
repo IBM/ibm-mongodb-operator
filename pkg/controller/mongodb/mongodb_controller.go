@@ -184,9 +184,9 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	// Set CommonServiceConfig instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, mongodbAdmin, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
+	//if err := controllerutil.SetControllerReference(instance, mongodbAdmin, r.scheme); err != nil {
+	//	return reconcile.Result{}, err
+	//}
 
 	log.Info("creating icp mongodb admin secret")
 	if err = r.client.Create(context.TODO(), mongodbAdmin); err != nil && !errors.IsAlreadyExists(err) {
