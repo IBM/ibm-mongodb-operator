@@ -35,7 +35,7 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: common-mongo
+        app.kubernetes.io/instance: common-mongodb
         app: icp-mongodb
         release: mongodb
       annotations:
@@ -46,6 +46,7 @@ spec:
         prometheus.io/scrape: "true"
         prometheus.io/port: "9216"
         prometheus.io/path: "/metrics"
+        clusterhealth.ibm.com/dependencies: ibm-common-services.cert-manager
     spec:
       serviceAccountName: ibm-mongodb-operand
       terminationGracePeriodSeconds: 30
