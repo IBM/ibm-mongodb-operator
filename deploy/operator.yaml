@@ -11,7 +11,6 @@ spec:
     metadata:
       labels:
         name: ibm-mongodb-operator
-        app.kubernetes.io/instance: common-mongodb
       annotations:
         productName: IBM Cloud Platform Common Services
         productID: "068a62892a1e4db39641342e592daa25"
