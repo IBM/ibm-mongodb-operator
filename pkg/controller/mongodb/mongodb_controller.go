@@ -280,8 +280,8 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
-	log.Info("creating mongodb statefulset")
-	if err := r.createFromYaml(instance, stsYaml.Bytes()); err != nil {
+	log.Info("creating or updating mongodb statefulset")
+	if err := r.createUpdateFromYaml(instance, stsYaml.Bytes()); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -352,6 +352,38 @@ func (r *ReconcileMongoDB) createFromYaml(instance *operatorv1alpha1.MongoDB, ya
 
 	err = r.client.Create(context.TODO(), obj)
 	if err != nil && !errors.IsAlreadyExists(err) {
+		return fmt.Errorf("could not Create resource: %v", err)
+	}
+
+	return nil
+}
+
+func (r *ReconcileMongoDB) createUpdateFromYaml(instance *operatorv1alpha1.MongoDB, yamlContent []byte) error {
+	obj := &unstructured.Unstructured{}
+	jsonSpec, err := yaml.YAMLToJSON(yamlContent)
+	if err != nil {
+		return fmt.Errorf("could not convert yaml to json: %v", err)
+	}
+
+	if err := obj.UnmarshalJSON(jsonSpec); err != nil {
+		return fmt.Errorf("could not unmarshal resource: %v", err)
+	}
+
+	obj.SetNamespace(instance.Namespace)
+
+	// Set CommonServiceConfig instance as the owner and controller
+	if err := controllerutil.SetControllerReference(instance, obj, r.scheme); err != nil {
+		return err
+	}
+
+	err = r.client.Create(context.TODO(), obj)
+	if err != nil {
+		if errors.IsAlreadyExists(err) {
+			if err := r.client.Update(context.TODO(), obj); err != nil {
+				return fmt.Errorf("could not Update resource: %v", err)
+			}
+			return nil
+		}
 		return fmt.Errorf("could not Create resource: %v", err)
 	}
 
