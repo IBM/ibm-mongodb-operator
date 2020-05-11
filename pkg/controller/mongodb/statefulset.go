@@ -55,7 +55,7 @@ spec:
       hostIPC: false
       initContainers:
         - name: install
-          image: "{{ .ImageRepo }}/{{ .InitImage }}"
+          image: "{{ .InitImage }}"
           command:
             - /install/install.sh
           args:
@@ -87,7 +87,7 @@ spec:
             - name: tmp-mongodb
               mountPath: /tmp
         - name: bootstrap
-          image: "{{ .ImageRepo }}/{{ .BootstrapImage }}"
+          image: "{{ .BootstrapImage }}"
           command:
             - /work-dir/peer-finder
           args:
@@ -151,7 +151,7 @@ spec:
               mountPath: /tmp
       containers:
         - name: icp-mongodb
-          image: "{{ .ImageRepo }}/{{ .BootstrapImage }}"
+          image: "{{ .BootstrapImage }}"
           imagePullPolicy: "IfNotPresent"
           securityContext:
             allowPrivilegeEscalation: false
@@ -221,7 +221,7 @@ spec:
               mountPath: /tmp
 
         - name: metrics
-          image: "{{ .ImageRepo }}/{{ .MetricsImage }}"
+          image: "{{ .MetricsImage }}"
           imagePullPolicy: "IfNotPresent"
           securityContext:
             allowPrivilegeEscalation: false
