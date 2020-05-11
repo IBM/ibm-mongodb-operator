@@ -20,9 +20,9 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"os"
 	"text/template"
 	"time"
-	"os"
 
 	"github.com/ghodss/yaml"
 	appsv1 "k8s.io/api/apps/v1"
