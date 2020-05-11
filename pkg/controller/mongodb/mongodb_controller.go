@@ -22,6 +22,7 @@ import (
 	"math/rand"
 	"text/template"
 	"time"
+	"os"
 
 	"github.com/ghodss/yaml"
 	appsv1 "k8s.io/api/apps/v1"
@@ -269,9 +270,9 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		Replicas:       instance.Spec.Replicas,
 		ImageRepo:      instance.Spec.ImageRegistry,
 		StorageClass:   storageclass,
-		InitImage:      "ibm-mongodb-install:" + instance.Spec.InitImage.Tag,
-		BootstrapImage: "ibm-mongodb:" + instance.Spec.BootstrapImage.Tag,
-		MetricsImage:   "ibm-mongodb-exporter:" + instance.Spec.MetricsImage.Tag,
+		InitImage:      os.Getenv("INIT_MONGODB_IMAGE"),
+		BootstrapImage: os.Getenv("MONGODB_IMAGE"),
+		MetricsImage:   os.Getenv("EXPORTER_MONGODB_IMAGE"),
 	}
 
 	var stsYaml bytes.Buffer
