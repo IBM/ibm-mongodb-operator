@@ -37,7 +37,7 @@ metadata:
     capabilities: Basic Install
     categories: Developer Tools, Database
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-mongodb-operator:1.1.0
+    containerImage: quay.io/opencloudio/ibm-mongodb-operator@sha256:7dd048d1d82be3630faa404b81c60a5b8a9beab4350c2da6be693e47adfc9a92
     createdAt: "2020-02-14T17:16:16Z"
     description: The Mongodb operator provides a simple Kubernetes CRD-Based API to
       manage the lifecycle of Mongodb. With this operator, you can simply deploy and
@@ -160,7 +160,7 @@ spec:
                   value: quay.io/opencloudio/ibm-mongodb@sha256:2c82b4d1025583a5c4c9263b48cd0138b294c33818aaf45b56984bff937080c9
                 - name: EXPORTER_MONGODB_IMAGE
                   value: quay.io/opencloudio/ibm-mongodb-exporter@sha256:ea69cc9a41f57d82f4bbaa546e73c09041ad8e44072bba04e188aaa75ac19f06
-                image: quay.io/opencloudio/ibm-mongodb-operator:1.1.0
+                image: quay.io/opencloudio/ibm-mongodb-operator@sha256:7dd048d1d82be3630faa404b81c60a5b8a9beab4350c2da6be693e47adfc9a92
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator
                 resources: {}
