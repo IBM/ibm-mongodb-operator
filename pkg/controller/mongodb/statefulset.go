@@ -64,9 +64,7 @@ spec:
           imagePullPolicy: "IfNotPresent"
           resources:
             limits:
-              memory: 8Gi
-            requests:
-              memory: 4Gi
+              memory: 5Gi
           volumeMounts:
             - name: mongodbdir
               subPath: workdir
@@ -96,9 +94,7 @@ spec:
           imagePullPolicy: "IfNotPresent"
           resources:
             limits:
-              memory: 8Gi
-            requests:
-              memory: 4Gi
+              memory: 5Gi
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -162,8 +158,6 @@ spec:
           resources:
             limits:
               memory: 5Gi
-            requests:
-              memory: 2Gi
           command:
             - mongod
             - --config=/data/configdb/mongod.conf
@@ -263,9 +257,6 @@ spec:
               containerPort: 9216
           resources:
             limits:
-              cpu: 300m
-              memory: 256Mi
-            requests:
               cpu: 300m
               memory: 256Mi
           readinessProbe:
