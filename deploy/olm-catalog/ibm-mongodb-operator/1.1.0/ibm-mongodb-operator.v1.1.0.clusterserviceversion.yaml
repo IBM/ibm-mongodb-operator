@@ -154,8 +154,6 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-mongodb-operator
-                - name: OPERATOR_NAME
-                  value: "ibm-mongodb-operator"
                 - name: INIT_MONGODB_IMAGE
                   value: quay.io/opencloudio/ibm-mongodb-install@sha256:34543370cc9fb7095229966376f96df30de067b0b97cbcc6b19017df02339c2f
                 - name: MONGODB_IMAGE
