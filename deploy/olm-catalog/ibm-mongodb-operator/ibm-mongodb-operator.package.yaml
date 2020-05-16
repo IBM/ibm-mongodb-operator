@@ -1,7 +1,9 @@
 channels:
-- currentCSV: ibm-mongodb-operator.v1.0.0
-  name: stable-v1
+- currentCSV: ibm-mongodb-operator.v1.1.0
+  name: beta
 - currentCSV: ibm-mongodb-operator.v1.1.0
   name: dev
+- currentCSV: ibm-mongodb-operator.v1.0.0
+  name: stable-v1
 defaultChannel: stable-v1
 packageName: ibm-mongodb-operator-app
