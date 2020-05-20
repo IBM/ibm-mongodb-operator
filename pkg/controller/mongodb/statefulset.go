@@ -24,6 +24,9 @@ metadata:
   labels:
     app: icp-mongodb
     release: mongodb
+    app.kubernetes.io/instance: mongodbs.operator.ibm.com
+    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
+    app.kubernetes.io/name: mongodbs.operator.ibm.com
   name: icp-mongodb
 spec:
   selector:
@@ -53,6 +56,17 @@ spec:
       hostNetwork: false
       hostPID: false
       hostIPC: false
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+                  - ppc64le
+                  - s390x
       initContainers:
         - name: install
           image: "{{ .InitImage }}"

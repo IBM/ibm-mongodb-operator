@@ -20,4 +20,8 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: ibm-mongodb-operand
+  labels: 
+    app.kubernetes.io/instance: mongodbs.operator.ibm.com
+    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
+    app.kubernetes.io/name: mongodbs.operator.ibm.com
 `

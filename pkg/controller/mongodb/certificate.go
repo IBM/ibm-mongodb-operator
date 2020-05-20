@@ -19,55 +19,71 @@ const godIssuerYaml = `
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Issuer
 metadata:
- name: god-issuer
- namespace: ibm-common-services
+  name: god-issuer
+  namespace: ibm-common-services
+  labels: 
+    app.kubernetes.io/instance: mongodbs.operator.ibm.com
+    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
+    app.kubernetes.io/name: mongodbs.operator.ibm.com
 spec:
- selfSigned: {}
+  selfSigned: {}
 `
 
 const rootCertYaml = `
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
- name: mongodb-root-ca-cert
- namespace: ibm-common-services
+  name: mongodb-root-ca-cert
+  namespace: ibm-common-services
+  labels: 
+    app.kubernetes.io/instance: mongodbs.operator.ibm.com
+    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
+    app.kubernetes.io/name: mongodbs.operator.ibm.com
 spec:
- secretName: mongodb-root-ca-cert
- duration: 17520h
- isCA: true
- issuerRef:
-   name: god-issuer
-   kind: Issuer
- commonName: "mongodb"
- dnsNames:
- - mongodb.root
+  secretName: mongodb-root-ca-cert
+  duration: 17520h
+  isCA: true
+  issuerRef:
+    name: god-issuer
+    kind: Issuer
+  commonName: "mongodb"
+  dnsNames:
+  - mongodb.root
 `
 
 const rootIssuerYaml = `
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Issuer
 metadata:
- name: mongodb-root-ca-issuer
- namespace: ibm-common-services
+  name: mongodb-root-ca-issuer
+  namespace: ibm-common-services
+  labels: 
+    app.kubernetes.io/instance: mongodbs.operator.ibm.com
+    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
+    app.kubernetes.io/name: mongodbs.operator.ibm.com
 spec:
- ca:
-   secretName: mongodb-root-ca-cert
+  ca:
+    secretName: mongodb-root-ca-cert
 `
 
 const clientCertYaml = `
 apiVersion: certmanager.k8s.io/v1alpha1
 kind: Certificate
 metadata:
- name: icp-mongodb-client-cert
- namespace: ibm-common-services
+  name: icp-mongodb-client-cert
+  namespace: ibm-common-services
+  labels: 
+    app.kubernetes.io/instance: mongodbs.operator.ibm.com
+    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
+    app.kubernetes.io/name: mongodbs.operator.ibm.com
 spec:
- secretName: icp-mongodb-client-cert
- duration: 17520h
- isCA: false
- issuerRef:
-   name: mongodb-root-ca-issuer
-   kind: Issuer
- commonName: "mongodb-service"
- dnsNames:
- - mongodb
+  secretName: icp-mongodb-client-cert
+  duration: 17520h
+  isCA: false
+  issuerRef:
+    name: mongodb-root-ca-issuer
+    kind: Issuer
+  commonName: "mongodb-service"
+  dnsNames:
+  - mongodb
 `
