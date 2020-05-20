@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ibm-mongodb-operator
-  labels: 
+  labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
     app.kubernetes.io/name: mongodbs.operator.ibm.com
@@ -43,9 +43,19 @@ spec:
         - name: ibm-mongodb-operator
           resources:
             limits:
-              memory: 5Gi
+              cpu: 20m
+              memory: 200Mi
             requests:
-              memory: 5Gi
+              cpu: 10m
+              memory: 100Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
           # Replace this with the built image name
           image: quay.io/opencloudio/ibm-mongodb-operator@sha256:7dd048d1d82be3630faa404b81c60a5b8a9beab4350c2da6be693e47adfc9a92
           command:

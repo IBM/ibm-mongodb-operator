@@ -1,7 +1,7 @@
 apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
-  labels: 
+  labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
     app.kubernetes.io/name: mongodbs.operator.ibm.com
@@ -167,7 +167,21 @@ spec:
                 image: quay.io/opencloudio/ibm-mongodb-operator:latest
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator
-                resources: {}
+                resources:
+                  limits:
+                    cpu: 20m
+                    memory: 200Mi
+                  requests:
+                    cpu: 10m
+                    memory: 100Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
+                  privileged: false
+                  readOnlyRootFilesystem: true
+                  runAsNonRoot: true
               serviceAccountName: ibm-mongodb-operator
       permissions:
       - rules:
