@@ -56,17 +56,6 @@ spec:
       hostNetwork: false
       hostPID: false
       hostIPC: false
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/arch
-                operator: In
-                values:
-                  - amd64
-                  - ppc64le
-                  - s390x
       initContainers:
         - name: install
           image: "{{ .InitImage }}"
@@ -76,9 +65,6 @@ spec:
             - --work-dir=/work-dir
             - --config-dir=/data/configdb
           imagePullPolicy: "IfNotPresent"
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
           resources:
             limits:
               memory: 5Gi
