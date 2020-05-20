@@ -2,6 +2,10 @@ kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: ibm-mongodb-operator
+  labels: 
+    app.kubernetes.io/instance: mongodbs.operator.ibm.com
+    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
+    app.kubernetes.io/name: mongodbs.operator.ibm.com
 subjects:
 - kind: ServiceAccount
   name: ibm-mongodb-operator

@@ -2,6 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ibm-mongodb-operator
+  labels: 
+    app.kubernetes.io/instance: mongodbs.operator.ibm.com
+    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
+    app.kubernetes.io/name: mongodbs.operator.ibm.com
 spec:
   replicas: 1
   selector:
@@ -11,6 +15,9 @@ spec:
     metadata:
       labels:
         name: ibm-mongodb-operator
+        app.kubernetes.io/instance: mongodbs.operator.ibm.com
+        app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
+        app.kubernetes.io/name: mongodbs.operator.ibm.com
       annotations:
         productName: IBM Cloud Platform Common Services
         productID: "068a62892a1e4db39641342e592daa25"
@@ -18,8 +25,27 @@ spec:
         productMetric: FREE
     spec:
       serviceAccountName: ibm-mongodb-operator
+      hostNetwork: false
+      hostPID: false
+      hostIPC: false
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+                  - ppc64le
+                  - s390x
       containers:
         - name: ibm-mongodb-operator
+          resources:
+            limits:
+              memory: 5Gi
+            requests:
+              memory: 5Gi
           # Replace this with the built image name
           image: quay.io/opencloudio/ibm-mongodb-operator@sha256:7dd048d1d82be3630faa404b81c60a5b8a9beab4350c2da6be693e47adfc9a92
           command:
