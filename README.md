@@ -19,7 +19,14 @@ This operator requires cert-manager, https://github.com/IBM/ibm-cert-manager-ope
 
 ## Documentation
 
-For installation and configuration, see the [IBM Knowledge Center](http://ibm.biz/cpcsdocs).
+To install the operator with the IBM Common Services Operator follow the installation and configuration instructions within the IBM Knowledge Center.
+
+- If you are using the operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak. For a list of IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).
+- If you are using the operator with an IBM Containerized Software, see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcs_opinstall).
+
+## SecurityContextConstraints Requirements
+
+The IBM Common Services MongoDB service supports running with the OpenShift Container Platform 4.3 default restricted Security Context Constraints (SCCs).
 
 #### Highlighted Features
 
