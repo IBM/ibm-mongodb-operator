@@ -191,6 +191,9 @@ all: check test coverage build images
 clean: ## Clean build binary
 	rm -f build/_output/bin/$(IMG)
 
+promote-to-beta:
+	common/scripts/promote-to-beta.sh
+
 ##@ Help
 help: ## Display this help
 	@echo "Usage:\n  make \033[36m<target>\033[0m"
