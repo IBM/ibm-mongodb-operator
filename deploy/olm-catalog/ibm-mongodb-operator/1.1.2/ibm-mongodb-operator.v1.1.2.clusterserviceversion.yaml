@@ -48,8 +48,8 @@ metadata:
       upgrade mongodb.
     repository: https://github.com/IBM/ibm-mongodb-operator.git
     support: IBM
-    olm.skipRange: '>=1.0.0 <1.1.1'
-  name: ibm-mongodb-operator.v1.1.1
+    olm.skipRange: '>=1.0.0 <1.1.2'
+  name: ibm-mongodb-operator.v1.1.2
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -283,4 +283,4 @@ spec:
   provider:
     name: IBM
   replaces: ibm-mongodb-operator.v1.0.0
-  version: 1.1.1
+  version: 1.1.2
