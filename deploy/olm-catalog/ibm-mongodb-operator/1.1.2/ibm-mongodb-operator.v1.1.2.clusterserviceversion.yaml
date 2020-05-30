@@ -42,7 +42,7 @@ metadata:
     categories: Developer Tools, Database
     certified: "false"
     containerImage: quay.io/opencloudio/ibm-mongodb-operator:latest
-    createdAt: "2020-02-14T17:16:16Z"
+    createdAt: "2020-05-30T12:24:39Z"
     description: The Mongodb operator provides a simple Kubernetes CRD-Based API to
       manage the lifecycle of Mongodb. With this operator, you can simply deploy and
       upgrade mongodb.
