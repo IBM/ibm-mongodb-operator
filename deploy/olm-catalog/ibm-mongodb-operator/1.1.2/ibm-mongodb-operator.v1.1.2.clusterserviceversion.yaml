@@ -41,15 +41,15 @@ metadata:
     capabilities: Basic Install
     categories: Developer Tools, Database
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-mongodb-operator@sha256:db9b991c292bf0d8fd2ee8a17fc0ea1138a40e9e3145b358b483f8f1ec2cdd70
-    createdAt: "2020-02-14T17:16:16Z"
+    containerImage: quay.io/opencloudio/ibm-mongodb-operator:latest
+    createdAt: "2020-05-30T12:24:39Z"
     description: The Mongodb operator provides a simple Kubernetes CRD-Based API to
       manage the lifecycle of Mongodb. With this operator, you can simply deploy and
       upgrade mongodb.
     repository: https://github.com/IBM/ibm-mongodb-operator.git
     support: IBM
-    olm.skipRange: '>=1.0.0 <1.1.1'
-  name: ibm-mongodb-operator.v1.1.1
+    olm.skipRange: '>=1.0.0 <1.1.2'
+  name: ibm-mongodb-operator.v1.1.2
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -157,12 +157,12 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-mongodb-operator
                 - name: INIT_MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb-install@sha256:34543370cc9fb7095229966376f96df30de067b0b97cbcc6b19017df02339c2f
+                  value: quay.io/opencloudio/ibm-mongodb-install:3.5.0
                 - name: MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb@sha256:2c82b4d1025583a5c4c9263b48cd0138b294c33818aaf45b56984bff937080c9
+                  value: quay.io/opencloudio/ibm-mongodb:4.0.12-build.4
                 - name: EXPORTER_MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb-exporter@sha256:ea69cc9a41f57d82f4bbaa546e73c09041ad8e44072bba04e188aaa75ac19f06
-                image: quay.io/opencloudio/ibm-mongodb-operator@sha256:db9b991c292bf0d8fd2ee8a17fc0ea1138a40e9e3145b358b483f8f1ec2cdd70
+                  value: quay.io/opencloudio/ibm-mongodb-exporter:3.5.0
+                image: quay.io/opencloudio/ibm-mongodb-operator:latest
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator
                 resources:
@@ -283,4 +283,4 @@ spec:
   provider:
     name: IBM
   replaces: ibm-mongodb-operator.v1.0.0
-  version: 1.1.1
+  version: 1.1.2

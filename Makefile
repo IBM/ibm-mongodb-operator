@@ -29,7 +29,7 @@ NAMESPACE=ibm-common-services
 # Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
 IMG ?= ibm-mongodb-operator
 REGISTRY ?= quay.io/opencloudio
-CSV_VERSION ?= 1.1.1
+CSV_VERSION ?= 1.1.2
 
 QUAY_USERNAME ?=
 QUAY_PASSWORD ?=
@@ -190,6 +190,9 @@ all: check test coverage build images
 ##@ Cleanup
 clean: ## Clean build binary
 	rm -f build/_output/bin/$(IMG)
+
+promote-to-beta:
+	common/scripts/promote-to-beta.sh ${CSV_VERSION}
 
 ##@ Help
 help: ## Display this help
