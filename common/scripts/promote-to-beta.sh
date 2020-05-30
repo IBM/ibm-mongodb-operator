@@ -59,5 +59,6 @@ read
 
 #Update version.go to new dev version
 gsed -i "s/$CURRENT_DEV_CSV/$NEW_DEV_CSV/" version/version.go
+gsed -i "s/$CURRENT_DEV_CSV/$NEW_DEV_CSV/" Makefile
 echo "Updated the version.go with new version (Push Enter when done): "
 read

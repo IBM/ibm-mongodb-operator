@@ -192,7 +192,7 @@ clean: ## Clean build binary
 	rm -f build/_output/bin/$(IMG)
 
 promote-to-beta:
-	common/scripts/promote-to-beta.sh
+	common/scripts/promote-to-beta.sh ${CSV_VERSION}
 
 ##@ Help
 help: ## Display this help
