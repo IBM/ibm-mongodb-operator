@@ -49,16 +49,16 @@ echo "Updated current CSV with SHAs from quay"
 read
 
 # Update Package channels beta and dev
-echo "Update the package.yaml with new channel CSVs (Push Enter when done): "
-read
-
-# Push CSV package yaml to quay
-./common/script/push-csv.sh
-echo "Pushed CSV to quay "
+echo "MANUALLY UPDATE the package.yaml with new channel CSVs (Push Enter when YOU HAVE MANUALLY UPDATED the package): "
 read
 
 #Update version.go to new dev version
 gsed -i "s/$CURRENT_DEV_CSV/$NEW_DEV_CSV/" version/version.go
 gsed -i "s/$CURRENT_DEV_CSV/$NEW_DEV_CSV/" Makefile
 echo "Updated the version.go with new version (Push Enter when done): "
+read
+
+# Push CSV package yaml to quay
+common/scripts/push-csv.sh
+echo "Pushed CSV to quay "
 read
