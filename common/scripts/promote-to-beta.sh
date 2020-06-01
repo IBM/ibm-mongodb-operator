@@ -43,7 +43,7 @@ read
 # replace old CSV value with new one
 gsed -i "s/$CURRENT_DEV_CSV/$NEW_DEV_CSV/g" $CSV_PATH/$NEW_DEV_CSV/ibm-mongodb-operator.v$NEW_DEV_CSV.clusterserviceversion.yaml
 TIME_STAMP=$(date '+%Y-%m-%dT%H:%M:%S'Z)
-gsed -i "s/[0-9]*-[0-9]*-[0-9]*T[0-9]*:[0-9]*:[0-9]*Z/$TIME_STAMP/g" $CSV_PATH/$NEW_DEV_CSV/ibm-mongodb-operator.v$NEW_DEV_CSV.clusterserviceversion.yaml
+gsed -i "s/2[0-9]*-[0-9]*-[0-9]*T[0-9]*:[0-9]*:[0-9]*Z/$TIME_STAMP/g" $CSV_PATH/$NEW_DEV_CSV/ibm-mongodb-operator.v$NEW_DEV_CSV.clusterserviceversion.yaml
 echo "Updated New file with new CSV version"
 read
 
