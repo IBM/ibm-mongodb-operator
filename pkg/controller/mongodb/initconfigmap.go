@@ -158,7 +158,8 @@ data:
     DNS.4 = localhost
     DNS.5 = 127.0.0.1
     DNS.6 = mongodb
-    DNS.7 = mongodb.ibm-common-services.svc.cluster.local
+    DNS.7 = mongodb.ibm-common-services
+    DNS.8 = mongodb.ibm-common-services.svc
     EOL
 
         # Generate the certs
