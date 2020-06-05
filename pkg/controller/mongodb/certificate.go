@@ -86,6 +86,5 @@ spec:
   commonName: "mongodb-service"
   dnsNames:
   - mongodb
-  - mongodb.ibm-common-services
-  - mongodb.ibm-common-services.svc
+  - mongodb.ibm-common-services.svc.cluster.local
 `
