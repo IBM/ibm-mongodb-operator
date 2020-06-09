@@ -172,7 +172,6 @@ data:
             -out mongo.crt -days 3650 -extensions v3_req -extfile openssl.cnf >> /work-dir/log.txt 2>&1
 
         echo "mongo stuff" >> /work-dir/log.txt
-        cat mongo.csr >> /work-dir/log.txt
 
         rm mongo.csr
 
