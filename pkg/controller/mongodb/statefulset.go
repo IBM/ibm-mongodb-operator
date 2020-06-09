@@ -271,7 +271,7 @@ spec:
               containerPort: 9216
           resources:
             limits:
-              cpu: 300m
+              cpu: 400m
               memory: 256Mi
           readinessProbe:
             exec:

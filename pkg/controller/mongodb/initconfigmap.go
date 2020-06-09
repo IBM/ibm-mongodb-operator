@@ -138,9 +138,7 @@ data:
         pem=/work-dir/mongo.pem
         ssl_args=(--ssl --sslCAFile $ca_crt --sslPEMKeyFile $pem)
 
-        echo "ca stuff" >> /work-dir/log.txt
-        cat $ca_crt >> /work-dir/log.txt
-        cat $ca_key >> /work-dir/log.txt
+        echo "ca stuff created" >> /work-dir/log.txt
 
     cat >openssl.cnf <<EOL
     [req]
@@ -162,7 +160,6 @@ data:
 
         # Generate the certs
         echo "cnf stuff" >> /work-dir/log.txt
-        cat openssl.cnf >> /work-dir/log.txt
         echo "genrsa " >> /work-dir/log.txt
         openssl genrsa -out mongo.key 2048 >> /work-dir/log.txt 2>&1
 
@@ -179,10 +176,6 @@ data:
 
         rm mongo.csr
 
-        echo "mongo key" >> /work-dir/log.txt
-        cat mongo.key >> /work-dir/log.txt
-        echo "mongo crt" >> /work-dir/log.txt
-        cat mongo.crt >> /work-dir/log.txt
         cat mongo.crt mongo.key > $pem
         rm mongo.key mongo.crt
     fi
