@@ -29,7 +29,7 @@ NAMESPACE=ibm-common-services
 # Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
 IMG ?= ibm-mongodb-operator
 REGISTRY ?= quay.io/opencloudio
-CSV_VERSION ?= 1.1.2
+CSV_VERSION ?= 1.1.3
 
 QUAY_USERNAME ?=
 QUAY_PASSWORD ?=
