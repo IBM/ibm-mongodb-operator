@@ -9,6 +9,8 @@ build/_test
 build/_generate
 .vscode
 env
+catchup.sh
+.gitignore
 # Test binary, built with `go test -c`
 *.test
 
