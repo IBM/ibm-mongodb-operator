@@ -2,7 +2,7 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: mongodbs.operator.ibm.com
-  labels:
+  labels: 
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
     app.kubernetes.io/name: mongodbs.operator.ibm.com
@@ -59,9 +59,6 @@ spec:
             replicas:
               type: integer
               description: The number of replicas of this database. Should be an odd number (1,3,5).
-            fsgroup:
-              type: integer
-              description: The group ID for filesystem in the container. 
             storageClass:
               type: string
               description: The storage class for the persistent volume.
