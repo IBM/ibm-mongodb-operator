@@ -129,6 +129,9 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		return reconcile.Result{}, err
 	}
 
+	log.Info("Custom Specs for MongoDB:")
+	long.Info("Replicas: " + instance.Spec.Replicas)
+
 	log.Info("creating mongodb service account")
 	if err := r.createFromYaml(instance, []byte(mongoSA)); err != nil {
 		return reconcile.Result{}, err
