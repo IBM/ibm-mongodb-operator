@@ -17,6 +17,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -34,6 +35,11 @@ type MongoDBSpec struct {
 	InitImage      Image  `json:"initImage,omitempty"`
 	BootstrapImage Image  `json:"bootstrapImage,omitempty"`
 	MetricsImage   Image  `json:"metricsImage,omitempty"`
+	//Resources      corev1.ResourceRequirements `json:"resources,omitempty"`
+	CpuLimit			 	string `json:"resources.limits.cpu,omitempty"`
+	MemoryLimit			string `json:"resources.limits.memory,omitempty"`
+	CpuRequest			string `json:"resources.requests.cpu,omitempty"`
+	MemoryRequest		string `json:"resources.requests.memory,omitempty"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB

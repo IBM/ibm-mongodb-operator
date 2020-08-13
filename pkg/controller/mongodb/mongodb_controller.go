@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"text/template"
 	"time"
 
@@ -147,6 +148,26 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		"app.kubernetes.io/managed-by": "operator", "app.kubernetes.io/instance": "icp-mongodb", "release": "mongodb"}
 
 	log.Info("creating icp mongodb config map")
+	//Calculate MongoDB cache Size -- TO DO
+
+
+	// monogdbConfigmapData := struct {
+	// 	CacheSize    	int
+	// }{
+	// 	CacheSize:    instance.Spec.MemoryLimit,
+	// }
+	//
+	// var mongodbConfigYaml bytes.Buffer
+	// t := template.Must(template.New("mongodbconfigmap").Parse(mongodbConfigMap))
+	// if err := t.Execute(&mongodbConfigYaml, monogdbConfigmapData); err != nil {
+	// 	return reconcile.Result{}, err
+	// }
+	//
+	// log.Info("creating or updating mongodb configmap")
+	// if err := r.createUpdateFromYaml(instance, mongodbConfigYaml.Bytes()); err != nil {
+	// 	return reconcile.Result{}, err
+	// }
+
 
 	if err := r.createFromYaml(instance, []byte(mongodbConfigMap)); err != nil {
 		return reconcile.Result{}, err
@@ -266,6 +287,10 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		InitImage      string
 		BootstrapImage string
 		MetricsImage   string
+		CpuLimit			 string
+		CpuRequest		 string
+		MemoryLimit    string
+		MemoryRequest  string
 	}{
 		Replicas:       instance.Spec.Replicas,
 		ImageRepo:      instance.Spec.ImageRegistry,
@@ -273,6 +298,10 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		InitImage:      os.Getenv("INIT_MONGODB_IMAGE"),
 		BootstrapImage: os.Getenv("MONGODB_IMAGE"),
 		MetricsImage:   os.Getenv("EXPORTER_MONGODB_IMAGE"),
+		CpuLimit:			 	instance.Spec.CpuLimit,
+		CpuRequest:		  instance.Spec.CpuRequest,
+		MemoryLimit:    instance.Spec.MemoryLimit,
+		MemoryRequest:  instance.Spec.MemoryRequest,
 	}
 
 	var stsYaml bytes.Buffer
