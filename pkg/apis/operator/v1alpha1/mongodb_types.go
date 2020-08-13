@@ -36,10 +36,6 @@ type MongoDBSpec struct {
 	BootstrapImage Image  `json:"bootstrapImage,omitempty"`
 	MetricsImage   Image  `json:"metricsImage,omitempty"`
 	Resources      corev1.ResourceRequirements `json:"resources,omitempty"`
-	// CpuLimit			 	string `json:"resources.limits.cpu,omitempty"`
-	// MemoryLimit			string `json:"resources.limits.memory,omitempty"`
-	// CpuRequest			string `json:"resources.requests.cpu,omitempty"`
-	// MemoryRequest		string `json:"resources.requests.memory,omitempty"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB

@@ -10,8 +10,8 @@ spec:
   replicas: 3
   resources:
     limits:
-      cpu: 200m
+      cpu: 2000m
       memory: 5Gi
     requests:
-      cpu: 1000m
+      cpu: 2000m
       memory: 5Gi
