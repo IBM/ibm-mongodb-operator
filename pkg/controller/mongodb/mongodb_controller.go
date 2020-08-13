@@ -131,7 +131,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	log.Info("Custom Specs for MongoDB:")
-	log.Info("Replicas: " + strconv.atoi(instance.Spec.Replicas))
+	log.Info("Replicas: " + strconv.Itoa(instance.Spec.Replicas))
 	log.Info("CPU Limit: " + instance.Spec.CpuLimit)
 
 	log.Info("creating mongodb service account")
