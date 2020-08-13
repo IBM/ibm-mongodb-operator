@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"strconv"
-	// "strings"
 	"text/template"
 	"time"
 
@@ -299,8 +297,8 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		InitImage:      	os.Getenv("INIT_MONGODB_IMAGE"),
 		BootstrapImage: 	os.Getenv("MONGODB_IMAGE"),
 		MetricsImage:   	os.Getenv("EXPORTER_MONGODB_IMAGE"),
-		CpuLimit:			 		instance.Spec.Resources.Limits.Cpu().String(),
-		CpuRequest:		  	instance.Spec.Resources.Requests.Cpu().String(),
+		CpuLimit:					instance.Spec.Resources.Limits.Cpu().String(),
+		CpuRequest:				instance.Spec.Resources.Requests.Cpu().String(),
 		MemoryLimit:    	instance.Spec.Resources.Limits.Memory().String(),
 		MemoryRequest:  	instance.Spec.Resources.Requests.Memory().String(),
 	}
