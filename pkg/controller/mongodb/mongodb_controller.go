@@ -303,10 +303,10 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		InitImage:      os.Getenv("INIT_MONGODB_IMAGE"),
 		BootstrapImage: os.Getenv("MONGODB_IMAGE"),
 		MetricsImage:   os.Getenv("EXPORTER_MONGODB_IMAGE"),
-		CpuLimit:			 	instance.Spec.CpuLimit,
-		CpuRequest:		  instance.Spec.CpuRequest,
-		MemoryLimit:    instance.Spec.MemoryLimit,
-		MemoryRequest:  instance.Spec.MemoryRequest,
+		CpuLimit:			 	"1000m",
+		CpuRequest:		  "1000m",
+		MemoryLimit:    "5Gi",
+		MemoryRequest:  "5Gi",
 	}
 
 	var stsYaml bytes.Buffer
