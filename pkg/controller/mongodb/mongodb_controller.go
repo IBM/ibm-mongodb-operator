@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
 	// "strings"
 	"text/template"
 	"time"
@@ -130,7 +131,8 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 
 	log.Info("Custom Specs for MongoDB:")
-	long.Info("Replicas: " + instance.Spec.Replicas)
+	log.Info("Replicas: " + strconv.atoi(instance.Spec.Replicas))
+	log.Info("CPU Limit: " + instance.Spec.CpuLimit)
 
 	log.Info("creating mongodb service account")
 	if err := r.createFromYaml(instance, []byte(mongoSA)); err != nil {
