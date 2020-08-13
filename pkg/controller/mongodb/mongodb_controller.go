@@ -133,6 +133,8 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	log.Info("Custom Specs for MongoDB:")
 	log.Info("Replicas: " + strconv.Itoa(instance.Spec.Replicas))
 	log.Info("Resource Requirement: " + instance.Spec.Resources.String())
+	log.Info("CPU String: " + instance.Spec.Resources.Limits.Cpu().String())
+	log.Info("CPU API Format: " + instance.Spec.Resources.Limits.Cpu().OpenAPISchemaFormat())
 
 	log.Info("creating mongodb service account")
 	if err := r.createFromYaml(instance, []byte(mongoSA)); err != nil {

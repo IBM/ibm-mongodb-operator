@@ -12,7 +12,6 @@ spec:
     limits:
       cpu: 2000m
       memory: 5Gi
-    request:
+    requests:
       cpu: 1000m
       memory: 5Gi
-    
