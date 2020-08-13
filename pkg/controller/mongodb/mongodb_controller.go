@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"strings"
+	// "strings"
 	"text/template"
 	"time"
 
