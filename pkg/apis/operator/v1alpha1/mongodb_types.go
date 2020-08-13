@@ -16,6 +16,7 @@
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -28,17 +29,13 @@ type Image struct {
 
 // MongoDBSpec defines the desired state of MongoDB
 type MongoDBSpec struct {
-	ImageRegistry  string `json:"imageRegistry,omitempty"`
-	Replicas       int    `json:"replicas,omitempty"`
-	StorageClass   string `json:"storageClass,omitempty"`
-	InitImage      Image  `json:"initImage,omitempty"`
-	BootstrapImage Image  `json:"bootstrapImage,omitempty"`
-	MetricsImage   Image  `json:"metricsImage,omitempty"`
-	//Resources      corev1.ResourceRequirements `json:"resources,omitempty"`
-	CpuLimit			 	string `json:"resources.limits.cpu,omitempty"`
-	MemoryLimit			string `json:"resources.limits.memory,omitempty"`
-	CpuRequest			string `json:"resources.requests.cpu,omitempty"`
-	MemoryRequest		string `json:"resources.requests.memory,omitempty"`
+	ImageRegistry  string                       `json:"imageRegistry,omitempty"`
+	Replicas       int                          `json:"replicas,omitempty"`
+	StorageClass   string                       `json:"storageClass,omitempty"`
+	InitImage      Image                        `json:"initImage,omitempty"`
+	BootstrapImage Image                        `json:"bootstrapImage,omitempty"`
+	MetricsImage   Image                        `json:"metricsImage,omitempty"`
+	Resources      corev1.ResourceRequirements	`json:"resources,omitempty"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB

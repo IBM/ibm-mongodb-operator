@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"strconv"
-	// "strings"
 	"text/template"
 	"time"
 
@@ -129,10 +127,6 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
-
-	log.Info("Custom Specs for MongoDB:")
-	log.Info("Replicas: " + strconv.Itoa(instance.Spec.Replicas))
-	log.Info("CPU Limit: " + instance.Spec.CpuLimit)
 
 	log.Info("creating mongodb service account")
 	if err := r.createFromYaml(instance, []byte(mongoSA)); err != nil {
@@ -292,21 +286,21 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		InitImage      string
 		BootstrapImage string
 		MetricsImage   string
-		CpuLimit			 string
-		CpuRequest		 string
+		CpuLimit       string
+		CpuRequest     string
 		MemoryLimit    string
 		MemoryRequest  string
 	}{
-		Replicas:       instance.Spec.Replicas,
-		ImageRepo:      instance.Spec.ImageRegistry,
-		StorageClass:   storageclass,
-		InitImage:      os.Getenv("INIT_MONGODB_IMAGE"),
-		BootstrapImage: os.Getenv("MONGODB_IMAGE"),
-		MetricsImage:   os.Getenv("EXPORTER_MONGODB_IMAGE"),
-		CpuLimit:			 	instance.Spec.CpuLimit,
-		CpuRequest:		  instance.Spec.CpuRequest,
-		MemoryLimit:    instance.Spec.MemoryLimit,
-		MemoryRequest:  instance.Spec.MemoryRequest,
+		Replicas:       	instance.Spec.Replicas,
+		ImageRepo:      	instance.Spec.ImageRegistry,
+		StorageClass:   	storageclass,
+		InitImage:      	os.Getenv("INIT_MONGODB_IMAGE"),
+		BootstrapImage: 	os.Getenv("MONGODB_IMAGE"),
+		MetricsImage:   	os.Getenv("EXPORTER_MONGODB_IMAGE"),
+		CpuLimit:         instance.Spec.Resources.Limits.Cpu().String(),
+		CpuRequest:       instance.Spec.Resources.Requests.Cpu().String(),
+		MemoryLimit:      instance.Spec.Resources.Limits.Memory().String(),
+		MemoryRequest:    instance.Spec.Resources.Requests.Memory().String(),
 	}
 
 	var stsYaml bytes.Buffer

@@ -80,7 +80,7 @@ spec:
             limits:
               cpu: {{ .CpuLimit }}
               memory: {{ .MemoryLimit }}
-            request:
+            requests:
               cpu: {{ .CpuRequest }}
               memory: {{ .MemoryRequest }}
           volumeMounts:
@@ -114,7 +114,7 @@ spec:
             limits:
               cpu: {{ .CpuLimit }}
               memory: {{ .MemoryLimit }}
-            request:
+            requests:
               cpu: {{ .CpuRequest }}
               memory: {{ .MemoryRequest }}
           securityContext:
@@ -181,7 +181,7 @@ spec:
             limits:
               cpu: {{ .CpuLimit }}
               memory: {{ .MemoryLimit }}
-            request:
+            requests:
               cpu: {{ .CpuRequest }}
               memory: {{ .MemoryRequest }}
           command:
