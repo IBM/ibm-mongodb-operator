@@ -154,27 +154,29 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	ramMB := instance.Spec.Resources.Limits.Memory().ScaledValue(resource.Mega)
 	var cacheSize float64
 	var cacheSizeGB float64
+	// Cache Size is 40 percent of RAM
 	cacheSize = float64(ramMB) * 0.4
+	// Convert to gig
 	cacheSizeGB = cacheSize / 1000.0
+	// Round to fit config
 	cacheSizeGB = math.Floor(cacheSizeGB*100)/100
-	log.Info("cacheGB = " + strconv.FormatFloat(cacheSizeGB, 'f', -1, 64))
 
-	// monogdbConfigmapData := struct {
-	// 	CacheSize    	int
-	// }{
-	// 	CacheSize:    instance.Spec.MemoryLimit,
-	// }
-	//
-	// var mongodbConfigYaml bytes.Buffer
-	// t := template.Must(template.New("mongodbconfigmap").Parse(mongodbConfigMap))
-	// if err := t.Execute(&mongodbConfigYaml, monogdbConfigmapData); err != nil {
-	// 	return reconcile.Result{}, err
-	// }
-	//
-	// log.Info("creating or updating mongodb configmap")
-	// if err := r.createUpdateFromYaml(instance, mongodbConfigYaml.Bytes()); err != nil {
-	// 	return reconcile.Result{}, err
-	// }
+	monogdbConfigmapData := struct {
+		CacheSize    	float64
+	}{
+		CacheSize:    cacheSizeGB,
+	}
+	// TO DO -- convert configmap to take option.
+	var mongodbConfigYaml bytes.Buffer
+	t := template.Must(template.New("mongodbconfigmap").Parse(mongodbConfigMap))
+	if err := t.Execute(&mongodbConfigYaml, monogdbConfigmapData); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	log.Info("creating or updating mongodb configmap")
+	if err := r.createUpdateFromYaml(instance, mongodbConfigYaml.Bytes()); err != nil {
+		return reconcile.Result{}, err
+	}
 
 
 	if err := r.createFromYaml(instance, []byte(mongodbConfigMap)); err != nil {
