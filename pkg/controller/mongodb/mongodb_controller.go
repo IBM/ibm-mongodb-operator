@@ -19,7 +19,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"math/rand"
+	"math"
 	"os"
 	"strconv"
 	"text/template"
@@ -155,6 +155,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	var cacheSizeGB float64
 	cacheSize = float64(ramMB) * 0.4
 	cacheSizeGB = cacheSize / 1000.0
+	cacheSizeGB = math.Floor(cacheSizeGB*100)/100
 	log.Info("cacheGB = " + strconv.FormatFloat(cacheSizeGB, 'f', -1, 64))
 
 	// monogdbConfigmapData := struct {
