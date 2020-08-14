@@ -168,8 +168,8 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	}
 	// TO DO -- convert configmap to take option.
 	var mongodbConfigYaml bytes.Buffer
-	t := template.Must(template.New("mongodbconfigmap").Parse(mongodbConfigMap))
-	if err := t.Execute(&mongodbConfigYaml, monogdbConfigmapData); err != nil {
+	tc := template.Must(template.New("mongodbconfigmap").Parse(mongodbConfigMap))
+	if err := tc.Execute(&mongodbConfigYaml, monogdbConfigmapData); err != nil {
 		return reconcile.Result{}, err
 	}
 
