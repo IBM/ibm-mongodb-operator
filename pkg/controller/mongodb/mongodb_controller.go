@@ -152,6 +152,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	//Calculate MongoDB cache Size -- TO DO
 	ramMB := instance.Spec.Resources.Limits.Memory().ScaledValue(resource.Mega)
 	var cacheSize float64
+	var cacheSizeGB float64
 	cacheSize = float64(ramMB) * 0.4
 	cacheSizeGB = cacheSize / 1000.0
 	log.Info("cacheGB = " + strconv.FormatFloat(cacheSizeGB, 'f', -1, 64))
