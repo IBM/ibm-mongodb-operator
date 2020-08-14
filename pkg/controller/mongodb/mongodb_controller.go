@@ -30,6 +30,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	resource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
@@ -43,7 +44,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
-	resource "k8s.io/apimachinery/pkg/api/resource"
 
 	operatorv1alpha1 "github.com/IBM/ibm-mongodb-operator/pkg/apis/operator/v1alpha1"
 )
@@ -158,12 +158,12 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	// Convert to gig
 	cacheSizeGB = cacheSize / 1000.0
 	// Round to fit config
-	cacheSizeGB = math.Floor(cacheSizeGB*100)/100
+	cacheSizeGB = math.Floor(cacheSizeGB*100) / 100
 
 	monogdbConfigmapData := struct {
-		CacheSize    	float64
+		CacheSize float64
 	}{
-		CacheSize:    cacheSizeGB,
+		CacheSize: cacheSizeGB,
 	}
 	// TO DO -- convert configmap to take option.
 	var mongodbConfigYaml bytes.Buffer
@@ -176,7 +176,6 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	if err := r.createUpdateFromYaml(instance, mongodbConfigYaml.Bytes()); err != nil {
 		return reconcile.Result{}, err
 	}
-
 
 	if err := r.createFromYaml(instance, []byte(mongodbConfigMap)); err != nil {
 		return reconcile.Result{}, err
@@ -301,16 +300,16 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		MemoryLimit    string
 		MemoryRequest  string
 	}{
-		Replicas:       	instance.Spec.Replicas,
-		ImageRepo:      	instance.Spec.ImageRegistry,
-		StorageClass:   	storageclass,
-		InitImage:      	os.Getenv("INIT_MONGODB_IMAGE"),
-		BootstrapImage: 	os.Getenv("MONGODB_IMAGE"),
-		MetricsImage:   	os.Getenv("EXPORTER_MONGODB_IMAGE"),
-		CpuLimit:         instance.Spec.Resources.Limits.Cpu().String(),
-		CpuRequest:       instance.Spec.Resources.Requests.Cpu().String(),
-		MemoryLimit:      instance.Spec.Resources.Limits.Memory().String(),
-		MemoryRequest:    instance.Spec.Resources.Requests.Memory().String(),
+		Replicas:       instance.Spec.Replicas,
+		ImageRepo:      instance.Spec.ImageRegistry,
+		StorageClass:   storageclass,
+		InitImage:      os.Getenv("INIT_MONGODB_IMAGE"),
+		BootstrapImage: os.Getenv("MONGODB_IMAGE"),
+		MetricsImage:   os.Getenv("EXPORTER_MONGODB_IMAGE"),
+		CpuLimit:       instance.Spec.Resources.Limits.Cpu().String(),
+		CpuRequest:     instance.Spec.Resources.Requests.Cpu().String(),
+		MemoryLimit:    instance.Spec.Resources.Limits.Memory().String(),
+		MemoryRequest:  instance.Spec.Resources.Requests.Memory().String(),
 	}
 
 	var stsYaml bytes.Buffer
