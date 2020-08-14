@@ -43,6 +43,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	resource "k8s.io/apimachinery/pkg/api/resource"
 
 	operatorv1alpha1 "github.com/IBM/ibm-mongodb-operator/pkg/apis/operator/v1alpha1"
 )
@@ -149,10 +150,10 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	log.Info("creating icp mongodb config map")
 	//Calculate MongoDB cache Size -- TO DO
-	ramMB := instance.Spec.Resources.Limits.Memory().ScaledValue(Mega)
+	ramMB := instance.Spec.Resources.Limits.Memory().ScaledValue(resource.Mega)
 	//var cacheSize float32
 	//cacheSize = float32(ramMB) * 0.4
-	log.Info("ramMB = " + strconv.Itoa(ramMB))
+	log.Info("ramMB = " + strconv.FormatInt(ramMB, 10))
 
 	// monogdbConfigmapData := struct {
 	// 	CacheSize    	int
