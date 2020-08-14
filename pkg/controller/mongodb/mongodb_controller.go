@@ -151,9 +151,10 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	log.Info("creating icp mongodb config map")
 	//Calculate MongoDB cache Size -- TO DO
 	ramMB := instance.Spec.Resources.Limits.Memory().ScaledValue(resource.Mega)
-	//var cacheSize float32
-	//cacheSize = float32(ramMB) * 0.4
-	log.Info("ramMB = " + strconv.FormatInt(ramMB, 10))
+	var cacheSize float64
+	cacheSize = float64(ramMB) * 0.4
+	cacheSizeGB = cacheSize / 1000.0
+	log.Info("cacheGB = " + strconv.FormatFloat(cacheSizeGB, 'f', -1, 64))
 
 	// monogdbConfigmapData := struct {
 	// 	CacheSize    	int
