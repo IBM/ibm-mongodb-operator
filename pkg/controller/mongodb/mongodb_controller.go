@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
 	"text/template"
 	"time"
 
@@ -148,7 +149,10 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	log.Info("creating icp mongodb config map")
 	//Calculate MongoDB cache Size -- TO DO
-
+	ramMB := instance.Spec.Resources.Limits.Memory().ScaledValue(Mega)
+	//var cacheSize float32
+	//cacheSize = float32(ramMB) * 0.4
+	log.Info("ramMB = " + strconv.Itoa(ramMB))
 
 	// monogdbConfigmapData := struct {
 	// 	CacheSize    	int
