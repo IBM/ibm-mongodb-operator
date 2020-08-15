@@ -16,6 +16,12 @@ metadata:
           },
           "spec": {
             "replicas": 3
+            "limits":
+              "cpu": "2000m"
+              "memory": "5Gi"
+            "requests":
+              "cpu": "2000m"
+              "memory": "5Gi"
           }
         },
         {
@@ -157,11 +163,11 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-mongodb-operator
                 - name: INIT_MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb-install:3.5.0
+                  value: quay.io/opencloudio/ibm-mongodb-install@ac49344d3128938e6d58d126d9b2e31581b23b1de9a039145e23e440b81d47c7
                 - name: MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb:4.0.12-build.4
+                  value: quay.io/opencloudio/ibm-mongodb@c9ea016c01875250276ad33829431b822ca3db63249a3ec32b68184384e16b10
                 - name: EXPORTER_MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb-exporter:3.5.0
+                  value: quay.io/opencloudio/ibm-mongodb-exporter@742db53dcde22cb4e215d992fa6316028ef3d7c1555eded1e95d0fd8fec5aeb8
                 image: quay.io/opencloudio/ibm-mongodb-operator:latest
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator

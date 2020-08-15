@@ -2,9 +2,16 @@ apiVersion: operator.ibm.com/v1alpha1
 kind: MongoDB
 metadata:
   name: ibm-mongodb
-  labels: 
+  labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
     app.kubernetes.io/name: mongodbs.operator.ibm.com
 spec:
   replicas: 3
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 1Gi
+    requests:
+      cpu: 2000m
+      memory: 1Gi
