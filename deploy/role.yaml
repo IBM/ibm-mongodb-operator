@@ -82,12 +82,3 @@ rules:
   - issuers
   verbs:
   - '*'
-- apiGroups:
-  - security.openshift.io
-  resourceNames:
-  - restricted
-  - privileged
-  resources:
-  - securitycontextconstraints
-  verbs:
-  - use
