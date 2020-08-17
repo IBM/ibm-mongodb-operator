@@ -78,10 +78,10 @@ spec:
           imagePullPolicy: "IfNotPresent"
           resources:
             limits:
-              cpu: {{ .CpuLimit }}
+              cpu: {{ .CPULimit }}
               memory: {{ .MemoryLimit }}
             requests:
-              cpu: {{ .CpuRequest }}
+              cpu: {{ .CPURequest }}
               memory: {{ .MemoryRequest }}
           volumeMounts:
             - name: mongodbdir
@@ -112,10 +112,10 @@ spec:
           imagePullPolicy: "IfNotPresent"
           resources:
             limits:
-              cpu: {{ .CpuLimit }}
+              cpu: {{ .CPULimit }}
               memory: {{ .MemoryLimit }}
             requests:
-              cpu: {{ .CpuRequest }}
+              cpu: {{ .CPURequest }}
               memory: {{ .MemoryRequest }}
           securityContext:
             allowPrivilegeEscalation: false
@@ -179,10 +179,10 @@ spec:
               containerPort: 27017
           resources:
             limits:
-              cpu: {{ .CpuLimit }}
+              cpu: {{ .CPULimit }}
               memory: {{ .MemoryLimit }}
             requests:
-              cpu: {{ .CpuRequest }}
+              cpu: {{ .CPURequest }}
               memory: {{ .MemoryRequest }}
           command:
             - mongod
