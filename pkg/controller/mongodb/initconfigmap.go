@@ -45,7 +45,7 @@ data:
     function log() {
         local msg="$1"
         local timestamp=$(date --iso-8601=ns)
-        echo "[$timestamp] [$script_name] $msg"
+        1>&2 echo "[$timestamp] [$script_name] $msg"
         echo "[$timestamp] [$script_name] $msg" >> /work-dir/log.txt
     }
 
