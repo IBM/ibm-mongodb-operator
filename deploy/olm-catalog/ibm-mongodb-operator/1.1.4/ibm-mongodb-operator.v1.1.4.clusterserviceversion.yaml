@@ -23,7 +23,7 @@ metadata:
             "requests": {
               "cpu": "2000m",
               "memory": "5Gi"
-            },
+            }
           }
         },
         {
