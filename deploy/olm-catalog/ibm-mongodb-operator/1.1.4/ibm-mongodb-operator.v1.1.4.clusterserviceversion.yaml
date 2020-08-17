@@ -15,13 +15,15 @@ metadata:
             "name": "ibm-mongodb"
           },
           "spec": {
-            "replicas": 3
-            "limits":
-              "cpu": "2000m"
+            "replicas": 3,
+            "limits": {
+              "cpu": "2000m",
               "memory": "5Gi"
-            "requests":
-              "cpu": "2000m"
+            },
+            "requests": {
+              "cpu": "2000m",
               "memory": "5Gi"
+            }
           }
         },
         {
