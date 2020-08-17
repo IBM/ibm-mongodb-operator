@@ -78,7 +78,11 @@ spec:
           imagePullPolicy: "IfNotPresent"
           resources:
             limits:
-              memory: 5Gi
+              cpu: {{ .CpuLimit }}
+              memory: {{ .MemoryLimit }}
+            requests:
+              cpu: {{ .CpuRequest }}
+              memory: {{ .MemoryRequest }}
           volumeMounts:
             - name: mongodbdir
               subPath: workdir
@@ -108,7 +112,11 @@ spec:
           imagePullPolicy: "IfNotPresent"
           resources:
             limits:
-              memory: 5Gi
+              cpu: {{ .CpuLimit }}
+              memory: {{ .MemoryLimit }}
+            requests:
+              cpu: {{ .CpuRequest }}
+              memory: {{ .MemoryRequest }}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -171,7 +179,11 @@ spec:
               containerPort: 27017
           resources:
             limits:
-              memory: 5Gi
+              cpu: {{ .CpuLimit }}
+              memory: {{ .MemoryLimit }}
+            requests:
+              cpu: {{ .CpuRequest }}
+              memory: {{ .MemoryRequest }}
           command:
             - mongod
             - --config=/data/configdb/mongod.conf
