@@ -58,6 +58,22 @@ spec:
           command:
           - ibm-mongodb-operator
           imagePullPolicy: Always
+          livenessProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - exec echo mongodb-operator still running
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+              - sh
+              - -c
+              - exec echo echo start mongodb-operator
+            initialDelaySeconds: 10
+            timeoutSeconds: 2
           env:
             - name: WATCH_NAMESPACE
               valueFrom:
