@@ -86,8 +86,8 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-mongodb-operator"
             - name: INIT_MONGODB_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb-install@sha256:34543370cc9fb7095229966376f96df30de067b0b97cbcc6b19017df02339c2f
+              value: quay.io/opencloudio/ibm-mongodb-install@sha256:ec368f85d4a6772600a71ad6c8ce02217743ff80941688b68ab5b223450bf88c
             - name: MONGODB_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb@sha256:2c82b4d1025583a5c4c9263b48cd0138b294c33818aaf45b56984bff937080c9
+              value: quay.io/opencloudio/ibm-mongodb@sha256:c9ea016c01875250276ad33829431b822ca3db63249a3ec32b68184384e16b10
             - name: EXPORTER_MONGODB_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb-exporter@sha256:ea69cc9a41f57d82f4bbaa546e73c09041ad8e44072bba04e188aaa75ac19f06
+              value: quay.io/opencloudio/ibm-mongodb-exporter@sha256:f8cee5b683d77623022cb592ebca675654d8fdd34914f386ff60ffa7e64b9088
