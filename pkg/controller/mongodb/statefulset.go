@@ -44,7 +44,6 @@ spec:
       annotations:
         productName: "IBM Cloud Platform Common Services"
         productID: "068a62892a1e4db39641342e592daa25"
-        productVersion: "3.4.0"
         productMetric: "FREE"
         prometheus.io/scrape: "true"
         prometheus.io/port: "9216"
