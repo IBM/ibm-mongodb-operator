@@ -55,14 +55,15 @@ spec:
       hostNetwork: false
       hostPID: false
       hostIPC: false
-      podAntiAffinity:
-        preferredDuringSchedulingIgnoredDuringExecution:
-        - podAffinityTerm:
-            labelSelector:
-              matchLabels:
-              - key: app
-                values:
-                - icp-mongodb
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                - key: app
+                  values:
+                  - icp-mongodb
       initContainers:
         - name: install
           image: "{{ .InitImage }}"
