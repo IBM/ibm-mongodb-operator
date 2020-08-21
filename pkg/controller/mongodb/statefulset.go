@@ -58,7 +58,8 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - podAffinityTerm:
+          - weightedPodAffinityTerm:
+            podAffinityTerm:
               labelSelector:
                 matchLabels:
                 - key: app
