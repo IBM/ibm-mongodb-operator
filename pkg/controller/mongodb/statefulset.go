@@ -60,11 +60,12 @@ spec:
           preferredDuringSchedulingIgnoredDuringExecution:
           - weightedPodAffinityTerm:
             podAffinityTerm:
+              topologyKey: name
               labelSelector:
                 matchLabels:
-                - key: app
-                  values:
-                  - icp-mongodb
+                  key: app
+                  values: icp-mongodb
+            weight: 10
       initContainers:
         - name: install
           image: "{{ .InitImage }}"
