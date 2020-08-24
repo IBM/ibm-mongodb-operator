@@ -56,16 +56,16 @@ spec:
       hostPID: false
       hostIPC: false
       affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/arch
-                operator: In
-                values:
-                  - amd64
-                  - ppc64le
-                  - s390x
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weightedPodAffinityTerm:
+            podAffinityTerm:
+              topologyKey: name
+              labelSelector:
+                matchLabels:
+                  key: app
+                  values: icp-mongodb
+            weight: 10
       initContainers:
         - name: install
           image: "{{ .InitImage }}"
