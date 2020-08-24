@@ -27,6 +27,17 @@ spec:
       hostNetwork: false
       hostPID: false
       hostIPC: false
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weightedPodAffinityTerm:
+            podAffinityTerm:
+              topologyKey: name
+              labelSelector:
+                matchLabels:
+                  key: app
+                  values: icp-mongodb
+            weight: 10
       containers:
         - name: ibm-mongodb-operator
           resources:
