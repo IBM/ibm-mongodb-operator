@@ -300,7 +300,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	memoryLimit := "5Gi"
 
 	// Check cpu request values and default if not there
-	if instance.Spec.Resources.Requests.Cpu().String() != "" {
+	if instance.Spec.Resources.Requests.Cpu().String() != "0" {
 		log.Info("CPU Request is : " + instance.Spec.Resources.Requests.Cpu().String())
 		cpuRequest = instance.Spec.Resources.Requests.Cpu().String()
 	}
