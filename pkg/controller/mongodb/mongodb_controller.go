@@ -301,6 +301,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	// Check cpu request values and default if not there
 	if instance.Spec.Resources.Requests.Cpu().String() != "" {
+		log.Info("CPU Request is : " + instance.Spec.Resources.Requests.Cpu().String())
 		cpuRequest = instance.Spec.Resources.Requests.Cpu().String()
 	}
 
