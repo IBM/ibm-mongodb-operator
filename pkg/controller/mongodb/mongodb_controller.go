@@ -152,7 +152,7 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 	//Calculate MongoDB cache Size
 	var cacheSize float64
 	var cacheSizeGB float64
-	if instance.Spec.Resources.Limits.Memory().String() != "" {
+	if instance.Spec.Resources.Limits.Memory().String() != "0" {
 		ramMB := instance.Spec.Resources.Limits.Memory().ScaledValue(resource.Mega)
 		// Cache Size is 40 percent of RAM
 		cacheSize = float64(ramMB) * 0.4
@@ -301,22 +301,21 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 
 	// Check cpu request values and default if not there
 	if instance.Spec.Resources.Requests.Cpu().String() != "0" {
-		log.Info("CPU Request is : " + instance.Spec.Resources.Requests.Cpu().String())
 		cpuRequest = instance.Spec.Resources.Requests.Cpu().String()
 	}
 
 	// Check memory request values and default if not there
-	if instance.Spec.Resources.Requests.Memory().String() != "" {
+	if instance.Spec.Resources.Requests.Memory().String() != "0" {
 		memoryRequest = instance.Spec.Resources.Requests.Memory().String()
 	}
 
 	// Check cpu limit values and default if not there
-	if instance.Spec.Resources.Limits.Cpu().String() != "" {
+	if instance.Spec.Resources.Limits.Cpu().String() != "0" {
 		cpuLimit = instance.Spec.Resources.Limits.Cpu().String()
 	}
 
 	// Check memory limit values and default if not there
-	if instance.Spec.Resources.Limits.Memory().String() != "" {
+	if instance.Spec.Resources.Limits.Memory().String() != "0" {
 		memoryLimit = instance.Spec.Resources.Limits.Memory().String()
 	}
 
