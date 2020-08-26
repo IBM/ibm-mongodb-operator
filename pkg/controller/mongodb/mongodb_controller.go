@@ -149,16 +149,21 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		"app.kubernetes.io/managed-by": "operator", "app.kubernetes.io/instance": "icp-mongodb", "release": "mongodb"}
 
 	log.Info("creating icp mongodb config map")
-	//Calculate MongoDB cache Size -- TO DO
-	ramMB := instance.Spec.Resources.Limits.Memory().ScaledValue(resource.Mega)
+	//Calculate MongoDB cache Size
 	var cacheSize float64
 	var cacheSizeGB float64
-	// Cache Size is 40 percent of RAM
-	cacheSize = float64(ramMB) * 0.4
-	// Convert to gig
-	cacheSizeGB = cacheSize / 1000.0
-	// Round to fit config
-	cacheSizeGB = math.Floor(cacheSizeGB*100) / 100
+	if instance.Spec.Resources.Limits.Memory().String() != "0" {
+		ramMB := instance.Spec.Resources.Limits.Memory().ScaledValue(resource.Mega)
+		// Cache Size is 40 percent of RAM
+		cacheSize = float64(ramMB) * 0.4
+		// Convert to gig
+		cacheSizeGB = cacheSize / 1000.0
+		// Round to fit config
+		cacheSizeGB = math.Floor(cacheSizeGB*100) / 100
+	} else {
+		//default value is 5Gi
+		cacheSizeGB = 2.0
+	}
 
 	monogdbConfigmapData := struct {
 		CacheSize float64
@@ -288,6 +293,32 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		storageclass = instance.Status.StorageClass
 	}
 
+	// Default values
+	cpuRequest := "2000m"
+	memoryRequest := "5Gi"
+	cpuLimit := "2000m"
+	memoryLimit := "5Gi"
+
+	// Check cpu request values and default if not there
+	if instance.Spec.Resources.Requests.Cpu().String() != "0" {
+		cpuRequest = instance.Spec.Resources.Requests.Cpu().String()
+	}
+
+	// Check memory request values and default if not there
+	if instance.Spec.Resources.Requests.Memory().String() != "0" {
+		memoryRequest = instance.Spec.Resources.Requests.Memory().String()
+	}
+
+	// Check cpu limit values and default if not there
+	if instance.Spec.Resources.Limits.Cpu().String() != "0" {
+		cpuLimit = instance.Spec.Resources.Limits.Cpu().String()
+	}
+
+	// Check memory limit values and default if not there
+	if instance.Spec.Resources.Limits.Memory().String() != "0" {
+		memoryLimit = instance.Spec.Resources.Limits.Memory().String()
+	}
+
 	stsData := struct {
 		Replicas       int
 		ImageRepo      string
@@ -306,10 +337,10 @@ func (r *ReconcileMongoDB) Reconcile(request reconcile.Request) (reconcile.Resul
 		InitImage:      os.Getenv("INIT_MONGODB_IMAGE"),
 		BootstrapImage: os.Getenv("MONGODB_IMAGE"),
 		MetricsImage:   os.Getenv("EXPORTER_MONGODB_IMAGE"),
-		CPULimit:       instance.Spec.Resources.Limits.Cpu().String(),
-		CPURequest:     instance.Spec.Resources.Requests.Cpu().String(),
-		MemoryLimit:    instance.Spec.Resources.Limits.Memory().String(),
-		MemoryRequest:  instance.Spec.Resources.Requests.Memory().String(),
+		CPULimit:       cpuLimit,
+		CPURequest:     cpuRequest,
+		MemoryLimit:    memoryLimit,
+		MemoryRequest:  memoryRequest,
 	}
 
 	var stsYaml bytes.Buffer
