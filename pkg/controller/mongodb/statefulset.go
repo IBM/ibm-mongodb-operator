@@ -210,7 +210,7 @@ spec:
                 - "db.adminCommand('ping')"
             initialDelaySeconds: 30
             timeoutSeconds: 10
-            failureThreshold: 10
+            failureThreshold: 5
             periodSeconds: 30
             successThreshold: 1
           readinessProbe:
@@ -314,6 +314,7 @@ spec:
               timeoutSeconds: 10
               failureThreshold: 10
               periodSeconds: 30
+              successThreshold: 1
       tolerations:
         - effect: NoSchedule
           key: dedicated
