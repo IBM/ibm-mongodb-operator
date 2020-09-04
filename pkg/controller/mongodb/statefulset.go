@@ -209,9 +209,9 @@ spec:
                 - --eval
                 - "db.adminCommand('ping')"
             initialDelaySeconds: 30
-            timeoutSeconds: 5
-            failureThreshold: 3
-            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 5
+            periodSeconds: 30
             successThreshold: 1
           readinessProbe:
             exec:
@@ -311,7 +311,10 @@ spec:
                   --mongodb.tls-cert=/work-dir/mongo.pem
                   --test
             initialDelaySeconds: 30
-            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 10
+            periodSeconds: 30
+            successThreshold: 1
       tolerations:
         - effect: NoSchedule
           key: dedicated
