@@ -202,22 +202,6 @@ spec:
                 image: quay.io/opencloudio/ibm-mongodb-operator:latest
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator
-                livenessProbe:
-                  exec:
-                    command:
-                    - "sh"
-                    - "-c"
-                    - "exec echo mongodb-operator still running"
-                  initialDelaySeconds: 30
-                  timeoutSeconds: 5
-                readinessProbe:
-                  exec:
-                    command:
-                    - "sh"
-                    - "-c"
-                    - "exec echo mongodb-operator starting up"
-                  initialDelaySeconds: 10
-                  timeoutSeconds: 2
                 resources:
                   limits:
                     cpu: 40m
