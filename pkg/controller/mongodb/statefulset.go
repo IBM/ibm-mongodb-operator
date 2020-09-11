@@ -283,7 +283,7 @@ spec:
           resources:
             limits:
               cpu: 500m
-              memory: 256Mi
+              memory: 450Mi
           readinessProbe:
             exec:
               command:
