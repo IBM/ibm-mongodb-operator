@@ -71,6 +71,10 @@ data:
         else
             args='force: true'
         fi
+
+        log "Running fsync..."
+        mongo ${CONNECT} -u ${USER} -p ${PASS} --quiet --eval "db.adminCommand( { fsync: 1, lock: true } )"
+        
         log "Shutting down MongoDB ($args)..."
         mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.shutdownServer({$args})"
     }
