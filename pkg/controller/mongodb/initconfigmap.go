@@ -70,6 +70,9 @@ data:
         log "Running fsync..."
         mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.adminCommand( { fsync: 1, lock: true } )"
 
+        log "Running fsync unlock..."
+        mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.adminCommand( { fsyncUnlock: 1 } )"
+
         log "Shutting down MongoDB..."
         mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.adminCommand({ shutdown: 1, force: true, timeoutSecs: 60 })"
     }
