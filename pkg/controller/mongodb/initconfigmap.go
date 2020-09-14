@@ -70,8 +70,8 @@ data:
         log "Running fsync..."
         mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.adminCommand( { fsync: 1, lock: true } )"
 
-        log "Shutting down MongoDB ($args)..."
-        mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.shutdownServer({ shutdown: 1, force: true, timeoutSecs: 20 })"
+        log "Shutting down MongoDB..."
+        mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.adminCommand({ shutdown: 1, force: true, timeoutSecs: 60 })"
     }
 
     #Check if Password has change and updated in mongo , if so update Creds
