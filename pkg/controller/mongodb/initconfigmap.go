@@ -66,13 +66,15 @@ data:
     fi
 
     function shutdown_mongo() {
-        if [[ $# -eq 1 ]]; then
-            args="timeoutSecs: $1"
-        else
-            args='force: true'
-        fi
-        log "Shutting down MongoDB ($args)..."
-        mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.shutdownServer({$args})"
+
+        log "Running fsync..."
+        mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.adminCommand( { fsync: 1, lock: true } )"
+
+        log "Running fsync unlock..."
+        mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.adminCommand( { fsyncUnlock: 1 } )"
+
+        log "Shutting down MongoDB..."
+        mongo admin "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.adminCommand({ shutdown: 1, force: true, timeoutSecs: 60 })"
     }
 
     #Check if Password has change and updated in mongo , if so update Creds
