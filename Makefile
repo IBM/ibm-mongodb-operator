@@ -29,7 +29,7 @@ NAMESPACE=ibm-common-services
 # Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
 IMG ?= ibm-mongodb-operator
 REGISTRY ?= "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
-CSV_VERSION ?= 1.1.5
+CSV_VERSION ?= 1.1.6
 
 QUAY_USERNAME ?=
 QUAY_PASSWORD ?=
@@ -190,8 +190,11 @@ all: check test coverage build images
 clean: ## Clean build binary
 	rm -f build/_output/bin/$(IMG)
 
-promote-to-beta:
-	common/scripts/promote-to-beta.sh ${CSV_VERSION}
+next-csv:
+	common/scripts/next-csv.sh ${CSV_VERSION}
+
+add-image-shas:
+	common/scripts/add-image-shas.sh ${CSV_VERSION}
 
 ##@ Help
 help: ## Display this help

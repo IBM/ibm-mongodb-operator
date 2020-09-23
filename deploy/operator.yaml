@@ -53,7 +53,7 @@ spec:
             readOnlyRootFilesystem: true
             runAsNonRoot: true
           # Replace this with the built image name
-          image: quay.io/opencloudio/ibm-mongodb-operator@sha256:2534d06331f9d0a739faa43dca9e26f83d8520350697c9c398a16cac34623ec8
+          image: quay.io/opencloudio/ibm-mongodb-operator:1.1.6
           command:
           - ibm-mongodb-operator
           imagePullPolicy: Always
@@ -69,8 +69,8 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-mongodb-operator"
             - name: INIT_MONGODB_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb-install@sha256:ec368f85d4a6772600a71ad6c8ce02217743ff80941688b68ab5b223450bf88c
+              value: quay.io/opencloudio/ibm-mongodb-install:3.6.1
             - name: MONGODB_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb@sha256:c9ea016c01875250276ad33829431b822ca3db63249a3ec32b68184384e16b10
+              value: quay.io/opencloudio/ibm-mongodb:4.0.16-build.1
             - name: EXPORTER_MONGODB_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb-exporter@sha256:f8cee5b683d77623022cb592ebca675654d8fdd34914f386ff60ffa7e64b9088
+              value: quay.io/opencloudio/ibm-mongodb-exporter:3.6.1
