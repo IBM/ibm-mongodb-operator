@@ -47,29 +47,6 @@ gsed -i "s/2[0-9]*-[0-9]*-[0-9]*T[0-9]*:[0-9]*:[0-9]*Z/$TIME_STAMP/g" $CSV_PATH/
 echo "Updated New file with new CSV version"
 read
 
-#Update old CSV
-# # Get SHA values for all images and replace tags
-# MONGODB_OPERATOR_SHA=$(docker pull quay.io/opencloudio/ibm-mongodb-operator:$CURRENT_DEV_CSV | grep Digest | cut -d ' ' -f2)
-# MONGODB_INSTALL_TAG=$(cat $CSV_PATH/$CURRENT_DEV_CSV/ibm-mongodb-operator.v$CURRENT_DEV_CSV.clusterserviceversion.yaml | grep value: | grep mongodb-install | cut -d ':' -f3)
-# MONGODB_EXPORTER_TAG=$(cat $CSV_PATH/$CURRENT_DEV_CSV/ibm-mongodb-operator.v$CURRENT_DEV_CSV.clusterserviceversion.yaml | grep value: | grep mongodb-exporter | cut -d ':' -f3)
-# MONGODB_IMAGE_TAG=$(cat $CSV_PATH/$CURRENT_DEV_CSV/ibm-mongodb-operator.v$CURRENT_DEV_CSV.clusterserviceversion.yaml | grep value: | grep mongodb: | cut -d ':' -f3)
-#
-# MONGODB_INSTALL_SHA=$(docker pull quay.io/opencloudio/ibm-mongodb-install:$MONGODB_INSTALL_TAG | grep Digest | cut -d ' ' -f2)
-# MONGODB_EXPORTER_SHA=$(docker pull quay.io/opencloudio/ibm-mongodb-exporter:$MONGODB_EXPORTER_TAG | grep Digest | cut -d ' ' -f2)
-# MONGODB_IMAGE_SHA=$(docker pull quay.io/opencloudio/ibm-mongodb:$MONGODB_IMAGE_TAG | grep Digest | cut -d ' ' -f2)
-#
-# gsed -i "s/ibm-mongodb-install:$MONGODB_INSTALL_TAG/ibm-mongodb-install@$MONGODB_INSTALL_SHA/g" $CSV_PATH/$CURRENT_DEV_CSV/ibm-mongodb-operator.v$CURRENT_DEV_CSV.clusterserviceversion.yaml
-# gsed -i "s/ibm-mongodb-exporter:$MONGODB_EXPORTER_TAG/ibm-mongodb-exporter@$MONGODB_EXPORTER_SHA/g" $CSV_PATH/$CURRENT_DEV_CSV/ibm-mongodb-operator.v$CURRENT_DEV_CSV.clusterserviceversion.yaml
-# gsed -i "s/ibm-mongodb:$MONGODB_IMAGE_TAG/ibm-mongodb@$MONGODB_IMAGE_SHA/g" $CSV_PATH/$CURRENT_DEV_CSV/ibm-mongodb-operator.v$CURRENT_DEV_CSV.clusterserviceversion.yaml
-# gsed -i "s/ibm-mongodb-operator:latest/ibm-mongodb-operator@$MONGODB_OPERATOR_SHA/g" $CSV_PATH/$CURRENT_DEV_CSV/ibm-mongodb-operator.v$CURRENT_DEV_CSV.clusterserviceversion.yaml
-#
-# echo "Updated current CSV with SHAs from quay"
-# read
-
-# Update Package channels beta and dev
-echo "MANUALLY UPDATE the package.yaml with new channel CSVs (Push Enter when YOU HAVE MANUALLY UPDATED the package): "
-read
-
 #Update version.go to new dev version
 gsed -i "s/$CURRENT_DEV_CSV/$NEW_DEV_CSV/" version/version.go
 gsed -i "s/$CURRENT_DEV_CSV/$NEW_DEV_CSV/" Makefile
