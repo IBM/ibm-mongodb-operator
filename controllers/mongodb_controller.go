@@ -17,31 +17,335 @@
 package controllers
 
 import (
+	"bytes"
 	"context"
+	"fmt"
+	"math"
+	"math/rand"
+	"os"
+	"text/template"
+	"time"
 
-	"github.com/go-logr/logr"
+	"github.com/ghodss/yaml"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	resource "k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
 	operatorv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/v1alpha1"
 )
 
+var log = logf.Log.WithName("controller_mongodb")
+
 // MongoDBReconciler reconciles a MongoDB object
 type MongoDBReconciler struct {
-	client.Client
-	Log    logr.Logger
+	Client client.Client
+	Reader client.Reader
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=operator.ibm.com,resources=mongodbs,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=operator.ibm.com,resources=mongodbs/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=operator.ibm.com,namespace="ibm-common-service",resources=mongodbs/status;mongodbs/finalizers;mongodbs,verbs=create;delete;get;list;patch;update;watch
+// +kubebuilder:rbac:groups=apps,namespace="ibm-common-service",resources=deployments/finalizers,verbs=get;update;patch,resourceNames=ibm-mongodb-operator
+// +kubebuilder:rbac:groups=monitoring.coreos.com,namespace="ibm-common-service",resources=servicemonitors,verbs=get;create
+// +kubebuilder:rbac:groups=core,namespace="ibm-common-service",resources=pods;services;services/finalizers;serviceaccounts;endpoints;persistentvolumeclaims;events;configmaps;secrets,verbs=create;delete;get;list;patch;update;watch
+// +kubebuilder:rbac:groups=apps,namespace="ibm-common-service",resources=deployments;daemonsets;replicasets;statefulsets,verbs=create;delete;get;list;patch;update;watch
+// +kubebuilder:rbac:groups=certmanager.k8s.io,namespace="ibm-common-service",resources=certificates;certificaterequests;orders;challenges;issuers,verbs=*
 
 func (r *MongoDBReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
-	_ = r.Log.WithValues("mongodb", req.NamespacedName)
+	reqLogger := log.WithValues("Request.Namespace", req.Namespace, "Request.Name", req.Name)
+	reqLogger.Info("Reconciling MongoDB")
 
-	// your logic here
+	// Fetch the MongoDB instance
+	instance := &operatorv1alpha1.MongoDB{}
+	err := r.Client.Get(context.TODO(), req.NamespacedName, instance)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+			// Return and don't requeue
+			return ctrl.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
+		return ctrl.Result{}, err
+	}
+
+	log.Info("creating mongodb service account")
+	if err := r.createFromYaml(instance, []byte(mongoSA)); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	log.Info("creating mongodb service")
+	if err := r.createFromYaml(instance, []byte(service)); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	log.Info("creating mongodb icp service")
+	if err := r.createFromYaml(instance, []byte(icpService)); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	metadatalabel := map[string]string{"app.kubernetes.io/name": "icp-mongodb", "app.kubernetes.io/component": "database",
+		"app.kubernetes.io/managed-by": "operator", "app.kubernetes.io/instance": "icp-mongodb", "release": "mongodb"}
+
+	log.Info("creating icp mongodb config map")
+	//Calculate MongoDB cache Size
+	var cacheSize float64
+	var cacheSizeGB float64
+	if instance.Spec.Resources.Limits.Memory().String() != "0" {
+		ramMB := instance.Spec.Resources.Limits.Memory().ScaledValue(resource.Mega)
+		// Cache Size is 40 percent of RAM
+		cacheSize = float64(ramMB) * 0.4
+		// Convert to gig
+		cacheSizeGB = cacheSize / 1000.0
+		// Round to fit config
+		cacheSizeGB = math.Floor(cacheSizeGB*100) / 100
+	} else {
+		//default value is 5Gi
+		cacheSizeGB = 2.0
+	}
+
+	monogdbConfigmapData := struct {
+		CacheSize float64
+	}{
+		CacheSize: cacheSizeGB,
+	}
+	// TO DO -- convert configmap to take option.
+	var mongodbConfigYaml bytes.Buffer
+	tc := template.Must(template.New("mongodbconfigmap").Parse(mongodbConfigMap))
+	if err := tc.Execute(&mongodbConfigYaml, monogdbConfigmapData); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	log.Info("creating or updating mongodb configmap")
+	if err := r.createUpdateFromYaml(instance, mongodbConfigYaml.Bytes()); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.createFromYaml(instance, []byte(mongodbConfigMap)); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	log.Info("creating icp mongodb init config map")
+
+	if err := r.createFromYaml(instance, []byte(initConfigMap)); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	log.Info("creating icp mongodb install config map")
+
+	if err := r.createFromYaml(instance, []byte(installConfigMap)); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// Create admin user and password as random string
+	// TODO: allow user to give a Secret
+	var pass, user string
+	user = createRandomAlphaNumeric(8)
+	pass = createRandomAlphaNumeric(13)
+	mongodbAdmin := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels: map[string]string{
+				"app": "icp-mongodb",
+			},
+			Name:      "icp-mongodb-admin",
+			Namespace: instance.GetNamespace(),
+		},
+		Type: corev1.SecretTypeOpaque,
+		StringData: map[string]string{
+			"user":     user,
+			"password": pass,
+		},
+	}
+
+	// Set CommonServiceConfig instance as the owner and controller
+	//if err := controllerutil.SetControllerReference(instance, mongodbAdmin, r.Scheme); err != nil {
+	//	return ctrl.Result{}, err
+	//}
+
+	log.Info("creating icp mongodb admin secret")
+	if err = r.Client.Create(context.TODO(), mongodbAdmin); err != nil && !errors.IsAlreadyExists(err) {
+		return ctrl.Result{}, err
+	}
+
+	mongodbMetric := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:    metadatalabel,
+			Name:      "icp-mongodb-metrics",
+			Namespace: instance.GetNamespace(),
+		},
+		Type: corev1.SecretTypeOpaque,
+		StringData: map[string]string{
+			"user":     "metrics",
+			"password": "icpmetrics",
+		},
+	}
+
+	// Set CommonServiceConfig instance as the owner and controller
+	if err := controllerutil.SetControllerReference(instance, mongodbMetric, r.Scheme); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	log.Info("creating icp mongodb metric secret")
+	if err = r.Client.Create(context.TODO(), mongodbMetric); err != nil && !errors.IsAlreadyExists(err) {
+		return ctrl.Result{}, err
+	}
+
+	keyfileSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Labels:    metadatalabel,
+			Name:      "icp-mongodb-keyfile",
+			Namespace: instance.GetNamespace(),
+		},
+		Type: corev1.SecretTypeOpaque,
+		StringData: map[string]string{
+			"key.txt": "icptest",
+		},
+	}
+
+	// Set CommonServiceConfig instance as the owner and controller
+	if err := controllerutil.SetControllerReference(instance, keyfileSecret, r.Scheme); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	log.Info("creating icp mongodb keyfile secret")
+	if err = r.Client.Create(context.TODO(), keyfileSecret); err != nil && !errors.IsAlreadyExists(err) {
+		return ctrl.Result{}, err
+	}
+
+	var storageclass string
+
+	if instance.Status.StorageClass == "" {
+		if instance.Spec.StorageClass == "" {
+			// TODO: weird because the storage class on OCP is opened for all
+			// Need to deploy an OCP cluster on AWS to verify
+			storageclass, err = r.getstorageclass()
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+		} else {
+			storageclass = instance.Spec.StorageClass
+		}
+	} else {
+		if instance.Spec.StorageClass != "" && instance.Spec.StorageClass != instance.Status.StorageClass {
+			log.Info("You need to delete the monogodb cr before switch the storage class. Please note that this will lose all your datamake")
+		}
+		storageclass = instance.Status.StorageClass
+	}
+
+	// Default values
+	cpuRequest := "2000m"
+	memoryRequest := "5Gi"
+	cpuLimit := "2000m"
+	memoryLimit := "5Gi"
+
+	// Check cpu request values and default if not there
+	if instance.Spec.Resources.Requests.Cpu().String() != "0" {
+		cpuRequest = instance.Spec.Resources.Requests.Cpu().String()
+	}
+
+	// Check memory request values and default if not there
+	if instance.Spec.Resources.Requests.Memory().String() != "0" {
+		memoryRequest = instance.Spec.Resources.Requests.Memory().String()
+	}
+
+	// Check cpu limit values and default if not there
+	if instance.Spec.Resources.Limits.Cpu().String() != "0" {
+		cpuLimit = instance.Spec.Resources.Limits.Cpu().String()
+	}
+
+	// Check memory limit values and default if not there
+	if instance.Spec.Resources.Limits.Memory().String() != "0" {
+		memoryLimit = instance.Spec.Resources.Limits.Memory().String()
+	}
+
+	stsData := struct {
+		Replicas       int
+		ImageRepo      string
+		StorageClass   string
+		InitImage      string
+		BootstrapImage string
+		MetricsImage   string
+		CPULimit       string
+		CPURequest     string
+		MemoryLimit    string
+		MemoryRequest  string
+	}{
+		Replicas:       instance.Spec.Replicas,
+		ImageRepo:      instance.Spec.ImageRegistry,
+		StorageClass:   storageclass,
+		InitImage:      os.Getenv("INIT_MONGODB_IMAGE"),
+		BootstrapImage: os.Getenv("MONGODB_IMAGE"),
+		MetricsImage:   os.Getenv("EXPORTER_MONGODB_IMAGE"),
+		CPULimit:       cpuLimit,
+		CPURequest:     cpuRequest,
+		MemoryLimit:    memoryLimit,
+		MemoryRequest:  memoryRequest,
+	}
+
+	var stsYaml bytes.Buffer
+	t := template.Must(template.New("statefulset").Parse(statefulset))
+	if err := t.Execute(&stsYaml, stsData); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	log.Info("creating or updating mongodb statefulset")
+	if err := r.createUpdateFromYaml(instance, stsYaml.Bytes()); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	instance.Status.StorageClass = storageclass
+	if err := r.Client.Status().Update(context.TODO(), instance); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// sign certificate
+	log.Info("creating root-ca-cert")
+	if err := r.createFromYaml(instance, []byte(godIssuerYaml)); err != nil {
+		log.Error(err, "create god-issuer fail")
+		return ctrl.Result{}, err
+	}
+	log.Info("creating root-ca-cert")
+	if err := r.createFromYaml(instance, []byte(rootCertYaml)); err != nil {
+		log.Error(err, "create root-ca-cert fail")
+		return ctrl.Result{}, err
+	}
+	log.Info("creating root-issuer")
+	if err := r.createFromYaml(instance, []byte(rootIssuerYaml)); err != nil {
+		log.Error(err, "create root-issuer fail")
+		return ctrl.Result{}, err
+	}
+	log.Info("creating icp-mongodb-client-cert")
+	if err := r.createFromYaml(instance, []byte(clientCertYaml)); err != nil {
+		log.Error(err, "create icp-mongodb-client-cert fail")
+		return ctrl.Result{}, err
+	}
+
+	// Get the StatefulSet
+	sts := &appsv1.StatefulSet{}
+	if err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "icp-mongodb", Namespace: instance.Namespace}, sts); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// Add controller on PVC
+	if err = r.addControlleronPVC(instance, sts); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if sts.Status.UpdatedReplicas != sts.Status.Replicas || sts.Status.UpdatedReplicas != sts.Status.ReadyReplicas {
+		log.Info("Waiting Mongodb to be ready ...")
+		return ctrl.Result{Requeue: true, RequeueAfter: time.Minute}, nil
+	}
+	log.Info("Mongodb is ready")
 
 	return ctrl.Result{}, nil
 }
@@ -49,5 +353,137 @@ func (r *MongoDBReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 func (r *MongoDBReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&operatorv1alpha1.MongoDB{}).
+		Owns(&corev1.Pod{}).
 		Complete(r)
+}
+
+func (r *MongoDBReconciler) createFromYaml(instance *operatorv1alpha1.MongoDB, yamlContent []byte) error {
+	obj := &unstructured.Unstructured{}
+	jsonSpec, err := yaml.YAMLToJSON(yamlContent)
+	if err != nil {
+		return fmt.Errorf("could not convert yaml to json: %v", err)
+	}
+
+	if err := obj.UnmarshalJSON(jsonSpec); err != nil {
+		return fmt.Errorf("could not unmarshal resource: %v", err)
+	}
+
+	obj.SetNamespace(instance.Namespace)
+
+	// Set CommonServiceConfig instance as the owner and controller
+	if err := controllerutil.SetControllerReference(instance, obj, r.Scheme); err != nil {
+		return err
+	}
+
+	err = r.Client.Create(context.TODO(), obj)
+	if err != nil && !errors.IsAlreadyExists(err) {
+		return fmt.Errorf("could not Create resource: %v", err)
+	}
+
+	return nil
+}
+
+func (r *MongoDBReconciler) createUpdateFromYaml(instance *operatorv1alpha1.MongoDB, yamlContent []byte) error {
+	obj := &unstructured.Unstructured{}
+	jsonSpec, err := yaml.YAMLToJSON(yamlContent)
+	if err != nil {
+		return fmt.Errorf("could not convert yaml to json: %v", err)
+	}
+
+	if err := obj.UnmarshalJSON(jsonSpec); err != nil {
+		return fmt.Errorf("could not unmarshal resource: %v", err)
+	}
+
+	obj.SetNamespace(instance.Namespace)
+
+	// Set CommonServiceConfig instance as the owner and controller
+	if err := controllerutil.SetControllerReference(instance, obj, r.Scheme); err != nil {
+		return err
+	}
+
+	err = r.Client.Create(context.TODO(), obj)
+	if err != nil {
+		if errors.IsAlreadyExists(err) {
+			if err := r.Client.Update(context.TODO(), obj); err != nil {
+				return fmt.Errorf("could not Update resource: %v", err)
+			}
+			return nil
+		}
+		return fmt.Errorf("could not Create resource: %v", err)
+	}
+
+	return nil
+}
+
+func (r *MongoDBReconciler) getstorageclass() (string, error) {
+	scList := &storagev1.StorageClassList{}
+	err := r.Reader.List(context.TODO(), scList)
+	if err != nil {
+		return "", err
+	}
+	if len(scList.Items) == 0 {
+		return "", fmt.Errorf("could not find storage class in the cluster")
+	}
+
+	var defaultSC []string
+	var nonDefaultSC []string
+
+	for _, sc := range scList.Items {
+		if sc.Provisioner == "kubernetes.io/no-provisioner" {
+			continue
+		}
+		if sc.ObjectMeta.GetAnnotations()["storageclass.kubernetes.io/is-default-class"] == "true" {
+			defaultSC = append(defaultSC, sc.GetName())
+			continue
+		}
+		nonDefaultSC = append(nonDefaultSC, sc.GetName())
+	}
+
+	if len(defaultSC) != 0 {
+		return defaultSC[0], nil
+	}
+
+	if len(nonDefaultSC) != 0 {
+		return nonDefaultSC[0], nil
+	}
+
+	return "", fmt.Errorf("could not find dynamic provisioner storage class in the cluster")
+}
+
+func (r *MongoDBReconciler) addControlleronPVC(instance *operatorv1alpha1.MongoDB, sts *appsv1.StatefulSet) error {
+	// Fetch the list of the PersistentVolumeClaim generated by the StatefulSet
+	pvcList := &corev1.PersistentVolumeClaimList{}
+	err := r.Client.List(context.TODO(), pvcList, &client.ListOptions{
+		Namespace:     instance.Namespace,
+		LabelSelector: labels.SelectorFromSet(sts.ObjectMeta.Labels),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	for _, pvc := range pvcList.Items {
+		if pvc.ObjectMeta.OwnerReferences == nil {
+			if err := controllerutil.SetControllerReference(instance, &pvc, r.Scheme); err != nil {
+				return err
+			}
+			if err = r.Client.Update(context.TODO(), &pvc); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Create Random String
+func createRandomAlphaNumeric(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	var seededRand = rand.New(
+		rand.NewSource(time.Now().UnixNano()))
+
+	byteString := make([]byte, length)
+	for i := range byteString {
+		byteString[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(byteString)
 }
