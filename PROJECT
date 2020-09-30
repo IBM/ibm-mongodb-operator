@@ -1,0 +1,7 @@
+domain: ibm.com
+layout: go.kubebuilder.io/v2
+projectName: ibm-mongodb-operator
+repo: github.com/IBM/ibm-mongodb-operator
+version: 3-alpha
+plugins:
+  go.sdk.operatorframework.io/v2-alpha: {}
