@@ -9,10 +9,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: ibm-mongodb-operator
-- kind: Group
-  name: system:serviceaccounts:ibm-common-services
-  apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: manager-role
+  name: ibm-mongodb-operator
   apiGroup: rbac.authorization.k8s.io

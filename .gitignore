@@ -5,7 +5,9 @@
 *.so
 *.dylib
 bin
-
+env	
+catchup.sh	
+.gitignore
 # Test binary, build with `go test -c`
 *.test
 

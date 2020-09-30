@@ -1,9 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  labels:
-    control-plane: controller-manager
-  name: system
+  name: ibm-common-service
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -60,9 +58,11 @@ spec:
             readOnlyRootFilesystem: true
             runAsNonRoot: true
           # Replace this with the built image name
-          image: quay.io/opencloudio/ibm-mongodb-operator:1.1.6
+          image: quay.io/opencloudio/ibm-mongodb-operator:latest
           command:
-          - manager
+          - /manager
+          args:
+          - --enable-leader-election
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -70,8 +70,8 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: INIT_MONGODB_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb-install:3.6.1
+              value: quay.io/opencloudio/ibm-mongodb-install@sha256:a66b549c4a186cf0115757f90eddc92bafc42351a25a67e44058fefeecf0ef0a
             - name: MONGODB_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb:4.0.16-build.1
+              value: quay.io/opencloudio/ibm-mongodb@sha256:9b041309305a7cb2c7b88fee288ea9b2f3d7590fbc61b30c102e47a95b451f2e
             - name: EXPORTER_MONGODB_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb-exporter:3.6.1
+              value: quay.io/opencloudio/ibm-mongodb-exporter@sha256:996ca1395a84638f153d6dade3514689bee452dd7244165d22c320f1eab53ec7

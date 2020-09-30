@@ -13,7 +13,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+FROM alpine as qemu
+
+RUN wget -O /qemu-ppc64le-static https://github.com/multiarch/qemu-user-static/releases/latest/download/qemu-ppc64le-static
+
+RUN chmod +x /qemu-ppc64le-static
+
+# Build the manager binary
+FROM golang:1.14.7 as builder
+ARG GOARCH
+
+WORKDIR /workspace
+# Copy the Go Modules manifests
+COPY go.mod go.mod
+COPY go.sum go.sum
+# cache deps before building and copying source so that we don't need to re-download as much
+# and so that source changes don't invalidate our downloaded layer
+RUN go mod download
+
+# Copy the go source
+COPY main.go main.go
+COPY api/ api/
+COPY controllers/ controllers/
+
+# Build
+RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o manager main.go
+
+# Use distroless as minimal base image to package the manager binary
+# Refer to https://github.com/GoogleContainerTools/distroless for more details
+# FROM gcr.io/distroless/static:nonroot
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
+
+ARG VCS_REF
+ARG VCS_URL
 
 LABEL org.label-schema.vendor="IBM" \
     org.label-schema.name="ibm-mongodb-operator" \
@@ -27,20 +60,15 @@ LABEL org.label-schema.vendor="IBM" \
     description="IBM MongoDB Operator" \
     summary="IBM MongoDB Operator"
 
-ENV OPERATOR=/usr/local/bin/ibm-mongodb-operator \
-    USER_UID=1001 \
-    USER_NAME=ibm-mongodb-operator
-
-# install operator binary
-COPY build/_output/bin/ibm-mongodb-operator ${OPERATOR}
-
-COPY build/bin /usr/local/bin
-RUN  /usr/local/bin/user_setup
+WORKDIR /
+COPY --from=builder /workspace/manager .
+COPY --from=qemu /qemu-ppc64le-static /usr/bin/
 
 # copy licenses
 RUN mkdir /licenses
 COPY LICENSE /licenses
 
-ENTRYPOINT ["/usr/local/bin/entrypoint"]
+# USER nonroot:nonroot
+USER 1001
 
-USER ${USER_UID}
+ENTRYPOINT ["/manager"]

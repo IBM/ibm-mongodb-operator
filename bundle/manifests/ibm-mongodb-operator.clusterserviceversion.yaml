@@ -16,16 +16,10 @@ metadata:
           "apiVersion": "operator.ibm.com/v1alpha1",
           "kind": "MongoDB",
           "metadata": {
-            "labels": {
-              "app.kubernetes.io/instance": "mongodbs.operator.ibm.com",
-              "app.kubernetes.io/managed-by": "mongodbs.operator.ibm.com",
-              "app.kubernetes.io/name": "mongodbs.operator.ibm.com"
-            },
             "name": "ibm-mongodb"
           },
           "spec": {
             "replicas": 3,
-            "resources": {
               "limits": {
                 "cpu": "2000m",
                 "memory": "5Gi"
@@ -35,7 +29,6 @@ metadata:
                 "memory": "5Gi"
               }
             }
-          }
         },
         {
           "apiVersion": "operator.ibm.com/v1alpha1",
@@ -140,29 +133,19 @@ spec:
         - 'urn:alm:descriptor:com.tectonic.ui:podStatuses'
   description: |-
     **Important:** Do not install this operator directly. Only install this operator by using the IBM Common Services Operator. For more information about installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall). Additionally, you can exit this panel and navigate to the IBM Common Services tile in OperatorHub to learn more about the operator. If you are using this operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak to learn more about how to install and use the operator service. For more information about IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).
-
     The MongoDB operator provides a simple Kubernetes CRD-Based API to manage the lifecycle of MongoDB. You can use the operator to deploy and upgrade MongoDB.
-
     For more information about the available IBM Cloud Platform Common Services, see the [IBM Knowledge Center](http://ibm.biz/cpcsdocs).
-
     ## Supported platforms
-
     Red Hat OpenShift Container Platform 4.3 or newer installed on one of the following platforms:
      - Linux x86_64
      - Linux on Power (ppc64le)
      - Linux on IBM Z and LinuxONE
-
     ## Prerequisites
-
     Before you install this operator, you need to first install the operator dependencies and prerequisites:
-
     - For the list of operator dependencies, see the IBM Knowledge Center [Common Services dependencies documentation](http://ibm.biz/cpcs_opdependencies).
     - For the list of prerequisites for installing the operator, see the IBM Knowledge Center [Preparing to install services documentation](http://ibm.biz/cpcs_opinstprereq).
-
     ## Documentation
-
     To install the operator with the IBM Common Services Operator follow the the installation and configuration instructions within the IBM Knowledge Center.
-
     - If you are using the operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak. For a list of IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).
     - If you are using the operator with an IBM Containerized Software, see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcs_opinstall).
   displayName: IBM MongoDB Operator
@@ -186,36 +169,25 @@ spec:
                 productMetric: FREE
                 productName: IBM Cloud Platform Common Services
               labels:
-                app.kubernetes.io/instance: mongodbs.operator.ibm.com
-                app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
-                app.kubernetes.io/name: mongodbs.operator.ibm.com
                 name: ibm-mongodb-operator
             spec:
-              affinity:
-                podAntiAffinity:
-                  preferredDuringSchedulingIgnoredDuringExecution:
-                  - podAffinityTerm:
-                      labelSelector:
-                        matchLabels:
-                          key: app
-                          values: icp-mongodb
-                      topologyKey: name
-                    weight: 10
               containers:
               - command:
-                - manager
+                - /manager
+                args:
+                - --enable-leader-election
                 env:
                 - name: WATCH_NAMESPACE
                   valueFrom:
                     fieldRef:
                       fieldPath: metadata.annotations['olm.targetNamespaces']
                 - name: INIT_MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb-install:3.6.1
+                  value: quay.io/opencloudio/ibm-mongodb-install@sha256:a66b549c4a186cf0115757f90eddc92bafc42351a25a67e44058fefeecf0ef0a
                 - name: MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb:4.0.16-build.1
+                  value: quay.io/opencloudio/ibm-mongodb@sha256:9b041309305a7cb2c7b88fee288ea9b2f3d7590fbc61b30c102e47a95b451f2e
                 - name: EXPORTER_MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb-exporter:3.6.1
-                image: quay.io/opencloudio/ibm-mongodb-operator:1.1.6
+                  value: quay.io/opencloudio/ibm-mongodb-exporter@sha256:996ca1395a84638f153d6dade3514689bee452dd7244165d22c320f1eab53ec7
+                image: quay.io/opencloudio/ibm-mongodb-operator:latest
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator
                 resources:
@@ -226,7 +198,7 @@ spec:
                   allowPrivilegeEscalation: false
                   capabilities:
                     drop:
-                    - ALL
+                      - ALL
                   privileged: false
                   readOnlyRootFilesystem: true
                   runAsNonRoot: true
@@ -234,12 +206,17 @@ spec:
       permissions:
       - rules:
         - apiGroups:
-          - apps
+          - ""
           resources:
-          - daemonsets
-          - deployments
-          - replicasets
-          - statefulsets
+          - pods
+          - services
+          - services/finalizers
+          - serviceaccounts
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
           verbs:
           - create
           - delete
@@ -250,36 +227,11 @@ spec:
           - watch
         - apiGroups:
           - apps
-          resourceNames:
-          - ibm-mongodb-operator
           resources:
-          - deployments/finalizers
-          verbs:
-          - get
-          - patch
-          - update
-        - apiGroups:
-          - certmanager.k8s.io
-          resources:
-          - certificaterequests
-          - certificates
-          - challenges
-          - issuers
-          - orders
-          verbs:
-          - '*'
-        - apiGroups:
-          - ""
-          resources:
-          - configmaps
-          - endpoints
-          - events
-          - persistentvolumeclaims
-          - pods
-          - secrets
-          - serviceaccounts
-          - services
-          - services/finalizers
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
           verbs:
           - create
           - delete
@@ -293,8 +245,16 @@ spec:
           resources:
           - servicemonitors
           verbs:
-          - create
           - get
+          - create
+        - apiGroups:
+          - apps
+          resourceNames:
+          - ibm-mongodb-operator
+          resources:
+          - deployments/finalizers
+          verbs:
+          - update
         - apiGroups:
           - operator.ibm.com
           resources:
@@ -309,6 +269,16 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - certificates
+          - certificaterequests
+          - orders
+          - challenges
+          - issuers
+          verbs:
+          - '*'
         serviceAccountName: ibm-mongodb-operator
     strategy: deployment
   installModes:
@@ -334,5 +304,4 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  replaces: ibm-mongodb-operator.v1.1.4
   version: 1.1.6
