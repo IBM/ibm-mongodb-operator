@@ -20,13 +20,15 @@ metadata:
           },
           "spec": {
             "replicas": 3,
-            "limits": {
-              "cpu": "2000m",
-              "memory": "5Gi"
-            },
-            "requests": {
-              "cpu": "2000m",
-              "memory": "5Gi"
+            "resources": {
+              "limits": {
+                "cpu": "2000m",
+                "memory": "5Gi"
+              },
+              "requests": {
+                "cpu": "2000m",
+                "memory": "5Gi"
+              }
             }
           }
         },
