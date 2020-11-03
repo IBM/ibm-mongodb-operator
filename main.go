@@ -68,7 +68,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&mongodbcontroller.MongoDBReconciler{
+	if err = (&mongodbcontroller.MongoReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("MongoDB"),
 		Scheme: mgr.GetScheme(),

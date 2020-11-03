@@ -21,7 +21,7 @@ kind: Issuer
 metadata:
   name: god-issuer
   namespace: ibm-common-services
-  labels: 
+  labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
     app.kubernetes.io/name: mongodbs.operator.ibm.com
@@ -35,7 +35,7 @@ kind: Certificate
 metadata:
   name: mongodb-root-ca-cert
   namespace: ibm-common-services
-  labels: 
+  labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
     app.kubernetes.io/name: mongodbs.operator.ibm.com
@@ -57,7 +57,7 @@ kind: Issuer
 metadata:
   name: mongodb-root-ca-issuer
   namespace: ibm-common-services
-  labels: 
+  labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
     app.kubernetes.io/name: mongodbs.operator.ibm.com
@@ -72,7 +72,7 @@ kind: Certificate
 metadata:
   name: icp-mongodb-client-cert
   namespace: ibm-common-services
-  labels: 
+  labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
     app.kubernetes.io/name: mongodbs.operator.ibm.com
