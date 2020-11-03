@@ -69,7 +69,7 @@ func main() {
 	}
 
 	if err = (&mongodbcontroller.MongoDBReconciler{
-		client: mgr.GetClient(),
+		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("MongoDB"),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {

@@ -49,10 +49,10 @@ import (
 
 // MongoDBReconciler reconciles a MongoDB object
 type MongoDBReconciler struct {
-	client client.Client
-	reader client.Reader
+	Client client.Client
+	Reader client.Reader
 	Log    logr.Logger
-	scheme *runtime.Scheme
+	Scheme *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=mongodb.operator.ibm.com,namespace=ibm-common-services,resources=mongodbs,verbs=get;list;watch;create;update;patch;delete
@@ -70,7 +70,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 
 	// Fetch the MongoDB instance
 	instance := &mongodbv1alpha1.MongoDB{}
-	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.Client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -176,7 +176,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	//}
 
 	r.Log.Info("creating icp mongodb admin secret")
-	if err = r.client.Create(context.TODO(), mongodbAdmin); err != nil && !errors.IsAlreadyExists(err) {
+	if err = r.Client.Create(context.TODO(), mongodbAdmin); err != nil && !errors.IsAlreadyExists(err) {
 		return reconcile.Result{}, err
 	}
 
@@ -194,12 +194,12 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	}
 
 	// Set CommonServiceConfig instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, mongodbMetric, r.scheme); err != nil {
+	if err := controllerutil.SetControllerReference(instance, mongodbMetric, r.Scheme); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	r.Log.Info("creating icp mongodb metric secret")
-	if err = r.client.Create(context.TODO(), mongodbMetric); err != nil && !errors.IsAlreadyExists(err) {
+	if err = r.Client.Create(context.TODO(), mongodbMetric); err != nil && !errors.IsAlreadyExists(err) {
 		return reconcile.Result{}, err
 	}
 
@@ -216,12 +216,12 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	}
 
 	// Set CommonServiceConfig instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, keyfileSecret, r.scheme); err != nil {
+	if err := controllerutil.SetControllerReference(instance, keyfileSecret, r.Scheme); err != nil {
 		return reconcile.Result{}, err
 	}
 
 	r.Log.Info("creating icp mongodb keyfile secret")
-	if err = r.client.Create(context.TODO(), keyfileSecret); err != nil && !errors.IsAlreadyExists(err) {
+	if err = r.Client.Create(context.TODO(), keyfileSecret); err != nil && !errors.IsAlreadyExists(err) {
 		return reconcile.Result{}, err
 	}
 
@@ -307,7 +307,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	}
 
 	instance.Status.StorageClass = storageclass
-	if err := r.client.Status().Update(context.TODO(), instance); err != nil {
+	if err := r.Client.Status().Update(context.TODO(), instance); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -335,7 +335,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 
 	// Get the StatefulSet
 	sts := &appsv1.StatefulSet{}
-	if err = r.client.Get(context.TODO(), types.NamespacedName{Name: "icp-mongodb", Namespace: instance.Namespace}, sts); err != nil {
+	if err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "icp-mongodb", Namespace: instance.Namespace}, sts); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -369,11 +369,11 @@ func (r *MongoDBReconciler) createFromYaml(instance *mongodbv1alpha1.MongoDB, ya
 	obj.SetNamespace(instance.Namespace)
 
 	// Set CommonServiceConfig instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, obj, r.scheme); err != nil {
+	if err := controllerutil.SetControllerReference(instance, obj, r.Scheme); err != nil {
 		return err
 	}
 
-	err = r.client.Create(context.TODO(), obj)
+	err = r.Client.Create(context.TODO(), obj)
 	if err != nil && !errors.IsAlreadyExists(err) {
 		return fmt.Errorf("could not Create resource: %v", err)
 	}
@@ -395,14 +395,14 @@ func (r *MongoDBReconciler) createUpdateFromYaml(instance *mongodbv1alpha1.Mongo
 	obj.SetNamespace(instance.Namespace)
 
 	// Set CommonServiceConfig instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, obj, r.scheme); err != nil {
+	if err := controllerutil.SetControllerReference(instance, obj, r.Scheme); err != nil {
 		return err
 	}
 
-	err = r.client.Create(context.TODO(), obj)
+	err = r.Client.Create(context.TODO(), obj)
 	if err != nil {
 		if errors.IsAlreadyExists(err) {
-			if err := r.client.Update(context.TODO(), obj); err != nil {
+			if err := r.Client.Update(context.TODO(), obj); err != nil {
 				return fmt.Errorf("could not Update resource: %v", err)
 			}
 			return nil
@@ -415,7 +415,7 @@ func (r *MongoDBReconciler) createUpdateFromYaml(instance *mongodbv1alpha1.Mongo
 
 func (r *MongoDBReconciler) getstorageclass() (string, error) {
 	scList := &storagev1.StorageClassList{}
-	err := r.reader.List(context.TODO(), scList)
+	err := r.Reader.List(context.TODO(), scList)
 	if err != nil {
 		return "", err
 	}
@@ -451,7 +451,7 @@ func (r *MongoDBReconciler) getstorageclass() (string, error) {
 func (r *MongoDBReconciler) addControlleronPVC(instance *mongodbv1alpha1.MongoDB, sts *appsv1.StatefulSet) error {
 	// Fetch the list of the PersistentVolumeClaim generated by the StatefulSet
 	pvcList := &corev1.PersistentVolumeClaimList{}
-	err := r.client.List(context.TODO(), pvcList, &client.ListOptions{
+	err := r.Client.List(context.TODO(), pvcList, &client.ListOptions{
 		Namespace:     instance.Namespace,
 		LabelSelector: labels.SelectorFromSet(sts.ObjectMeta.Labels),
 	})
@@ -462,10 +462,10 @@ func (r *MongoDBReconciler) addControlleronPVC(instance *mongodbv1alpha1.MongoDB
 
 	for _, pvc := range pvcList.Items {
 		if pvc.ObjectMeta.OwnerReferences == nil {
-			if err := controllerutil.SetControllerReference(instance, &pvc, r.scheme); err != nil {
+			if err := controllerutil.SetControllerReference(instance, &pvc, r.Scheme); err != nil {
 				return err
 			}
-			if err = r.client.Update(context.TODO(), &pvc); err != nil {
+			if err = r.Client.Update(context.TODO(), &pvc); err != nil {
 				return err
 			}
 		}
