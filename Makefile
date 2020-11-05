@@ -127,6 +127,11 @@ build:
 	@echo "Building the ibm-mongodb-operator binary"
 	@CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o manager main.go
 
+build-test-image: manager
+	docker build -t quay.io/$(QUAY_USERNAME)/my-mongodb-operator:test \
+	--build-arg VCS_REF=$(VCS_REF) --build-arg VCS_URL=$(VCS_URL) \
+	--build-arg GOARCH="amd64" -f Dockerfile .
+
 build-image: $(CONFIG_DOCKER_TARGET)
 	$(eval ARCH := $(shell uname -m|sed 's/x86_64/amd64/'))
 	docker build -t $(REGISTRY)/$(IMG)-$(ARCH):$(VERSION) \

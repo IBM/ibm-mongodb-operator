@@ -28,7 +28,6 @@ import (
 
 	"github.com/ghodss/yaml"
 	"github.com/go-logr/logr"
-	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
@@ -82,10 +81,10 @@ func (r *MongoReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
 		return reconcile.Result{}, err
 	}
 
-	r.Log.Info("creating mongodb service account")
-	if err := r.createFromYaml(instance, []byte(mongoSA)); err != nil {
-		return reconcile.Result{}, err
-	}
+	// r.Log.Info("creating mongodb service account")
+	// if err := r.createFromYaml(instance, []byte(mongoSA)); err != nil {
+	// 	return reconcile.Result{}, err
+	// }
 
 	r.Log.Info("creating mongodb service")
 	if err := r.createFromYaml(instance, []byte(service)); err != nil {
@@ -491,7 +490,7 @@ func createRandomAlphaNumeric(length int) string {
 func (r *MongoReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mongodbv1alpha1.MongoDB{}).
-		Owns(&appsv1.StatefulSet{}).Owns(&corev1.ConfigMap{}).Owns(&certmgr.Certificate{}).Owns(&corev1.ServiceAccount{}).
+		Owns(&appsv1.StatefulSet{}).Owns(&corev1.ConfigMap{}).Owns(&corev1.ServiceAccount{}).
 		Owns(&corev1.Service{}).
 		Complete(r)
 }
