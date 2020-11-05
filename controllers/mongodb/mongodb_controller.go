@@ -81,10 +81,10 @@ func (r *MongoReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
 		return reconcile.Result{}, err
 	}
 
-	// r.Log.Info("creating mongodb service account")
-	// if err := r.createFromYaml(instance, []byte(mongoSA)); err != nil {
-	// 	return reconcile.Result{}, err
-	// }
+	r.Log.Info("creating mongodb service account")
+	if err := r.createFromYaml(instance, []byte(mongoSA)); err != nil {
+		return reconcile.Result{}, err
+	}
 
 	r.Log.Info("creating mongodb service")
 	if err := r.createFromYaml(instance, []byte(service)); err != nil {
@@ -170,9 +170,9 @@ func (r *MongoReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
 	}
 
 	// Set CommonServiceConfig instance as the owner and controller
-	//if err := controllerutil.SetControllerReference(instance, mongodbAdmin, r.scheme); err != nil {
-	//	return reconcile.Result{}, err
-	//}
+	// if err := controllerutil.SetControllerReference(instance, mongodbAdmin, r.scheme); err != nil {
+	// 	return reconcile.Result{}, err
+	// }
 
 	r.Log.Info("creating icp mongodb admin secret")
 	if err = r.Client.Create(context.TODO(), mongodbAdmin); err != nil && !errors.IsAlreadyExists(err) {

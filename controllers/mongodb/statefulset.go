@@ -50,7 +50,7 @@ spec:
         prometheus.io/path: "/metrics"
         clusterhealth.ibm.com/dependencies: ibm-common-services.cert-manager
     spec:
-      serviceAccountName: default
+      serviceAccountName: ibm-mongodb-operand
       terminationGracePeriodSeconds: 30
       hostNetwork: false
       hostPID: false
