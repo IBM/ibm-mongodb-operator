@@ -43,7 +43,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/apis/mongodb/v1alpha1"
+	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/v1alpha1"
 )
 
 // MongoDBReconciler reconciles a MongoDB object

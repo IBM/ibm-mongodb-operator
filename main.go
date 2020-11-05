@@ -31,8 +31,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 
-	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/mongodb/v1alpha1"
-	mongodbcontroller "github.com/IBM/ibm-mongodb-operator/controllers/"
+	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/v1alpha1"
+	mongodbcontroller "github.com/IBM/ibm-mongodb-operator/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
