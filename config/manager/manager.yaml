@@ -55,7 +55,7 @@ spec:
           # Replace this with the built image name
           image: quay.io/opencloudio/ibm-mongodb-operator:1.1.6
           command:
-          - ibm-mongodb-operator
+          - '/manager'
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
