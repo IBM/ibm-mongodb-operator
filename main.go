@@ -31,8 +31,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 
-	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/apis/mongodb/v1alpha1"
-	mongodbcontroller "github.com/IBM/ibm-mongodb-operator/controllers/mongodb"
+	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/mongodb/v1alpha1"
+	mongodbcontroller "github.com/IBM/ibm-mongodb-operator/controllers/"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -90,7 +90,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&mongodbcontroller.MongoReconciler{
+	if err = (&mongodbcontroller.MongoDBReconciler{
 		Client: mgr.GetClient(),
 		Reader: mgr.GetAPIReader(),
 		Log:    ctrl.Log.WithName("controllers").WithName("MongoDB"),

@@ -1,10 +1,9 @@
-domain: operator.ibm.com
+domain: ibm.com
 layout: go.kubebuilder.io/v2
-multigroup: true
-projectName: ibm-mongodb-operator
+projectName: cs-mongodb-operator
 repo: github.com/IBM/ibm-mongodb-operator
 resources:
-- group: mongodb
+- group: operator
   kind: MongoDB
   version: v1alpha1
 version: 3-alpha

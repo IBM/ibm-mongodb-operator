@@ -13,29 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package mongodb
+package controllers
 
-const service = `
+const mongoSA = `
 apiVersion: v1
-kind: Service
+kind: ServiceAccount
 metadata:
+  name: ibm-mongodb-operand
   labels:
-    app.kubernetes.io/name: icp-mongodb
-    app.kubernetes.io/instance: icp-mongodb
-    app.kubernetes.io/version: 4.0.12-build.3
-    app.kubernetes.io/component: database
-    app.kubernetes.io/part-of: common-services-cloud-pak
-    app.kubernetes.io/managed-by: operator
-    release: mongodb
-  name: mongodb
-spec:
-  serviceAccountName: ibm-mongodb-operator
-  type: ClusterIP
-  ports:
-  - port: 27017
-    protocol: TCP
-    targetPort: 27017
-  selector:
-    app: icp-mongodb
-    release: mongodb
+    app.kubernetes.io/instance: mongodbs.operator.ibm.com
+    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
+    app.kubernetes.io/name: mongodbs.operator.ibm.com
 `
