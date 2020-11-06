@@ -15,6 +15,10 @@
 # limitations under the License.
 
 .DEFAULT_GOAL:=help
+
+OPERATOR_SDK ?= $(shell which operator-sdk)
+CONTROLLER_GEN ?= $(shell which controller-gen)
+KUSTOMIZE ?= $(shell which kustomize)
 # Specify whether this repo is build locally or not, default values is '1';
 # If set to 1, then you need to also set 'DOCKER_USERNAME' and 'DOCKER_PASSWORD'
 # environment variables before build the repo.
@@ -28,65 +32,48 @@ NAMESPACE=ibm-common-services
 # Image URL to use all building/pushing image targets;
 # Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
 IMG ?= ibm-mongodb-operator
+BUNDLE_IMAGE_NAME=ibm-mongodb-operator-bundle
 REGISTRY ?= "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
-CSV_VERSION ?= 1.1.6
+CSV_VERSION ?= 1.2.0
+
+# Options for 'bundle-build'
+ifneq ($(origin CHANNELS), undefined)
+BUNDLE_CHANNELS := --channels=$(CHANNELS)
+endif
+ifneq ($(origin DEFAULT_CHANNEL), undefined)
+BUNDLE_DEFAULT_CHANNEL := --default-channel=$(DEFAULT_CHANNEL)
+endif
+BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 
 QUAY_USERNAME ?=
 QUAY_PASSWORD ?=
 
 MARKDOWN_LINT_WHITELIST=https://quay.io/cnr
-
+VCS_URL ?= https://github.com/IBM/ibm-mongodb-operator
+VCS_REF ?= $(shell git rev-parse HEAD)
 TESTARGS_DEFAULT := "-v"
 export TESTARGS ?= $(TESTARGS_DEFAULT)
 VERSION ?= $(shell cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
+
+# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
+CRD_OPTIONS ?= "crd:trivialVersions=true"
 
 LOCAL_OS := $(shell uname)
 LOCAL_ARCH := $(shell uname -m)
 ifeq ($(LOCAL_OS),Linux)
     TARGET_OS ?= linux
     XARGS_FLAGS="-r"
-	STRIP_FLAGS=
+    STRIP_FLAGS=
 else ifeq ($(LOCAL_OS),Darwin)
     TARGET_OS ?= darwin
     XARGS_FLAGS=
-	STRIP_FLAGS="-x"
+    STRIP_FLAGS="-x"
 else
     $(error "This system's OS $(LOCAL_OS) isn't recognized/supported")
 endif
 
 include common/Makefile.common.mk
 
-##@ Application
-
-install: ## Install all resources (CR/CRD's, RBCA and Operator)
-	@echo ....... Set environment variables ......
-	- export DEPLOY_DIR=deploy/crds
-	- export WATCH_NAMESPACE=${NAMESPACE}
-	@echo ....... Creating namespace .......
-	- kubectl create namespace ${NAMESPACE}
-	@echo ....... Applying CRDS and Operator .......
-	- kubectl apply -f deploy/crds/operator.ibm.com_mongodbs_crd.yaml
-	@echo ....... Applying RBAC .......
-	- kubectl apply -f deploy/service_account.yaml -n ${NAMESPACE}
-	- kubectl apply -f deploy/role.yaml -n ${NAMESPACE}
-	- kubectl apply -f deploy/role_binding.yaml -n ${NAMESPACE}
-	@echo ....... Applying Operator .......
-	- kubectl apply -f deploy/operator.yaml -n ${NAMESPACE}
-	@echo ....... Creating the Instance .......
-	- kubectl apply -f deploy/crds/operator.ibm.com_v1alpha1_mongodb_cr.yaml -n ${NAMESPACE}
-
-uninstall: ## Uninstall all that all performed in the $ make install
-	@echo ....... Uninstalling .......
-	@echo ....... Deleting CR .......
-	- kubectl delete -f deploy/crds/operator.ibm.com_v1alpha1_mongodb_cr.yaml -n ${NAMESPACE}
-	@echo ....... Deleting Operator .......
-	- kubectl delete -f deploy/operator.yaml -n ${NAMESPACE}
-	@echo ....... Deleting CRDs.......
-	- kubectl delete -f deploy/crds/operator.ibm.com_mongodbs_crd.yaml
-	@echo ....... Deleting Rules and Service Account .......
-	- kubectl delete -f deploy/role_binding.yaml -n ${NAMESPACE}
-	- kubectl delete -f deploy/service_account.yaml -n ${NAMESPACE}
-	- kubectl delete -f deploy/role.yaml -n ${NAMESPACE}
 
 ##@ Development
 
@@ -97,40 +84,73 @@ code-dev: ## Run the default dev commands which are the go tidy, fmt, vet then e
 	- make code-tidy
 	- make code-fmt
 	- make code-vet
-	- make code-gen
 	@echo Running the common required commands for code delivery
 	- make check
 	- make test
-	- make build
 
-run: ## Run against the configured Kubernetes cluster in ~/.kube/config
-	go run ./cmd/manager/main.go
+manager: generate code-fmt code-vet ## Build manager binary
+	go build -o bin/manager main.go
 
-ifeq ($(BUILD_LOCALLY),0)
-    export CONFIG_DOCKER_TARGET = config-docker
-endif
+run: generate code-fmt code-vet manifests ## Run against the configured Kubernetes cluster in ~/.kube/config
+	WATCH_NAMESPACE=ibm-common-services go run ./main.go
+
+install: manifests kustomize ## Install CRDs into a cluster
+	$(KUSTOMIZE) build config/crd | kubectl apply -f -
+
+uninstall: manifests kustomize ## Uninstall CRDs from a cluster
+	$(KUSTOMIZE) build config/crd | kubectl delete -f -
+
+deploy: manifests kustomize ## Deploy controller in the configured Kubernetes cluster in ~/.kube/config
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMAGE_REPO)/$(OPERATOR_IMAGE_NAME):$(CSV_VERSION)
+	$(KUSTOMIZE) build config/default | kubectl apply -f -
+
+##@ Generate code and manifests
+
+manifests: controller-gen ## Generate manifests e.g. CRD, RBAC etc.
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=ibm-mongodb-operator webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+
+generate: controller-gen ## Generate code e.g. API etc.
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+bundle-manifests:
+	$(KUSTOMIZE) build config/manifests | $(OPERATOR_SDK) generate bundle \
+	-q --overwrite --version $(CSV_VERSION) $(BUNDLE_METADATA_OPTS)
+	$(OPERATOR_SDK) bundle validate ./bundle
+
+generate-all: manifests kustomize operator-sdk ## Generate bundle manifests, metadata and package manifests
+	$(OPERATOR_SDK) generate kustomize manifests -q
+	- make bundle-manifests CHANNELS=beta,stable-v1 DEFAULT_CHANNEL=stable-v1
 
 ##@ Build
 
 build:
 	@echo "Building the ibm-mongodb-operator binary"
-	@CGO_ENABLED=0 go build -o build/_output/bin/$(IMG) ./cmd/manager
-	@strip $(STRIP_FLAGS) build/_output/bin/$(IMG)
+	@CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o manager main.go
 
-build-image: build $(CONFIG_DOCKER_TARGET)
+build-test-image: manager
+	docker build -t quay.io/$(QUAY_USERNAME)/my-mongodb-operator:test \
+	--build-arg VCS_REF=$(VCS_REF) --build-arg VCS_URL=$(VCS_URL) \
+	--build-arg GOARCH="amd64" -f Dockerfile .
+
+build-image: $(CONFIG_DOCKER_TARGET)
 	$(eval ARCH := $(shell uname -m|sed 's/x86_64/amd64/'))
-	docker build -t $(REGISTRY)/$(IMG)-$(ARCH):$(VERSION) -f build/Dockerfile .
-	@\rm -f build/_output/bin/ibm-mongodb-operator
+	docker build -t $(REGISTRY)/$(IMG)-$(ARCH):$(VERSION) \
+	--build-arg VCS_REF=$(VCS_REF) --build-arg VCS_URL=$(VCS_URL) \
+	--build-arg GOARCH="amd64" -f Dockerfile .
 	@if [ $(BUILD_LOCALLY) -ne 1 ] && [ "$(ARCH)" = "amd64" ]; then docker push $(REGISTRY)/$(IMG)-$(ARCH):$(VERSION); fi
+
+build-bundle-image: ## Build the operator bundle image.
+	$(eval ARCH := $(shell uname -m|sed 's/x86_64/amd64/'))
+	docker build -f bundle.Dockerfile -t $(REGISTRY)/$(BUNDLE_IMAGE_NAME)-$(ARCH):$(VERSION) .
 
 # runs on amd64 machine
 build-image-ppc64le: $(CONFIG_DOCKER_TARGET)
 ifeq ($(LOCAL_OS),Linux)
 ifeq ($(LOCAL_ARCH),x86_64)
-	GOOS=linux GOARCH=ppc64le CGO_ENABLED=0 go build -o build/_output/bin/ibm-mongodb-operator-ppc64le ./cmd/manager
 	docker run --rm --privileged multiarch/qemu-user-static:register --reset
-	docker build -t $(REGISTRY)/$(IMG)-ppc64le:$(VERSION) -f build/Dockerfile.ppc64le .
-	@\rm -f build/_output/bin/ibm-mongodb-operator-ppc64le
+	docker build -t $(REGISTRY)/$(IMG)-ppc64le:$(VERSION) \
+	--build-arg VCS_REF=$(VCS_REF) --build-arg VCS_URL=$(VCS_URL) \
+	--build-arg GOARCH="ppc64le" -f Dockerfile.ppc64le .
 	@if [ $(BUILD_LOCALLY) -ne 1 ]; then docker push $(REGISTRY)/$(IMG)-ppc64le:$(VERSION); fi
 endif
 endif
@@ -139,10 +159,10 @@ endif
 build-image-s390x: $(CONFIG_DOCKER_TARGET)
 ifeq ($(LOCAL_OS),Linux)
 ifeq ($(LOCAL_ARCH),x86_64)
-	GOOS=linux GOARCH=s390x CGO_ENABLED=0 go build -o build/_output/bin/ibm-mongodb-operator-s390x ./cmd/manager
 	docker run --rm --privileged multiarch/qemu-user-static:register --reset
-	docker build -t $(REGISTRY)/$(IMG)-s390x:$(VERSION) -f build/Dockerfile.s390x .
-	@\rm -f build/_output/bin/ibm-mongodb-operator-s390x
+	docker build -t $(REGISTRY)/$(IMG)-s390x:$(VERSION) \
+	--build-arg VCS_REF=$(VCS_REF) --build-arg VCS_URL=$(VCS_URL) \
+	--build-arg GOARCH="s390x" -f Dockerfile.s390x .
 	@if [ $(BUILD_LOCALLY) -ne 1 ]; then docker push $(REGISTRY)/$(IMG)-s390x:$(VERSION); fi
 endif
 endif
@@ -150,7 +170,7 @@ endif
 ##@ Test
 
 test: ## Run unit test
-	@go test ${TESTARGS} ./pkg/...
+	@go test ${TESTARGS} ./controllers/...
 
 test-e2e: ## Run integration e2e tests with different options.
 	@echo ... Running the same e2e tests with different args ...
@@ -161,10 +181,6 @@ test-e2e: ## Run integration e2e tests with different options.
 
 coverage: ## Run code coverage test
 	@common/scripts/codecov.sh ${BUILD_LOCALLY}
-
-scorecard: ## Run scorecard test
-	@echo ... Running the scorecard test
-	- operator-sdk scorecard -b deploy/olm-catalog/ibm-mongodb-operator --verbose
 
 ##@ Release
 
@@ -188,19 +204,62 @@ all: check test coverage build images
 
 ##@ Cleanup
 clean: ## Clean build binary
-	rm -f build/_output/bin/$(IMG)
+	rm -f bin/manager
 
-next-csv:
-	common/scripts/next-csv.sh ${CSV_VERSION}
+promote-to-beta:
+	common/scripts/promote-to-beta.sh ${CSV_VERSION}
 
-add-image-shas:
-	common/scripts/add-image-shas.sh ${CSV_VERSION}
+# download operator-sdk if necessary
+operator-sdk:
+ifeq (, $(OPERATOR_SDK))
+	@./common/scripts/install-operator-sdk.sh
+	OPERATOR_SDK=/usr/local/bin/operator-sdk
+endif
+
+# find or download kubebuilder
+# download kubebuilder if necessary
+kube-builder:
+ifeq (, $(wildcard /usr/local/kubebuilder))
+	@./common/scripts/install-kubebuilder.sh
+endif
+
+# find or download controller-gen
+# download controller-gen if necessary
+controller-gen:
+ifeq (, $(shell which controller-gen))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0 ;\
+	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
+endif
+
+kustomize:
+ifeq (, $(shell which kustomize))
+	@{ \
+	set -e ;\
+	KUSTOMIZE_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$KUSTOMIZE_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4 ;\
+	rm -rf $$KUSTOMIZE_GEN_TMP_DIR ;\
+	}
+KUSTOMIZE=$(GOBIN)/kustomize
+else
+KUSTOMIZE=$(shell which kustomize)
+endif
 
 ##@ Help
 help: ## Display this help
 	@echo "Usage:\n  make \033[36m<target>\033[0m"
 	@awk 'BEGIN {FS = ":.*##"}; \
-		/^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 } \
-		/^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+			/^[a-zA-Z0-9_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 } \
+			/^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
-.PHONY: all build run check install uninstall code-dev test test-e2e coverage images csv clean help
+.PHONY: all build run check install uninstall code-dev test test-e2e coverage images csv clean controller-gen kustomize help

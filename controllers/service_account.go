@@ -13,9 +13,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package version
+package controllers
 
-var (
-	// Version for MongoDB operator
-	Version = "1.2.0"
-)
+const mongoSA = `
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ibm-mongodb-operand
+  labels:
+    app.kubernetes.io/instance: mongodbs.operator.ibm.com
+    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
+    app.kubernetes.io/name: mongodbs.operator.ibm.com
+`

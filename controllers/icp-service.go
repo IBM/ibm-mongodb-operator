@@ -13,9 +13,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package version
+package controllers
 
-var (
-	// Version for MongoDB operator
-	Version = "1.2.0"
-)
+const icpService = `
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  labels:
+    app.kubernetes.io/name: icp-mongodb
+    app.kubernetes.io/instance: icp-mongodb
+    app.kubernetes.io/version: 4.0.12-build.3
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: common-services-cloud-pak
+    app.kubernetes.io/managed-by: operator
+    release: mongodb
+  name: icp-mongodb
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: peer
+      port: 27017
+  selector:
+    app: icp-mongodb
+    release: mongodb
+`
