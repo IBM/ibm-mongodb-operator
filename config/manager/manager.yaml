@@ -56,7 +56,7 @@ spec:
           image: quay.io/opencloudio/ibm-mongodb-operator:1.1.6
           command:
           - '/manager'
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
               valueFrom:
