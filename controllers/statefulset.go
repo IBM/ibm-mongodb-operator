@@ -296,9 +296,12 @@ spec:
             - name: metrics
               containerPort: 9216
           resources:
+            requests:
+              cpu: 100m
+              memory: 300Mi
             limits:
-              cpu: 500m
-              memory: 450Mi
+              cpu: 1000m
+              memory: 350Mi
           readinessProbe:
             exec:
               command:
