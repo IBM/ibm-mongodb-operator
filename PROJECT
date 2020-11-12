@@ -1,6 +1,6 @@
 domain: ibm.com
 layout: go.kubebuilder.io/v2
-projectName: cs-mongodb-operator
+projectName: ibm-mongodb-operator
 repo: github.com/IBM/ibm-mongodb-operator
 resources:
 - group: operator

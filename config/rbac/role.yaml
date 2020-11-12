@@ -1,38 +1,17 @@
+
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   creationTimestamp: null
   name: ibm-mongodb-operator
-  labels:
-    app.kubernetes.io/instance: mongodbs.operator.ibm.com
-    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
-    app.kubernetes.io/name: mongodbs.operator.ibm.com
+  namespace: ibm-common-services
 rules:
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  - services
-  - services/finalizers
-  - serviceaccounts
-  - endpoints
-  - persistentvolumeclaims
-  - events
-  - configmaps
-  - secrets
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
 - apiGroups:
   - apps
   resources:
-  - deployments
   - daemonsets
+  - deployments
   - replicasets
   - statefulsets
   verbs:
@@ -44,13 +23,6 @@ rules:
   - update
   - watch
 - apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - servicemonitors
-  verbs:
-  - get
-  - create
-- apiGroups:
   - apps
   resourceNames:
   - ibm-mongodb-operator
@@ -58,6 +30,68 @@ rules:
   - deployments/finalizers
   verbs:
   - update
+- apiGroups:
+  - certmanager.k8s.io
+  resources:
+  - certificaterequests
+  - certificates
+  - challenges
+  - issuers
+  - orders
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - events
+  - persistentvolumeclaims
+  - secrets
+  - serviceaccounts
+  - services
+  - services/finalizers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mongodb.operator.ibm.com
+  resources:
+  - mongodbs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mongodb.operator.ibm.com
+  resources:
+  - mongodbs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - create
+  - get
 - apiGroups:
   - operator.ibm.com
   resources:
@@ -72,14 +106,3 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - certmanager.k8s.io
-  resources:
-  - certificates
-  - certificaterequests
-  - orders
-  - challenges
-  - issuers
-  verbs:
-  - create
-  - use
