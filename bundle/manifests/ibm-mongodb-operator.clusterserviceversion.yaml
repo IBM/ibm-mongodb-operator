@@ -2,7 +2,46 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
-    alm-examples: '[]'
+    alm-examples: |-
+      [
+        {
+          "apiVersion": "operator.ibm.com/v1alpha1",
+          "kind": "MongoDB",
+          "metadata": {
+            "name": "ibm-mongodb"
+          },
+          "spec": {
+            "replicas": 3,
+            "limits": {
+              "cpu": "1000m",
+              "memory": "2Gi"
+            },
+            "requests": {
+              "cpu": "1000m",
+              "memory": "2Gi"
+            }
+          }
+        },
+        {
+          "apiVersion": "operator.ibm.com/v1alpha1",
+          "kind": "OperandRequest",
+          "metadata": {
+            "name": "ibm-mongodb-request"
+          },
+          "spec": {
+            "requests": [
+              {
+                "operands": [
+                  {
+                    "name": "ibm-cert-manager-operator"
+                  }
+                ],
+                "registry": "common-service"
+              }
+            ]
+          }
+        }
+      ]
     capabilities: Basic Install
     operators.operatorframework.io/builder: operator-sdk-v1.1.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
