@@ -20,8 +20,30 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM registry.access.redhat.com/ubi8/ubi-minimal:latest
+
+ARG VCS_REF
+ARG VCS_URL
+
+LABEL org.label-schema.vendor="IBM" \
+  org.label-schema.name="ibm-mongodb-operator" \
+  org.label-schema.description="IBM Cloud Platform Common Services MongoDB Component" \
+  org.label-schema.vcs-ref=$VCS_REF \
+  org.label-schema.vcs-url=$VCS_URL \
+  org.label-schema.license="Licensed Materials - Property of IBM" \
+  org.label-schema.schema-version="1.0" \
+  name="ibm-mongodb-operator" \
+  vendor="IBM" \
+  description="IBM Cloud Platform Common Services MongoDB Component" \
+  summary="MongoDB for internal use only."
+
 WORKDIR /
 COPY --from=builder /workspace/manager .
-USER nonroot:nonroot
+
+# copy licenses
+RUN mkdir /licenses
+COPY LICENSE /licenses
+
+# USER nonroot:nonroot
+USER 1001
 
 ENTRYPOINT ["/manager"]

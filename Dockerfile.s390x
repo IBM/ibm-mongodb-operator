@@ -49,24 +49,24 @@ ARG VCS_REF
 ARG VCS_URL
 
 LABEL org.label-schema.vendor="IBM" \
-    org.label-schema.name="ibm-mongodb-operator" \
-    org.label-schema.description="IBM MongoDB Operator" \
-    org.label-schema.vcs-ref=$VCS_REF \
-    org.label-schema.vcs-url=$VCS_URL \
-    org.label-schema.license="Licensed Materials - Property of IBM" \
-    org.label-schema.schema-version="1.0" \
-    name="ibm-mongodb-operator" \
-    vendor="IBM" \
-    description="IBM MongoDB Operator" \
-    summary="IBM MongoDB Operator"
+  org.label-schema.name="ibm-mongodb-operator" \
+  org.label-schema.description="IBM Cloud Platform Common Services MongoDB Component" \
+  org.label-schema.vcs-ref=$VCS_REF \
+  org.label-schema.vcs-url=$VCS_URL \
+  org.label-schema.license="Licensed Materials - Property of IBM" \
+  org.label-schema.schema-version="1.0" \
+  name="ibm-mongodb-operator" \
+  vendor="IBM" \
+  description="IBM Cloud Platform Common Services MongoDB Component" \
+  summary="MongoDB for internal use only."
 
 WORKDIR /
 COPY --from=builder /workspace/manager .
 COPY --from=qemu /qemu-s390x-static /usr/bin/
+COPY LICENSE /licenses
 
 # copy licenses
 RUN mkdir /licenses
-COPY LICENSE /licenses
 
 # USER nonroot:nonroot
 USER 1001
