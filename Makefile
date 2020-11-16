@@ -74,6 +74,10 @@ endif
 
 include common/Makefile.common.mk
 
+ifeq ($(BUILD_LOCALLY),0)
+    export CONFIG_DOCKER_TARGET = config-docker
+endif
+
 
 ##@ Development
 
