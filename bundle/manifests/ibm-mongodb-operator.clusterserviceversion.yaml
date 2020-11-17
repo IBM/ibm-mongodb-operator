@@ -173,7 +173,7 @@ spec:
             spec:
               containers:
               - command:
-                - - '/manager'
+                - '/manager'
                 env:
                 - name: WATCH_NAMESPACE
                   valueFrom:
