@@ -34,7 +34,7 @@ NAMESPACE=ibm-common-services
 IMG ?= ibm-mongodb-operator
 BUNDLE_IMAGE_NAME=ibm-mongodb-operator-bundle
 REGISTRY ?= "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
-CSV_VERSION ?= 1.2.0
+CSV_VERSION ?= 1.2.1
 
 # Options for 'bundle-build'
 ifneq ($(origin CHANNELS), undefined)

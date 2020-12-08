@@ -45,7 +45,7 @@ metadata:
     capabilities: Basic Install
     operators.operatorframework.io/builder: operator-sdk-v1.1.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
-    olm.skipRange: '>=1.0.0 <1.2.0'
+    olm.skipRange: '>=1.0.0 <1.2.1'
   labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
@@ -54,7 +54,7 @@ metadata:
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
-  name: ibm-mongodb-operator.v1.2.0
+  name: ibm-mongodb-operator.v1.2.1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -309,5 +309,5 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  replaces: ibm-mongodb-operator.v1.1.6
-  version: 1.2.0
+  replaces: ibm-mongodb-operator.v1.2.0
+  version: 1.2.1
