@@ -444,7 +444,7 @@ func (r *MongoDBReconciler) getstorageclass() (string, error) {
 		return nonDefaultSC[0], nil
 	}
 
-	return "", fmt.Errorf("Could not find dynamic provisioner storage class in the cluster nor is there a default storage class.")
+	return "", fmt.Errorf("could not find dynamic provisioner storage class in the cluster nor is there a default storage class")
 }
 
 func (r *MongoDBReconciler) addControlleronPVC(instance *mongodbv1alpha1.MongoDB, sts *appsv1.StatefulSet) error {
