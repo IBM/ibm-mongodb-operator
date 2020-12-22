@@ -426,11 +426,11 @@ func (r *MongoDBReconciler) getstorageclass() (string, error) {
 	var nonDefaultSC []string
 
 	for _, sc := range scList.Items {
-		if sc.Provisioner == "kubernetes.io/no-provisioner" {
-			continue
-		}
 		if sc.ObjectMeta.GetAnnotations()["storageclass.kubernetes.io/is-default-class"] == "true" {
 			defaultSC = append(defaultSC, sc.GetName())
+			continue
+		}
+		if sc.Provisioner == "kubernetes.io/no-provisioner" {
 			continue
 		}
 		nonDefaultSC = append(nonDefaultSC, sc.GetName())
@@ -444,7 +444,7 @@ func (r *MongoDBReconciler) getstorageclass() (string, error) {
 		return nonDefaultSC[0], nil
 	}
 
-	return "", fmt.Errorf("could not find dynamic provisioner storage class in the cluster")
+	return "", fmt.Errorf("could not find dynamic provisioner storage class in the cluster nor is there a default storage class")
 }
 
 func (r *MongoDBReconciler) addControlleronPVC(instance *mongodbv1alpha1.MongoDB, sts *appsv1.StatefulSet) error {
