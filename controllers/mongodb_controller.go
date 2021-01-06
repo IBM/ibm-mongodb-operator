@@ -281,7 +281,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		CPURequest     string
 		MemoryLimit    string
 		MemoryRequest  string
-		NamespaceName	 string
+		NamespaceName  string
 	}{
 		Replicas:       instance.Spec.Replicas,
 		ImageRepo:      instance.Spec.ImageRegistry,
@@ -293,7 +293,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		CPURequest:     cpuRequest,
 		MemoryLimit:    memoryLimit,
 		MemoryRequest:  memoryRequest,
-		NamespaceName:	instance.Namespace,
+		NamespaceName:  instance.Namespace,
 	}
 
 	var stsYaml bytes.Buffer
