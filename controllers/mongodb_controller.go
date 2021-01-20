@@ -288,7 +288,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		StorageClass:   storageclass,
 		InitImage:      os.Getenv("IBM_MONGODB_INSTALL_IMAGE"),
 		BootstrapImage: os.Getenv("IBM_MONGODB_IMAGE"),
-		MetricsImage:   os.Getenv("IBM_MONGODB_INSTALL_IMAGE"),
+		MetricsImage:   os.Getenv("IBM_MONGODB_EXPORTER_IMAGE"),
 		CPULimit:       cpuLimit,
 		CPURequest:     cpuRequest,
 		MemoryLimit:    memoryLimit,
