@@ -187,11 +187,11 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-mongodb-operator
-                - name: INIT_MONGODB_IMAGE
+                - name: IBM_MONGODB_INSTALL_IMAGE
                   value: quay.io/opencloudio/ibm-mongodb-install:3.7.0
-                - name: MONGODB_IMAGE
+                - name: IBM_MONGODB_IMAGE
                   value: quay.io/opencloudio/ibm-mongodb:4.0.20
-                - name: EXPORTER_MONGODB_IMAGE
+                - name: IBM_MONGODB_EXPORTER_IMAGE
                   value: quay.io/opencloudio/ibm-mongodb-exporter:3.7.0
                 image: quay.io/opencloudio/ibm-mongodb-operator:latest
                 imagePullPolicy: Always
