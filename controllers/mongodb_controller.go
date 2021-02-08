@@ -348,16 +348,17 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		return reconcile.Result{}, err
 	}
 
+	// Need to check for statefulset update before waiting for Mongo to be ready
+	if err = r.updateStatefulset(&stsData); err != nil {
+		r.Log.Error(err, "failed to call update StatefulSet")
+		return reconcile.Result{}, err
+	}
+
 	if sts.Status.UpdatedReplicas != sts.Status.Replicas || sts.Status.UpdatedReplicas != sts.Status.ReadyReplicas {
 		r.Log.Info("Waiting Mongodb to be ready ...")
 		return reconcile.Result{Requeue: true, RequeueAfter: time.Minute}, nil
 	}
 	r.Log.Info("Mongodb is ready")
-
-	if err = r.updateStatefulset(&stsData); err != nil {
-		r.Log.Error(err, "failed to call update StatefulSet")
-		return reconcile.Result{}, err
-	}
 
 	return ctrl.Result{}, nil
 }
@@ -416,6 +417,11 @@ func (r *MongoDBReconciler) updateStatefulset(stsData *mongoDBStatefulSetData) e
 
 	// Check CPULimit
 	cpuLimit, err := resource.ParseQuantity(stsData.CPULimit)
+	if err != nil {
+		r.Log.Error(err, "failed to get cpu Limit in updateStatefulset")
+		return err
+	}
+
 	if !(cpuLimit.Equal(sts.Spec.Template.Spec.InitContainers[0].Resources.Limits["cpu"])) {
 		r.Log.Info("need to update CPU Limit for Install container")
 		desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Limits["cpu"] = cpuLimit
@@ -434,6 +440,10 @@ func (r *MongoDBReconciler) updateStatefulset(stsData *mongoDBStatefulSetData) e
 
 	// Check CPURequest
 	cpuRequest, err := resource.ParseQuantity(stsData.CPURequest)
+	if err != nil {
+		r.Log.Error(err, "failed to get cpu request in updateStatefulset")
+		return err
+	}
 	if !(cpuRequest.Equal(sts.Spec.Template.Spec.InitContainers[0].Resources.Requests["cpu"])) {
 		r.Log.Info("need to update CPU Request for Install container")
 		desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Requests["cpu"] = cpuRequest
@@ -452,6 +462,10 @@ func (r *MongoDBReconciler) updateStatefulset(stsData *mongoDBStatefulSetData) e
 
 	// Check MemoryLimit
 	memoryLimit, err := resource.ParseQuantity(stsData.MemoryLimit)
+	if err != nil {
+		r.Log.Error(err, "failed to get memory Limit in updateStatefulset")
+		return err
+	}
 	if !(memoryLimit.Equal(sts.Spec.Template.Spec.InitContainers[0].Resources.Limits["memory"])) {
 		r.Log.Info("need to update Memory Limit for Install container")
 		desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Limits["memory"] = memoryLimit
@@ -470,6 +484,10 @@ func (r *MongoDBReconciler) updateStatefulset(stsData *mongoDBStatefulSetData) e
 
 	// Check MemoryRequest
 	memoryRequest, err := resource.ParseQuantity(stsData.MemoryRequest)
+	if err != nil {
+		r.Log.Error(err, "failed to get memory Request in updateStatefulset")
+		return err
+	}
 	if !(memoryRequest.Equal(sts.Spec.Template.Spec.InitContainers[0].Resources.Requests["memory"])) {
 		r.Log.Info("need to update Memory Request for Install container")
 		desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Requests["memory"] = memoryRequest
