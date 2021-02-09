@@ -296,6 +296,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		CPURequest:     cpuRequest,
 		MemoryLimit:    memoryLimit,
 		MemoryRequest:  memoryRequest,
+		NamespaceName:  instance.Namespace,
 	}
 
 	var stsYaml bytes.Buffer
@@ -370,7 +371,7 @@ func (r *MongoDBReconciler) updateStatefulset(stsData *mongoDBStatefulSetData) e
 
 	// Get Current Statefulset
 	sts := &appsv1.StatefulSet{}
-	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: "icp-mongodb", Namespace: "ibm-common-services"}, sts)
+	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: "icp-mongodb", Namespace: stsData.NamespaceName}, sts)
 	if err != nil {
 		r.Log.Error(err, "failed to get statefulset for update check")
 		return err
