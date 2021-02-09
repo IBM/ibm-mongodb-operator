@@ -1,5 +1,5 @@
 /*
-# Copyright 2020 IBM Corporation
+# Copyright 2021 IBM Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,6 +52,21 @@ type MongoDBReconciler struct {
 	Reader client.Reader
 	Log    logr.Logger
 	Scheme *runtime.Scheme
+}
+
+// MongoDB StatefulSet Data
+type mongoDBStatefulSetData struct {
+	Replicas       int
+	ImageRepo      string
+	StorageClass   string
+	InitImage      string
+	BootstrapImage string
+	MetricsImage   string
+	CPULimit       string
+	CPURequest     string
+	MemoryLimit    string
+	MemoryRequest  string
+	NamespaceName  string
 }
 
 // +kubebuilder:rbac:groups=mongodb.operator.ibm.com,namespace=ibm-common-services,resources=mongodbs,verbs=get;list;watch;create;update;patch;delete
@@ -270,25 +285,13 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		memoryLimit = instance.Spec.Resources.Limits.Memory().String()
 	}
 
-	stsData := struct {
-		Replicas       int
-		ImageRepo      string
-		StorageClass   string
-		InitImage      string
-		BootstrapImage string
-		MetricsImage   string
-		CPULimit       string
-		CPURequest     string
-		MemoryLimit    string
-		MemoryRequest  string
-		NamespaceName  string
-	}{
+	stsData := mongoDBStatefulSetData{
 		Replicas:       instance.Spec.Replicas,
 		ImageRepo:      instance.Spec.ImageRegistry,
 		StorageClass:   storageclass,
-		InitImage:      os.Getenv("INIT_MONGODB_IMAGE"),
-		BootstrapImage: os.Getenv("MONGODB_IMAGE"),
-		MetricsImage:   os.Getenv("EXPORTER_MONGODB_IMAGE"),
+		InitImage:      os.Getenv("IBM_MONGODB_INSTALL_IMAGE"),
+		BootstrapImage: os.Getenv("IBM_MONGODB_IMAGE"),
+		MetricsImage:   os.Getenv("IBM_MONGODB_EXPORTER_IMAGE"),
 		CPULimit:       cpuLimit,
 		CPURequest:     cpuRequest,
 		MemoryLimit:    memoryLimit,
@@ -303,7 +306,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	}
 
 	r.Log.Info("creating or updating mongodb statefulset")
-	if err := r.createUpdateFromYaml(instance, stsYaml.Bytes()); err != nil {
+	if err := r.createFromYaml(instance, stsYaml.Bytes()); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -345,6 +348,12 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		return reconcile.Result{}, err
 	}
 
+	// Need to check for statefulset update before waiting for Mongo to be ready
+	if err = r.updateStatefulset(&stsData); err != nil {
+		r.Log.Error(err, "failed to call update StatefulSet")
+		return reconcile.Result{}, err
+	}
+
 	if sts.Status.UpdatedReplicas != sts.Status.Replicas || sts.Status.UpdatedReplicas != sts.Status.ReadyReplicas {
 		r.Log.Info("Waiting Mongodb to be ready ...")
 		return reconcile.Result{Requeue: true, RequeueAfter: time.Minute}, nil
@@ -355,6 +364,157 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 }
 
 // Move to separate file begin
+
+func (r *MongoDBReconciler) updateStatefulset(stsData *mongoDBStatefulSetData) error {
+	// Update Needed Boolean
+	needUpdate := false
+
+	// Get Current Statefulset
+	sts := &appsv1.StatefulSet{}
+	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: "icp-mongodb", Namespace: stsData.NamespaceName}, sts)
+	if err != nil {
+		r.Log.Error(err, "failed to get statefulset for update check")
+		return err
+	}
+
+	// create a desired statefulset
+	desiredSts := sts
+
+	// Check and change configurable variables in statefulset
+	// Check Replicas
+	if stsData.Replicas != int(*sts.Spec.Replicas) {
+		r.Log.Info("need to update replica count")
+		rep := int32(stsData.Replicas)
+		desiredSts.Spec.Replicas = &rep
+		needUpdate = true
+	}
+
+	// Check InitImage
+	if stsData.InitImage != sts.Spec.Template.Spec.InitContainers[0].Image {
+		r.Log.Info("need to update Install Container image")
+		desiredSts.Spec.Template.Spec.InitContainers[0].Image = stsData.InitImage
+		needUpdate = true
+	}
+
+	// Check BootstrapImage
+	if stsData.BootstrapImage != sts.Spec.Template.Spec.InitContainers[1].Image {
+		r.Log.Info("need to update Bootstrap Container image")
+		desiredSts.Spec.Template.Spec.InitContainers[1].Image = stsData.BootstrapImage
+		needUpdate = true
+	}
+	if stsData.BootstrapImage != sts.Spec.Template.Spec.Containers[0].Image {
+		r.Log.Info("need to update ICP MongoDB Container image")
+		desiredSts.Spec.Template.Spec.Containers[0].Image = stsData.BootstrapImage
+		needUpdate = true
+	}
+
+	// Check MetricsImage
+	if stsData.MetricsImage != sts.Spec.Template.Spec.Containers[1].Image {
+		r.Log.Info("need to update Metrics Container image")
+		desiredSts.Spec.Template.Spec.Containers[1].Image = stsData.MetricsImage
+		needUpdate = true
+	}
+
+	// Check CPULimit
+	cpuLimit, err := resource.ParseQuantity(stsData.CPULimit)
+	if err != nil {
+		r.Log.Error(err, "failed to get cpu Limit in updateStatefulset")
+		return err
+	}
+
+	if !(cpuLimit.Equal(sts.Spec.Template.Spec.InitContainers[0].Resources.Limits["cpu"])) {
+		r.Log.Info("need to update CPU Limit for Install container")
+		desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Limits["cpu"] = cpuLimit
+		needUpdate = true
+	}
+	if !(cpuLimit.Equal(sts.Spec.Template.Spec.InitContainers[1].Resources.Limits["cpu"])) {
+		r.Log.Info("need to update CPU Limit for Bootstrap container")
+		desiredSts.Spec.Template.Spec.InitContainers[1].Resources.Limits["cpu"] = cpuLimit
+		needUpdate = true
+	}
+	if !(cpuLimit.Equal(sts.Spec.Template.Spec.Containers[0].Resources.Limits["cpu"])) {
+		r.Log.Info("need to update CPU Limit for ICP MongoDB container")
+		desiredSts.Spec.Template.Spec.Containers[0].Resources.Limits["cpu"] = cpuLimit
+		needUpdate = true
+	}
+
+	// Check CPURequest
+	cpuRequest, err := resource.ParseQuantity(stsData.CPURequest)
+	if err != nil {
+		r.Log.Error(err, "failed to get cpu request in updateStatefulset")
+		return err
+	}
+	if !(cpuRequest.Equal(sts.Spec.Template.Spec.InitContainers[0].Resources.Requests["cpu"])) {
+		r.Log.Info("need to update CPU Request for Install container")
+		desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Requests["cpu"] = cpuRequest
+		needUpdate = true
+	}
+	if !(cpuRequest.Equal(sts.Spec.Template.Spec.InitContainers[1].Resources.Requests["cpu"])) {
+		r.Log.Info("need to update CPU Request for Bootstrap container")
+		desiredSts.Spec.Template.Spec.InitContainers[1].Resources.Requests["cpu"] = cpuRequest
+		needUpdate = true
+	}
+	if !(cpuRequest.Equal(sts.Spec.Template.Spec.Containers[0].Resources.Requests["cpu"])) {
+		r.Log.Info("need to update CPU Request for ICP MongoDB container")
+		desiredSts.Spec.Template.Spec.Containers[0].Resources.Requests["cpu"] = cpuRequest
+		needUpdate = true
+	}
+
+	// Check MemoryLimit
+	memoryLimit, err := resource.ParseQuantity(stsData.MemoryLimit)
+	if err != nil {
+		r.Log.Error(err, "failed to get memory Limit in updateStatefulset")
+		return err
+	}
+	if !(memoryLimit.Equal(sts.Spec.Template.Spec.InitContainers[0].Resources.Limits["memory"])) {
+		r.Log.Info("need to update Memory Limit for Install container")
+		desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Limits["memory"] = memoryLimit
+		needUpdate = true
+	}
+	if !(memoryLimit.Equal(sts.Spec.Template.Spec.InitContainers[1].Resources.Limits["memory"])) {
+		r.Log.Info("need to update Memory Limit for Bootstrap container")
+		desiredSts.Spec.Template.Spec.InitContainers[1].Resources.Limits["memory"] = memoryLimit
+		needUpdate = true
+	}
+	if !(memoryLimit.Equal(sts.Spec.Template.Spec.Containers[0].Resources.Limits["memory"])) {
+		r.Log.Info("need to update Memory Limit for ICP MongoDB container")
+		desiredSts.Spec.Template.Spec.Containers[0].Resources.Limits["memory"] = memoryLimit
+		needUpdate = true
+	}
+
+	// Check MemoryRequest
+	memoryRequest, err := resource.ParseQuantity(stsData.MemoryRequest)
+	if err != nil {
+		r.Log.Error(err, "failed to get memory Request in updateStatefulset")
+		return err
+	}
+	if !(memoryRequest.Equal(sts.Spec.Template.Spec.InitContainers[0].Resources.Requests["memory"])) {
+		r.Log.Info("need to update Memory Request for Install container")
+		desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Requests["memory"] = memoryRequest
+		needUpdate = true
+	}
+	if !(memoryRequest.Equal(sts.Spec.Template.Spec.InitContainers[1].Resources.Requests["memory"])) {
+		r.Log.Info("need to update Memory Request for Bootstrap container")
+		desiredSts.Spec.Template.Spec.InitContainers[1].Resources.Requests["memory"] = memoryRequest
+		needUpdate = true
+	}
+	if !(memoryRequest.Equal(sts.Spec.Template.Spec.Containers[0].Resources.Requests["memory"])) {
+		r.Log.Info("need to update Memory Request for ICP MongoDB container")
+		desiredSts.Spec.Template.Spec.Containers[0].Resources.Requests["memory"] = memoryRequest
+		needUpdate = true
+	}
+
+	// Update Statefulset if needed
+	if needUpdate {
+		r.Log.Info("updating statefulset")
+		if err := r.Client.Update(context.TODO(), desiredSts); err != nil {
+			return fmt.Errorf("could not Update resource: %v", err)
+		}
+		return nil
+	}
+	return nil
+
+}
 
 func (r *MongoDBReconciler) createFromYaml(instance *mongodbv1alpha1.MongoDB, yamlContent []byte) error {
 	obj := &unstructured.Unstructured{}

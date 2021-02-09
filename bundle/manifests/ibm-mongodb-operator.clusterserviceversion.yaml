@@ -187,12 +187,12 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-mongodb-operator
-                - name: INIT_MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb-install@sha256:1211ee8ece2791b91fadd5b1294749e46cb88cef5f3a37e1d9dd6890038f1043
-                - name: MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb@sha256:5004b6073efd2df5eae51431e866123d386495aea1b4baa2dcac9fcbaaf7eb83
-                - name: EXPORTER_MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb-exporter@sha256:d919b68e11254c38bef86b036ce5636e62699045d22c04c3c7ce616d95f341ec
+                - name: IBM_MONGODB_INSTALL_IMAGE
+                  value: quay.io/opencloudio/ibm-mongodb-install:3.6.2
+                - name: IBM_MONGODB_IMAGE
+                  value: quay.io/opencloudio/ibm-mongodb:4.0.20
+                - name: IBM_MONGODB_EXPORTER_IMAGE
+                  value: quay.io/opencloudio/ibm-mongodb-exporter:3.6.2
                 image: quay.io/opencloudio/ibm-mongodb-operator:latest
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator
@@ -209,6 +209,20 @@ spec:
                   readOnlyRootFilesystem: true
                   runAsNonRoot: true
               serviceAccountName: ibm-mongodb-operator
+              hostIPC: false
+              hostNetwork: false
+              hostPID: false
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                      - matchExpressions:
+                          - key: kubernetes.io/arch
+                            operator: In
+                            values:
+                              - amd64
+                              - ppc64le
+                              - s390x
       permissions:
       - rules:
         - apiGroups:
