@@ -446,16 +446,37 @@ func (r *MongoDBReconciler) updateStatefulset(stsData *mongoDBStatefulSetData) e
 	}
 	if !(cpuRequest.Equal(sts.Spec.Template.Spec.InitContainers[0].Resources.Requests["cpu"])) {
 		r.Log.Info("need to update CPU Request for Install container")
+		_, found := desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Requests["cpu"]
+		if found {
+			desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Requests["cpu"] = cpuRequest
+		} else {
+			desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Requests = corev1.ResourceList{}
+			desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Requests["cpu"] = cpuRequest
+		}
 		desiredSts.Spec.Template.Spec.InitContainers[0].Resources.Requests["cpu"] = cpuRequest
 		needUpdate = true
 	}
 	if !(cpuRequest.Equal(sts.Spec.Template.Spec.InitContainers[1].Resources.Requests["cpu"])) {
 		r.Log.Info("need to update CPU Request for Bootstrap container")
+		_, found := desiredSts.Spec.Template.Spec.InitContainers[1].Resources.Requests["cpu"]
+		if found {
+			desiredSts.Spec.Template.Spec.InitContainers[1].Resources.Requests["cpu"] = cpuRequest
+		} else {
+			desiredSts.Spec.Template.Spec.InitContainers[1].Resources.Requests = corev1.ResourceList{}
+			desiredSts.Spec.Template.Spec.InitContainers[1].Resources.Requests["cpu"] = cpuRequest
+		}
 		desiredSts.Spec.Template.Spec.InitContainers[1].Resources.Requests["cpu"] = cpuRequest
 		needUpdate = true
 	}
 	if !(cpuRequest.Equal(sts.Spec.Template.Spec.Containers[0].Resources.Requests["cpu"])) {
 		r.Log.Info("need to update CPU Request for ICP MongoDB container")
+		_, found := desiredSts.Spec.Template.Spec.Containers[0].Resources.Requests["cpu"]
+		if found {
+			desiredSts.Spec.Template.Spec.Containers[0].Resources.Requests["cpu"] = cpuRequest
+		} else {
+			desiredSts.Spec.Template.Spec.Containers[0].Resources.Requests = corev1.ResourceList{}
+			desiredSts.Spec.Template.Spec.Containers[0].Resources.Requests["cpu"] = cpuRequest
+		}
 		desiredSts.Spec.Template.Spec.Containers[0].Resources.Requests["cpu"] = cpuRequest
 		needUpdate = true
 	}
