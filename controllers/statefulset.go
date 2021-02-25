@@ -75,7 +75,7 @@ spec:
           preferredDuringSchedulingIgnoredDuringExecution:
           - weightedPodAffinityTerm:
             podAffinityTerm:
-              topologyKey: name
+              topologyKey: kubernetes.io/hostname
               labelSelector:
                 matchLabels:
                   key: app
