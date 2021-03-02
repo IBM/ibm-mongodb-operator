@@ -73,14 +73,15 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weightedPodAffinityTerm:
+          - weighted: 50
             podAffinityTerm:
               topologyKey: kubernetes.io/hostname
               labelSelector:
-                matchLabels:
-                  key: app
-                  values: icp-mongodb
-            weight: 10
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - icp-mongodb
       initContainers:
         - name: install
           image: "{{ .InitImage }}"
