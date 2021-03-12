@@ -53,7 +53,8 @@ type MongoDBReconciler struct {
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
-
+//
+const mongodbOperatorUri = `mongodbs.operator.ibm.com`
 // MongoDB StatefulSet Data
 type mongoDBStatefulSetData struct {
 	Replicas       int
@@ -298,9 +299,9 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		constStsLabels := make(map[string]string)
 		constStsLabels["app"] = "icp-mongodb"
 		constStsLabels["release"] = "mongodb"
-		constStsLabels["app.kubernetes.io/instance"] = "mongodbs.operator.ibm.com"
-		constStsLabels["app.kubernetes.io/managed-by"] = "mongodbs.operator.ibm.com"
-		constStsLabels["app.kubernetes.io/name"] = "mongodbs.operator.ibm.com"
+		constStsLabels["app.kubernetes.io/instance"] = mongodbOperatorUri
+		constStsLabels["app.kubernetes.io/managed-by"] = mongodbOperatorUri
+		constStsLabels["app.kubernetes.io/name"] = mongodbOperatorUri
 		stsLabels = constStsLabels
 		constPodLabels := make(map[string]string)
 		constPodLabels["app.kubernetes.io/instance"] = "common-mongodb"
