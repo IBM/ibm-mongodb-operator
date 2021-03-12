@@ -53,8 +53,10 @@ type MongoDBReconciler struct {
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
+
 //
 const mongodbOperatorUri = `mongodbs.operator.ibm.com`
+
 // MongoDB StatefulSet Data
 type mongoDBStatefulSetData struct {
 	Replicas       int
