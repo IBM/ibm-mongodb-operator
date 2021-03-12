@@ -67,8 +67,8 @@ type mongoDBStatefulSetData struct {
 	MemoryLimit    string
 	MemoryRequest  string
 	NamespaceName  string
-	StsLabels     map[string]string
-	PodLabels     map[string]string
+	StsLabels      map[string]string
+	PodLabels      map[string]string
 }
 
 // +kubebuilder:rbac:groups=mongodb.operator.ibm.com,namespace=ibm-common-services,resources=mongodbs,verbs=get;list;watch;create;update;patch;delete
@@ -295,18 +295,18 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "icp-mongodb", Namespace: instance.Namespace}, sts)
 	if err != nil {
 		r.Log.Info("failed to get statefulset check")
-		const_stsLabels := make(map[string]string)
-		const_stsLabels["app"] = "icp-mongodb"
-		const_stsLabels["release"] = "mongodb"
-		const_stsLabels["app.kubernetes.io/instance"] = "mongodbs.operator.ibm.com"
-		const_stsLabels["app.kubernetes.io/managed-by"] = "mongodbs.operator.ibm.com"
-		const_stsLabels["app.kubernetes.io/name"] = "mongodbs.operator.ibm.com"
-		stsLabels = const_stsLabels
-		const_podLabels := make(map[string]string)
-		const_podLabels["app.kubernetes.io/instance"] = "common-mongodb"
-		const_podLabels["app"] = "icp-mongodb"
-		const_podLabels["release"] = "mongodb"
-		podLabels = const_podLabels
+		constStsLabels := make(map[string]string)
+		constStsLabels["app"] = "icp-mongodb"
+		constStsLabels["release"] = "mongodb"
+		constStsLabels["app.kubernetes.io/instance"] = "mongodbs.operator.ibm.com"
+		constStsLabels["app.kubernetes.io/managed-by"] = "mongodbs.operator.ibm.com"
+		constStsLabels["app.kubernetes.io/name"] = "mongodbs.operator.ibm.com"
+		stsLabels = constStsLabels
+		constPodLabels := make(map[string]string)
+		constPodLabels["app.kubernetes.io/instance"] = "common-mongodb"
+		constPodLabels["app"] = "icp-mongodb"
+		constPodLabels["release"] = "mongodb"
+		podLabels = constPodLabels
 	} else {
 		r.Log.Info("succeeded to get statefulset check")
 		stsLabels = sts.ObjectMeta.Labels
