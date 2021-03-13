@@ -55,7 +55,7 @@ type MongoDBReconciler struct {
 }
 
 //
-const mongodbOperatorUri = `mongodbs.operator.ibm.com`
+const mongodbOperatorURI = `mongodbs.operator.ibm.com`
 
 // MongoDB StatefulSet Data
 type mongoDBStatefulSetData struct {
@@ -301,9 +301,9 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		constStsLabels := make(map[string]string)
 		constStsLabels["app"] = "icp-mongodb"
 		constStsLabels["release"] = "mongodb"
-		constStsLabels["app.kubernetes.io/instance"] = mongodbOperatorUri
-		constStsLabels["app.kubernetes.io/managed-by"] = mongodbOperatorUri
-		constStsLabels["app.kubernetes.io/name"] = mongodbOperatorUri
+		constStsLabels["app.kubernetes.io/instance"] = mongodbOperatorURI
+		constStsLabels["app.kubernetes.io/managed-by"] = mongodbOperatorURI
+		constStsLabels["app.kubernetes.io/name"] = mongodbOperatorURI
 		stsLabels = constStsLabels
 		constPodLabels := make(map[string]string)
 		constPodLabels["app.kubernetes.io/instance"] = "common-mongodb"
