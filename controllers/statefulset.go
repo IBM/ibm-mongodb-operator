@@ -22,11 +22,9 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   labels:
-    app: icp-mongodb
-    release: mongodb
-    app.kubernetes.io/instance: mongodbs.operator.ibm.com
-    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
-    app.kubernetes.io/name: mongodbs.operator.ibm.com
+    {{- range $key, $value := .StsLabels }}
+      {{ $key}}: {{ $value}}
+    {{- end }}
   name: icp-mongodb
 spec:
   selector:
@@ -38,9 +36,9 @@ spec:
   template:
     metadata:
       labels:
-        app.kubernetes.io/instance: common-mongodb
-        app: icp-mongodb
-        release: mongodb
+        {{- range $key, $value := .PodLabels }}
+          {{ $key}}: {{ $value}}
+        {{- end }}
       annotations:
         productName: "IBM Cloud Platform Common Services"
         productID: "068a62892a1e4db39641342e592daa25"
@@ -73,7 +71,7 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weighted: 50
+          - weight: 50
             podAffinityTerm:
               topologyKey: kubernetes.io/hostname
               labelSelector:
