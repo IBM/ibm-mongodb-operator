@@ -46,7 +46,7 @@ metadata:
     containerImage: quay.io/opencloudio/ibm-mongodb-operator:latest
     operators.operatorframework.io/builder: operator-sdk-v1.1.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
-    olm.skipRange: '<1.3.1'
+    olm.skipRange: '<1.3.2'
   labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
@@ -55,7 +55,7 @@ metadata:
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
-  name: ibm-mongodb-operator.v1.3.1
+  name: ibm-mongodb-operator.v1.3.2
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -324,5 +324,5 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  replaces: ibm-mongodb-operator.v1.3.0
-  version: 1.3.1
+  replaces: ibm-mongodb-operator.v1.3.1
+  version: 1.3.2
