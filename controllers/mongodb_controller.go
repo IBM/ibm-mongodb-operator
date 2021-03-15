@@ -296,8 +296,12 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	var podLabels map[string]string
 
 	err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "icp-mongodb", Namespace: instance.Namespace}, sts)
-	if err != nil {
-		r.Log.Info("failed to get statefulset check")
+	if err == nil {
+		r.Log.Info("succeeded to get statefulset check")
+		stsLabels = sts.ObjectMeta.Labels
+		podLabels = sts.Spec.Template.ObjectMeta.Labels
+	} else if errors.IsNotFound(err) {
+		r.Log.Info("statefulset not found for labels")
 		constStsLabels := make(map[string]string)
 		constStsLabels["app"] = "icp-mongodb"
 		constStsLabels["release"] = "mongodb"
@@ -311,9 +315,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		constPodLabels["release"] = "mongodb"
 		podLabels = constPodLabels
 	} else {
-		r.Log.Info("succeeded to get statefulset check")
-		stsLabels = sts.ObjectMeta.Labels
-		podLabels = sts.Spec.Template.ObjectMeta.Labels
+		return reconcile.Result{}, err
 	}
 
 	stsData := mongoDBStatefulSetData{
