@@ -53,12 +53,14 @@ data:
 
         if [ !  -f "$credentials_file" ]; then
             log "Creds File Not found!"
+            log "Original User: $ADMIN_USER"
             echo $ADMIN_USER > $credentials_file
             echo $ADMIN_PASSWORD >> $credentials_file
         fi
         admin_user=$(head -n 1 $credentials_file)
         admin_password=$(tail -n 1 $credentials_file)
         admin_auth=(-u "$admin_user" -p "$admin_password")
+        log "Original User: $admin_user"
         if [[ "$METRICS" == "true" ]]; then
             metrics_user="$METRICS_USER"
             metrics_password="$METRICS_PASSWORD"
