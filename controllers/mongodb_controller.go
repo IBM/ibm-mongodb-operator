@@ -157,9 +157,9 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		return reconcile.Result{}, err
 	}
 
-	r.Log.Info("creating icp mongodb init config map")
+	r.Log.Info("creating or updating icp mongodb init config map")
 
-	if err := r.createFromYaml(instance, []byte(initConfigMap)); err != nil {
+	if err := r.createUpdateFromYaml(instance, []byte(initConfigMap)); err != nil {
 		return reconcile.Result{}, err
 	}
 
