@@ -69,8 +69,8 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-mongodb-operator"
             - name: IBM_MONGODB_INSTALL_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb-install:3.7.0
+              value: quay.io/opencloudio/ibm-mongodb-install:3.7.1
             - name: IBM_MONGODB_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb:4.0.20
+              value: quay.io/opencloudio/ibm-mongodb:4.0.20-build.1
             - name: IBM_MONGODB_EXPORTER_IMAGE
-              value: quay.io/opencloudio/ibm-mongodb-exporter:3.7.0
+              value: quay.io/opencloudio/ibm-mongodb-exporter:3.7.1
