@@ -294,9 +294,17 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	// Default values
 	PVCSizeRequest := "20Gi"
 
-	// Check PVC size request values and default if not there
-	if instance.Spec.PVCSize != "" {
-		PVCSizeRequest = instance.Spec.PVCSize
+	// If PVC already exist and the value does not match the PVCSizeRequest then log information that it cannot be changed.
+	pvc := &corev1.PersistentVolumeClaim{}
+	err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "mongodbdir-icp-mongodb-0", Namespace: instance.Namespace}, pvc)
+	if err == nil {
+		r.Log.Info("mongoDB Persistent Volume Claim already exists, it's size is immutable, ignoring pvcSize and using the current PVC storage value")
+		PVCSizeRequest = pvc.Spec.Resources.Requests.Storage().String()
+	} else if errors.IsNotFound(err) {
+		// Check PVC size request values and default if not there
+		if instance.Spec.PVC.Resources.Requests.Storage().String() != "" {
+			PVCSizeRequest = instance.Spec.PVC.Resources.Requests.Storage().String()
+		}
 	}
 
 	// Check if statefulset already exists
