@@ -72,6 +72,7 @@ type mongoDBStatefulSetData struct {
 	NamespaceName  string
 	StsLabels      map[string]string
 	PodLabels      map[string]string
+	PVCSize        string
 }
 
 // +kubebuilder:rbac:groups=mongodb.operator.ibm.com,namespace=ibm-common-services,resources=mongodbs,verbs=get;list;watch;create;update;patch;delete
@@ -290,6 +291,14 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		memoryLimit = instance.Spec.Resources.Limits.Memory().String()
 	}
 
+	// Default values
+	PVCSizeRequest := "20Gi"
+
+	// Check PVC size request values and default if not there
+	if instance.Spec.PVCSize != "" {
+		PVCSizeRequest = instance.Spec.PVCSize
+	}
+
 	// Check if statefulset already exists
 	sts := &appsv1.StatefulSet{}
 	var stsLabels map[string]string
@@ -332,6 +341,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		NamespaceName:  instance.Namespace,
 		StsLabels:      stsLabels,
 		PodLabels:      podLabels,
+		PVCSize:        PVCSizeRequest,
 	}
 
 	var stsYaml bytes.Buffer

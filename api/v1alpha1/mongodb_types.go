@@ -35,6 +35,7 @@ type MongoDBSpec struct {
 	BootstrapImage Image                       `json:"bootstrapImage,omitempty"`
 	MetricsImage   Image                       `json:"metricsImage,omitempty"`
 	Resources      corev1.ResourceRequirements `json:"resources,omitempty"`
+	PVCSize        string                      `json:"pvcSize,omitempty"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB

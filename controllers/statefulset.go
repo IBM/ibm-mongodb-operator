@@ -378,6 +378,6 @@ spec:
         - ReadWriteOnce
         resources:
           requests:
-            storage: 20Gi
+            storage: {{ .PVCSize }}
         storageClassName: {{ .StorageClass }}
 `
