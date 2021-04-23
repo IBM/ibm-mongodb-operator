@@ -56,6 +56,7 @@ type MongoDBReconciler struct {
 
 //
 const mongodbOperatorURI = `mongodbs.operator.ibm.com`
+const defaultPVCSize = `20Gi`
 
 // MongoDB StatefulSet Data
 type mongoDBStatefulSetData struct {
@@ -292,17 +293,26 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	}
 
 	// Default values
-	PVCSizeRequest := "20Gi"
+	PVCSizeRequest := defaultPVCSize
 
 	// If PVC already exist and the value does not match the PVCSizeRequest then log information that it cannot be changed.
 	pvc := &corev1.PersistentVolumeClaim{}
 	err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "mongodbdir-icp-mongodb-0", Namespace: instance.Namespace}, pvc)
 	if err == nil {
-		r.Log.Info("mongoDB Persistent Volume Claim already exists, it's size is immutable, ignoring pvcSize and using the current PVC storage value")
 		PVCSizeRequest = pvc.Spec.Resources.Requests.Storage().String()
+		if instance.Spec.PVC.Resources.Requests.Storage().String() != "0" {
+			if (PVCSizeRequest != instance.Spec.PVC.Resources.Requests.Storage().String()) && (instance.Spec.PVC.Resources.Requests.Storage().String() != defaultPVCSize) {
+				r.Log.Info("mongoDB Persistent Volume Claim already exists, it's size is immutable, ignoring requested storage size for the PVC")
+			}
+		} else {
+			if PVCSizeRequest != defaultPVCSize {
+				r.Log.Info("mongoDB Persistent Volume Claim already exists, it's size is immutable.")
+				r.Log.Info("the PVC storage request is not set to the current default nor is it specified in the Custom Resource")
+			}
+		}
 	} else if errors.IsNotFound(err) {
 		// Check PVC size request values and default if not there
-		if instance.Spec.PVC.Resources.Requests.Storage().String() != "" {
+		if instance.Spec.PVC.Resources.Requests.Storage().String() != "0" {
 			PVCSizeRequest = instance.Spec.PVC.Resources.Requests.Storage().String()
 		}
 	}

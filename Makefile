@@ -135,6 +135,7 @@ build-test-image:
 	docker build -t quay.io/$(QUAY_USERNAME)/my-mongodb-operator:test \
 	--build-arg VCS_REF=$(VCS_REF) --build-arg VCS_URL=$(VCS_URL) \
 	--build-arg GOARCH="amd64" -f Dockerfile .
+	docker push quay.io/$(QUAY_USERNAME)/my-mongodb-operator:test
 
 build-image: $(CONFIG_DOCKER_TARGET)
 	$(eval ARCH := $(shell uname -m|sed 's/x86_64/amd64/'))
