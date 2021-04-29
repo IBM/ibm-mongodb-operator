@@ -35,6 +35,12 @@ type MongoDBSpec struct {
 	BootstrapImage Image                       `json:"bootstrapImage,omitempty"`
 	MetricsImage   Image                       `json:"metricsImage,omitempty"`
 	Resources      corev1.ResourceRequirements `json:"resources,omitempty"`
+	PVC            MongoDBPVCSpec              `json:"pvc,omitempty"`
+}
+
+// MongoDBPVCSpec defines the desired state of the MongoDB PVCs
+type MongoDBPVCSpec struct {
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 // MongoDBStatus defines the observed state of MongoDB

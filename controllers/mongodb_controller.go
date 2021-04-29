@@ -56,6 +56,7 @@ type MongoDBReconciler struct {
 
 //
 const mongodbOperatorURI = `mongodbs.operator.ibm.com`
+const defaultPVCSize = `20Gi`
 
 // MongoDB StatefulSet Data
 type mongoDBStatefulSetData struct {
@@ -72,6 +73,7 @@ type mongoDBStatefulSetData struct {
 	NamespaceName  string
 	StsLabels      map[string]string
 	PodLabels      map[string]string
+	PVCSize        string
 }
 
 // +kubebuilder:rbac:groups=mongodb.operator.ibm.com,namespace=ibm-common-services,resources=mongodbs,verbs=get;list;watch;create;update;patch;delete
@@ -290,6 +292,31 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		memoryLimit = instance.Spec.Resources.Limits.Memory().String()
 	}
 
+	// Default values
+	PVCSizeRequest := defaultPVCSize
+
+	// If PVC already exist and the value does not match the PVCSizeRequest then log information that it cannot be changed.
+	pvc := &corev1.PersistentVolumeClaim{}
+	err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "mongodbdir-icp-mongodb-0", Namespace: instance.Namespace}, pvc)
+	if err == nil {
+		PVCSizeRequest = pvc.Spec.Resources.Requests.Storage().String()
+		if instance.Spec.PVC.Resources.Requests.Storage().String() != "0" {
+			if (PVCSizeRequest != instance.Spec.PVC.Resources.Requests.Storage().String()) && (instance.Spec.PVC.Resources.Requests.Storage().String() != defaultPVCSize) {
+				r.Log.Info("mongoDB Persistent Volume Claim already exists, it's size is immutable, ignoring requested storage size for the PVC")
+			}
+		} else {
+			if PVCSizeRequest != defaultPVCSize {
+				r.Log.Info("mongoDB Persistent Volume Claim already exists, it's size is immutable.")
+				r.Log.Info("the PVC storage request is not set to the current default nor is it specified in the Custom Resource")
+			}
+		}
+	} else if errors.IsNotFound(err) {
+		// Check PVC size request values and default if not there
+		if instance.Spec.PVC.Resources.Requests.Storage().String() != "0" {
+			PVCSizeRequest = instance.Spec.PVC.Resources.Requests.Storage().String()
+		}
+	}
+
 	// Check if statefulset already exists
 	sts := &appsv1.StatefulSet{}
 	var stsLabels map[string]string
@@ -332,6 +359,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		NamespaceName:  instance.Namespace,
 		StsLabels:      stsLabels,
 		PodLabels:      podLabels,
+		PVCSize:        PVCSizeRequest,
 	}
 
 	var stsYaml bytes.Buffer
