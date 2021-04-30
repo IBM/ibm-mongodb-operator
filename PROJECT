@@ -5,7 +5,7 @@ repo: github.com/IBM/ibm-mongodb-operator
 resources:
 - group: operator
   kind: MongoDB
-  version: v1alpha1
+  version: v1
 version: 3-alpha
 plugins:
   go.sdk.operatorframework.io/v2-alpha: {}

@@ -5,7 +5,7 @@ metadata:
     alm-examples: |-
       [
         {
-          "apiVersion": "operator.ibm.com/v1alpha1",
+          "apiVersion": "operator.ibm.com/v1",
           "kind": "MongoDB",
           "metadata": {
             "name": "ibm-mongodb"
@@ -23,7 +23,7 @@ metadata:
           }
         },
         {
-          "apiVersion": "operator.ibm.com/v1alpha1",
+          "apiVersion": "operator.ibm.com/v1",
           "kind": "OperandRequest",
           "metadata": {
             "name": "ibm-mongodb-request"
@@ -65,7 +65,7 @@ spec:
       displayName: MongoDB
       kind: MongoDB
       name: mongodbs.operator.ibm.com
-      version: v1alpha1
+      version: v1
       resources:
         - kind: Secret
           name: ''

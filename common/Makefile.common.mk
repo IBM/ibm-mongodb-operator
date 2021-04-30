@@ -75,7 +75,7 @@ code-gen:
 	operator-sdk generate crds
 	which ./build/_generate/bin/openapi-gen > /dev/null || go build -o ./build/_generate/bin/openapi-gen k8s.io/kube-openapi/cmd/openapi-gen
 	# Run openapi-gen for each of your API group/version packages
-	GOPATH=/tmp ./build/_generate/bin/openapi-gen --logtostderr=true -o "" -i ./pkg/apis/operator/v1alpha1 -O zz_generated.openapi -p ./pkg/apis/operator/v1alpha1/ -h ./hack/boilerplate.go.txt -r "-"
+	GOPATH=/tmp ./build/_generate/bin/openapi-gen --logtostderr=true -o "" -i ./pkg/apis/operator/v1 -O zz_generated.openapi -p ./pkg/apis/operator/v1/ -h ./hack/boilerplate.go.txt -r "-"
 
 csv-gen:
 	@echo Updating the CSV files with the changes in the CRD

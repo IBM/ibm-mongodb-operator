@@ -30,7 +30,7 @@ package controllers
 // 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 // 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 //
-// 	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/apis/mongodb/v1alpha1"
+// 	mongodbv1 "github.com/IBM/ibm-mongodb-operator/apis/mongodb/v1"
 // 	// +kubebuilder:scaffold:imports
 // )
 //
@@ -62,7 +62,7 @@ package controllers
 // 	Expect(err).ToNot(HaveOccurred())
 // 	Expect(cfg).ToNot(BeNil())
 //
-// 	err = mongodbv1alpha1.AddToScheme(scheme.Scheme)
+// 	err = mongodbv1.AddToScheme(scheme.Scheme)
 // 	Expect(err).NotTo(HaveOccurred())
 //
 // 	// +kubebuilder:scaffold:scheme
