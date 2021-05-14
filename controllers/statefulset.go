@@ -237,7 +237,7 @@ spec:
                 - --eval
                 - "db.adminCommand('ping')"
             initialDelaySeconds: 5
-            timeoutSeconds: 1
+            timeoutSeconds: 5
             failureThreshold: 3
             periodSeconds: 10
             successThreshold: 1
@@ -313,8 +313,11 @@ spec:
                   --mongodb.tls-ca=/data/configdb/tls.crt
                   --mongodb.tls-cert=/work-dir/mongo.pem
                   --test
-            initialDelaySeconds: 30
-            periodSeconds: 10
+              initialDelaySeconds: 30
+              timeoutSeconds: 10
+              failureThreshold: 10
+              periodSeconds: 30
+              successThreshold: 1
           livenessProbe:
             exec:
               command:
