@@ -34,7 +34,7 @@ NAMESPACE=ibm-common-services
 IMG ?= ibm-mongodb-operator
 BUNDLE_IMAGE_NAME=ibm-mongodb-operator-bundle
 REGISTRY ?= "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
-CSV_VERSION ?= 1.3.2
+CSV_VERSION ?= $(shell cat version/version.go | grep = | cut -d '"' -f2)
 
 # Options for 'bundle-build'
 ifneq ($(origin CHANNELS), undefined)
@@ -123,7 +123,7 @@ bundle-manifests:
 
 generate-all: manifests kustomize operator-sdk ## Generate bundle manifests, metadata and package manifests
 	$(OPERATOR_SDK) generate kustomize manifests -q
-	- make bundle-manifests CHANNELS=beta,stable-v1 DEFAULT_CHANNEL=stable-v1
+	- make bundle-manifests CHANNELS=v3,beta DEFAULT_CHANNEL=v3
 
 ##@ Build
 
@@ -237,7 +237,7 @@ ifeq (, $(shell which controller-gen))
 	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
 	cd $$CONTROLLER_GEN_TMP_DIR ;\
 	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0 ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.0 ;\
 	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
 	}
 CONTROLLER_GEN=$(GOBIN)/controller-gen

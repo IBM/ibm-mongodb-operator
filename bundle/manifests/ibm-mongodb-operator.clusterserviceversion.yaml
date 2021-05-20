@@ -56,7 +56,6 @@ metadata:
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
   name: ibm-mongodb-operator.v1.4.0
-  namespace: placeholder
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -85,12 +84,6 @@ spec:
         - kind: persistentvolumeclaims
           name: ''
           version: v1
-      required:
-      - description: CertManager is the Schema for the certmanagers API
-        displayName: CertManager
-        kind: CertManager
-        name: certmanagers.operator.ibm.com
-        version: v1alpha1
       specDescriptors:
       - description: The image used to run the mongod process.
         displayName: Bootstrap Image
@@ -298,7 +291,7 @@ spec:
           - challenges
           - issuers
           verbs:
-          - '*'
+          - create
         serviceAccountName: ibm-mongodb-operator
     strategy: deployment
   installModes:
