@@ -298,7 +298,8 @@ spec:
           - challenges
           - issuers
           verbs:
-          - '*'
+          - create
+          - use
         serviceAccountName: ibm-mongodb-operator
     strategy: deployment
   installModes:
