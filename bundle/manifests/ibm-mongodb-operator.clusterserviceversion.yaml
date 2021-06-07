@@ -44,6 +44,7 @@ metadata:
       ]
     capabilities: Basic Install
     containerImage: quay.io/opencloudio/ibm-mongodb-operator:latest
+    description: This is for IBM Common Services use only. Installs MongoDB Community Edition.
     operators.operatorframework.io/builder: operator-sdk-v1.1.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
     olm.skipRange: '<1.4.0'

@@ -36,6 +36,8 @@ To install the operator with the IBM Common Services Operator follow the install
 
 The IBM Common Services MongoDB service supports running with the OpenShift Container Platform 4.3 default restricted Security Context Constraints (SCCs).
 
+Custom SecurityContextConstraints definition:
+
 ```
 allowHostDirVolumePlugin: false
 allowHostIPC: false
@@ -114,4 +116,3 @@ This is designed for use by IBM Common Services only.
 The operator does not support updating the CR in version 1.0.0. To make changes to a deployed MongoDB instance, it is best to directly edit the statefulset.
 
 When you deploy MongoDB, it is better to use 3 replicas, especially if you are not backing up your data. It is possible for the data to be corrupted and recovering from a 3-replica deployment is much easier.
-
