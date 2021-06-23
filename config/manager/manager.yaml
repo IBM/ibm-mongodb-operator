@@ -53,7 +53,7 @@ spec:
             readOnlyRootFilesystem: true
             runAsNonRoot: true
           # Replace this with the built image name
-          image: quay.io/opencloudio/ibm-mongodb-operator:1.4.0
+          image: quay.io/opencloudio/ibm-mongodb-operator:1.4.1
           command:
           - '/manager'
           imagePullPolicy: Always
