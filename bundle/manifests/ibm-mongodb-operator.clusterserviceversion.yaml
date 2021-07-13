@@ -61,7 +61,9 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - description: MongoDB is the Schema for the mongodbs API
+    - description: 'Documentation For additional details regarding install parameters
+        check: https://ibm.biz/icpfs39install. License By installing this product
+        you accept the license terms https://ibm.biz/icpfs39license.'
       displayName: MongoDB
       kind: MongoDB
       name: mongodbs.operator.ibm.com
