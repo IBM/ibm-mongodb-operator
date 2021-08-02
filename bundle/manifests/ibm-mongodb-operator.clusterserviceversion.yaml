@@ -321,6 +321,7 @@ spec:
   - email: supports@ibm.com
     name: IBM Support
   maturity: alpha
+  minKubeVersion: 1.19.0
   provider:
     name: IBM
   replaces: ibm-mongodb-operator.v1.4.1
