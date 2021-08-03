@@ -328,3 +328,12 @@ spec:
     name: IBM
   replaces: ibm-mongodb-operator.v1.2.2
   version: 1.2.3
+  relatedImages:
+    - name: IBM_MONGODB_INSTALL_IMAGE
+      value: quay.io/opencloudio/ibm-mongodb-install:3.6.3
+    - name: IBM_MONGODB_IMAGE
+      value: quay.io/opencloudio/ibm-mongodb:4.0.20-build.1
+    - name: IBM_MONGODB_EXPORTER_IMAGE
+      value: quay.io/opencloudio/ibm-mongodb-exporter:3.6.3
+    - name: IBM_MONGODB_OPERATOR_IMAGE
+      value: quay.io/opencloudio/ibm-mongodb-operator:1.2.3
