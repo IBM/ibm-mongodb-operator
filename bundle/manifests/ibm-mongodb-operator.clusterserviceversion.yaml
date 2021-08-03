@@ -324,5 +324,14 @@ spec:
   minKubeVersion: 1.19.0
   provider:
     name: IBM
+  relatedImages:
+    - name: IBM_MONGODB_INSTALL_IMAGE
+      value: quay.io/opencloudio/ibm-mongodb-install:3.7.1
+    - name: IBM_MONGODB_IMAGE
+      value: quay.io/opencloudio/ibm-mongodb:4.0.20-build.2
+    - name: IBM_MONGODB_EXPORTER_IMAGE
+      value: quay.io/opencloudio/ibm-mongodb-exporter:3.7.1
+    - name: IBM_MONGODB_OPERATOR_IMAGE
+      value: quay.io/opencloudio/ibm-mongodb-operator:1.5.0
   replaces: ibm-mongodb-operator.v1.4.1
   version: 1.5.0
