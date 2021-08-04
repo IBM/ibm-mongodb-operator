@@ -101,8 +101,6 @@ spec:
                 type: string
             type: object
         type: object
-    subresources:
-      status: {}
 status:
   acceptedNames:
     kind: ""
