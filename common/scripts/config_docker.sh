@@ -25,3 +25,7 @@ CONTAINER_CLI=${CONTAINER_CLI:-docker}
 
 # login the docker registry
 ${CONTAINER_CLI} login "${DOCKER_REGISTRY}" -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
+
+# opt-in to CICD automated builds
+DOCKER_EDGE_REGISTRY="hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com"
+${CONTAINER_CLI} login "${DOCKER_EDGE_REGISTRY}" -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
