@@ -333,5 +333,5 @@ spec:
       value: quay.io/opencloudio/ibm-mongodb-exporter:3.7.1
     - name: IBM_MONGODB_OPERATOR_IMAGE
       value: quay.io/opencloudio/ibm-mongodb-operator:1.5.0
-  replaces: ibm-mongodb-operator.v1.5.1
+  replaces: ibm-mongodb-operator.v1.5.0
   version: 1.6.0
