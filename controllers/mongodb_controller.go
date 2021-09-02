@@ -320,7 +320,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		return reconcile.Result{}, err
 	}
 
-	// [working] Set Replicas
+	//Set Replicas
 	//Get current number of replicas in cluster based on number of PVCs
 	pvcs := &corev1.PersistentVolumeClaimList{}
 	err = r.Client.List(context.TODO(), pvcs, &client.ListOptions{
