@@ -45,6 +45,8 @@ metadata:
     capabilities: Basic Install
     containerImage: quay.io/opencloudio/ibm-mongodb-operator:latest
     operators.operatorframework.io/builder: operator-sdk-v1.1.0
+    operators.operatorframework.io/internal-objects: '["mongodbs.operator.ibm.com"]'
+    operators.operatorframework.io/operator-type: 'non-standalone'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
     olm.skipRange: '>=1.0.0 <1.2.2'
   labels:
