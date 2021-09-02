@@ -23,10 +23,10 @@ import (
 	"math"
 	"math/rand"
 	"os"
-	"text/template"
-	"time"
 	"strconv"
 	"strings"
+	"text/template"
+	"time"
 
 	"github.com/ghodss/yaml"
 	"github.com/go-logr/logr"
@@ -324,14 +324,14 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	//Get current number of replicas in cluster based on number of PVCs
 	pvcs := &corev1.PersistentVolumeClaimList{}
 	err = r.Client.List(context.TODO(), pvcs, &client.ListOptions{
-		Namespace:     instance.Namespace,
+		Namespace: instance.Namespace,
 	})
-	pvc_count := 0
+	pvcCount := 0
 	if err == nil {
 		// loop items in pvcs and count mongodbdir
 		for _, pvc := range pvcs.Items {
 			if strings.Contains(pvc.ObjectMeta.Name, "mongodbdir-icp-mongodb") {
-				pvc_count = pvc_count + 1
+				pvcCount++
 				r.Log.Info("Found PVC" + pvc.ObjectMeta.Name)
 			}
 		}
@@ -340,12 +340,12 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	}
 
 	//check pvc count with replicas
-	//if pvc_count is greater than the replicas, then at one time there must have been more replicas
+	//if pvcCount is greater than the replicas, then at one time there must have been more replicas
 	replicas := instance.Spec.Replicas
-	if pvc_count > replicas {
-		replicas = pvc_count
+	if pvcCount > replicas {
+		replicas = pvcCount
 		r.Log.Info("Ignoring Replica spec, there are more mongodbdir-icp-mongodb PVCs than the current relica request.")
-		r.Log.Info("PVC count: " + strconv.Itoa(pvc_count))
+		r.Log.Info("PVC count: " + strconv.Itoa(pvcCount))
 	}
 	stsData := mongoDBStatefulSetData{
 		Replicas:       replicas,
