@@ -1,6 +1,6 @@
 module github.com/IBM/ibm-mongodb-operator
 
-go 1.13
+go 1.17
 
 require (
 	github.com/ghodss/yaml v1.0.0
