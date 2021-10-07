@@ -1,24 +1,5 @@
 
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  creationTimestamp: null
-  name: ibm-mongodb-operator
-  labels:
-    app.kubernetes.io/instance: mongodbs.operator.ibm.com
-    app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
-    app.kubernetes.io/name: mongodbs.operator.ibm.com
-rules:
-- apiGroups:
-  - storage.k8s.io
-  resources:
-  - storageclasses
-  verbs:
-  - get
-  - list
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   creationTimestamp: null
