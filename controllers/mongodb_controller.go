@@ -23,6 +23,8 @@ import (
 	"math"
 	"math/rand"
 	"os"
+	"strconv"
+	"strings"
 	"text/template"
 	"time"
 
@@ -318,8 +320,35 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		return reconcile.Result{}, err
 	}
 
+	//Set Replicas
+	//Get current number of replicas in cluster based on number of PVCs
+	pvcs := &corev1.PersistentVolumeClaimList{}
+	err = r.Client.List(context.TODO(), pvcs, &client.ListOptions{
+		Namespace: instance.Namespace,
+	})
+	pvcCount := 0
+	if err == nil {
+		// loop items in pvcs and count mongodbdir
+		for _, pvc := range pvcs.Items {
+			if strings.Contains(pvc.ObjectMeta.Name, "mongodbdir-icp-mongodb") {
+				pvcCount++
+				r.Log.Info("Found PVC" + pvc.ObjectMeta.Name)
+			}
+		}
+	} else {
+		return reconcile.Result{}, err
+	}
+
+	//check pvc count with replicas
+	//if pvcCount is greater than the replicas, then at one time there must have been more replicas
+	replicas := instance.Spec.Replicas
+	if pvcCount > replicas {
+		replicas = pvcCount
+		r.Log.Info("Ignoring Replica spec, there are more mongodbdir-icp-mongodb PVCs than the current relica request.")
+		r.Log.Info("PVC count: " + strconv.Itoa(pvcCount))
+	}
 	stsData := mongoDBStatefulSetData{
-		Replicas:       instance.Spec.Replicas,
+		Replicas:       replicas,
 		ImageRepo:      instance.Spec.ImageRegistry,
 		StorageClass:   storageclass,
 		InitImage:      os.Getenv("IBM_MONGODB_INSTALL_IMAGE"),
