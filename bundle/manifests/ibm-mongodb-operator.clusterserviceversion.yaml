@@ -49,7 +49,7 @@ metadata:
     operators.operatorframework.io/internal-objects: '["mongodbs.operator.ibm.com"]'
     operators.operatorframework.io/operator-type: 'non-standalone'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
-    olm.skipRange: '<1.8.0'
+    olm.skipRange: '<1.9.0'
   labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
@@ -58,7 +58,7 @@ metadata:
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
-  name: ibm-mongodb-operator.v1.8.0
+  name: ibm-mongodb-operator.v1.9.0
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -334,6 +334,6 @@ spec:
     - name: IBM_MONGODB_EXPORTER_IMAGE
       value: quay.io/opencloudio/ibm-mongodb-exporter:3.7.1
     - name: IBM_MONGODB_OPERATOR_IMAGE
-      value: quay.io/opencloudio/ibm-mongodb-operator:1.8.0
-  replaces: ibm-mongodb-operator.v1.7.0
-  version: 1.8.0
+      value: quay.io/opencloudio/ibm-mongodb-operator:1.9.0
+  replaces: ibm-mongodb-operator.v1.8.0
+  version: 1.9.0
