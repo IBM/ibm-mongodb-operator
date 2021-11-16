@@ -76,6 +76,7 @@ type mongoDBStatefulSetData struct {
 	StsLabels      map[string]string
 	PodLabels      map[string]string
 	PVCSize        string
+	UserId				 int
 }
 
 // +kubebuilder:rbac:groups=mongodb.operator.ibm.com,namespace=ibm-common-services,resources=mongodbs,verbs=get;list;watch;create;update;patch;delete
@@ -319,6 +320,18 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		}
 	}
 
+	// Select User to use
+	cppConfig := &corev1.ConfigMap{}
+	err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "ibm-cpp-config", Namespace: instance.Namespace}, cppConfig)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	uid := 0
+	if cppConfig.Data["kubernetes_cluster_type"] == "cncf" {
+		uid = 1000
+	}
+
 	// Check if statefulset already exists
 	sts := &appsv1.StatefulSet{}
 	var stsLabels map[string]string
@@ -389,6 +402,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		StsLabels:      stsLabels,
 		PodLabels:      podLabels,
 		PVCSize:        PVCSizeRequest,
+		UserId:					uid,
 	}
 
 	var stsYaml bytes.Buffer
