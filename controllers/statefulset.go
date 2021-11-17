@@ -49,8 +49,10 @@ spec:
         clusterhealth.ibm.com/dependencies: {{ .NamespaceName }}.cert-manager
     spec:
       serviceAccountName: ibm-mongodb-operand
+      {{ if eq .UserId 1000 }}
       securityContext:
-        runAsUser: 1000
+        runAsUser: {{ .UserId }}
+      {{ end }}
       terminationGracePeriodSeconds: 30
       hostNetwork: false
       hostPID: false

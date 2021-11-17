@@ -164,7 +164,7 @@ spec:
                 - get
                 - list
                 - watch
-          serviceAccountName: ibm-mongodb-operator      
+          serviceAccountName: ibm-mongodb-operator
       deployments:
       - name: ibm-mongodb-operator
         spec:
