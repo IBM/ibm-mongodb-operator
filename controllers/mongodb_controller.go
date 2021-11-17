@@ -328,8 +328,10 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	}
 
 	uid := 0
-	if cppConfig.Data["kubernetes_cluster_type"] == "cncf" {
-		uid = 1000
+	if clusterType, exists := cppConfig.Data["kubernetes_cluster_type"]; exists {
+		if clusterType != "ocp" {
+			uid = 1000
+		}
 	}
 
 	// Check if statefulset already exists
