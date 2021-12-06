@@ -76,7 +76,7 @@ type mongoDBStatefulSetData struct {
 	StsLabels      map[string]string
 	PodLabels      map[string]string
 	PVCSize        string
-	UserId         int
+	UserID         int
 }
 
 // +kubebuilder:rbac:groups=mongodb.operator.ibm.com,namespace=ibm-common-services,resources=mongodbs,verbs=get;list;watch;create;update;patch;delete
@@ -404,7 +404,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 		StsLabels:      stsLabels,
 		PodLabels:      podLabels,
 		PVCSize:        PVCSizeRequest,
-		UserId:         uid,
+		UserID:         uid,
 	}
 
 	var stsYaml bytes.Buffer
