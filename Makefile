@@ -183,9 +183,6 @@ test-e2e: ## Run integration e2e tests with different options.
 	# @echo ... Running with the param ...
 	# - operator-sdk test local ./test/e2e --namespace=${NAMESPACE}
 
-coverage: ## Run code coverage test
-	@common/scripts/codecov.sh ${BUILD_LOCALLY}
-
 ##@ Release
 
 images: build-image build-image-ppc64le build-image-s390x
