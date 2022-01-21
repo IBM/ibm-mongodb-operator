@@ -21,7 +21,7 @@ RUN wget -O /qemu-ppc64le-static https://github.com/multiarch/qemu-user-static/r
 RUN chmod +x /qemu-ppc64le-static
 
 # Build the manager binary
-FROM golang:1.17.3 as builder
+FROM golang:1.17.6 as builder
 ARG GOARCH
 
 WORKDIR /workspace
