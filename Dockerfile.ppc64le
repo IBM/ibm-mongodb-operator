@@ -22,6 +22,7 @@ RUN chmod +x /qemu-ppc64le-static
 
 # Build the manager binary
 FROM golang:1.17.6 as builder
+
 ARG GOARCH
 
 WORKDIR /workspace
