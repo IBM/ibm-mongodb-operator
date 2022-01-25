@@ -539,7 +539,7 @@ func (r *MongoDBReconciler) getstorageclass() (string, error) {
 	var nonDefaultSC []string
 
 	for _, sc := range scList.Items {
-		if sc.ObjectMeta.GetAnnotations()["storageclass.kubernetes.io/is-default-class"] == "true" {
+		if sc.ObjectMeta.GetAnnotations()["storageclass.kubernetes.io/is-default-class"] == "true" || sc.ObjectMeta.GetAnnotations()["storageclass.beta.kubernetes.io/is-default-class"] == "true" {
 			defaultSC = append(defaultSC, sc.GetName())
 			continue
 		}
