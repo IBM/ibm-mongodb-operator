@@ -193,7 +193,7 @@ data:
 
 
     log "Waiting for MongoDB to be ready..."
-    until [[ $(mongo "${ssl_args[@]}" --quiet --eval "db.adminCommand('ping').ok") == "1" ]]; do
+    until [[ $(mongo "${ssl_args[@]}" --quiet --eval "db.adminCommand('ping').ok" | tail -1) == "1" ]]; do
         log "Retrying..."
         sleep 2
     done
