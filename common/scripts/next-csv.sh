@@ -57,7 +57,7 @@ gsed -i "s/$CURRENT_DEV_CSV/$NEW_DEV_CSV/" Makefile
 echo "Updated the version.go and Makefile with new version (Push Enter when done): "
 read
 
-# Push CSV package yaml to quay
+# Push CSV package yaml to icr
 # common/scripts/push-csv.sh
-# echo "Pushed CSV to quay "
+# echo "Pushed CSV to icr "
 # read
