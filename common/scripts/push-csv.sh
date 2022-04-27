@@ -16,20 +16,20 @@
 #
 
 set -e
-ICR_NAMESPACE=${ICR_NAMESPACE:-cpopen}
-ICR_REPOSITORY=${ICR_REPOSITORY:-ibm-mongodb-operator-app}
+QUAY_NAMESPACE=${QUAY_NAMESPACE:-opencloudio}
+QUAY_REPOSITORY=${QUAY_REPOSITORY:-ibm-mongodb-operator-app}
 BUNDLE_DIR=${BUNDLE_DIR:-deploy/olm-catalog/ibm-mongodb-operator}
 
-[[ "X$ICR_USERNAME" == "X" ]] && read -rp "Enter username icr.io: " ICR_USERNAME
-[[ "X$ICR_PASSWORD" == "X" ]] && read -rsp "Enter password icr.io: " ICR_PASSWORD && echo
+[ "X$QUAY_USERNAME" == "X" ]] && read -rp "Enter username quay.io: " QUAY_USERNAME
+[[ "X$QUAY_PASSWORD" == "X" ]] && read -rsp "Enter password quay.io: " QUAY_PASSWORD && echo
 [[ "X$RELEASE" == "X" ]] && read -rp "Enter Version/Release of operator: " RELEASE
 
-# Fetch authentication token used to push to icr.io
-AUTH_TOKEN=$(curl -sH "Content-Type: application/json" -XPOST https://icr.io/cnr/api/v1/users/login -d '
+# Fetch authentication token used to push to Quay.io
+AUTH_TOKEN=$(curl -sH "Content-Type: application/json" -XPOST https://quay.io/cnr/api/v1/users/login -d '
 {
     "user": {
-        "username": "'"${ICR_USERNAME}"'",
-        "password": "'"${ICR_PASSWORD}"'"
+        "username": "'"${QUAY_USERNAME}"'",
+        "password": "'"${QUAY_PASSWORD}"'"
     }
 }' | awk -F'"' '{print $4}')
 
@@ -47,10 +47,10 @@ else
 fi
 
 # Push application to repository
-echo "Push package ${ICR_REPOSITORY} into namespace ${ICR_NAMESPACE}"
+echo "Push package ${QUAY_REPOSITORY} into namespace ${QUAY_NAMESPACE}"
 curl -H "Content-Type: application/json" \
      -H "Authorization: ${AUTH_TOKEN}" \
-     -XPOST https://icr.io/cnr/api/v1/packages/"${ICR_NAMESPACE}"/"${ICR_REPOSITORY}" -d '
+     -XPOST https://quay.io/cnr/api/v1/packages/"${QUAY_NAMESPACE}"/"${QUAY_REPOSITORY}" -d '
 {
     "blob": "'"${BLOB}"'",
     "release": "'"${RELEASE}"'",
