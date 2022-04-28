@@ -43,7 +43,7 @@ metadata:
         }
       ]
     capabilities: Seamless Upgrades
-    containerImage: quay.io/opencloudio/ibm-mongodb-operator:latest
+    containerImage: icr.io/cpopen/ibm-mongodb-operator:latest
     description: This is for IBM Common Services use only. Installs MongoDB Community Edition.
     operators.operatorframework.io/builder: operator-sdk-v1.1.0
     operators.operatorframework.io/internal-objects: '["mongodbs.operator.ibm.com"]'
@@ -197,12 +197,12 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-mongodb-operator
                 - name: IBM_MONGODB_INSTALL_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb-install:3.18.0
+                  value: icr.io/cpopen/cpfs/ibm-mongodb-install:3.18.0
                 - name: IBM_MONGODB_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb:4.0.24-build.10
+                  value: icr.io/cpopen/cpfs/ibm-mongodb:4.0.24-build.10
                 - name: IBM_MONGODB_EXPORTER_IMAGE
-                  value: quay.io/opencloudio/ibm-mongodb-exporter:3.18.0
-                image: quay.io/opencloudio/ibm-mongodb-operator:latest
+                  value: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.18.0
+                image: icr.io/cpopen/ibm-mongodb-operator:latest
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator
                 resources:
@@ -339,12 +339,12 @@ spec:
     name: IBM
   relatedImages:
     - name: IBM_MONGODB_INSTALL_IMAGE
-      value: quay.io/opencloudio/ibm-mongodb-install:3.18.0
+      value: icr.io/cpopen/cpfs/ibm-mongodb-install:3.18.0
     - name: IBM_MONGODB_IMAGE
-      value: quay.io/opencloudio/ibm-mongodb:4.0.24-build.10
+      value: icr.io/cpopen/cpfs/ibm-mongodb:4.0.24-build.10
     - name: IBM_MONGODB_EXPORTER_IMAGE
-      value: quay.io/opencloudio/ibm-mongodb-exporter:3.18.0
+      value: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.18.0
     - name: IBM_MONGODB_OPERATOR_IMAGE
-      value: quay.io/opencloudio/ibm-mongodb-operator:1.13.0
+      value: icr.io/cpopen/ibm-mongodb-operator:1.13.0
   replaces: ibm-mongodb-operator.v1.12.0
   version: 1.13.0
