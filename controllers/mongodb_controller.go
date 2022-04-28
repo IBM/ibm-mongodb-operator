@@ -575,6 +575,7 @@ func (r *MongoDBReconciler) addControlleronPVC(instance *mongodbv1alpha1.MongoDB
 
 	for _, pvc := range pvcList.Items {
 		if pvc.ObjectMeta.OwnerReferences == nil {
+			pvc := pvc
 			if err := controllerutil.SetControllerReference(instance, &pvc, r.Scheme); err != nil {
 				return err
 			}
@@ -589,8 +590,6 @@ func (r *MongoDBReconciler) addControlleronPVC(instance *mongodbv1alpha1.MongoDB
 // Create Random String
 func createRandomAlphaNumeric(length int) string {
 	const charset = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	//	var seededRand = rand.New(
-	//		rand.NewSource(time.Now().UnixNano()))
 	nbig, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
 	n := int(nbig.Int64())
 
