@@ -45,10 +45,10 @@ BUNDLE_DEFAULT_CHANNEL := --default-channel=$(DEFAULT_CHANNEL)
 endif
 BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 
-ICR_USERNAME ?=
-ICR_PASSWORD ?=
+QUAY_USERNAME ?=
+QUAY_PASSWORD ?=
 
-MARKDOWN_LINT_WHITELIST=https://icr.io/cnr
+MARKDOWN_LINT_WHITELIST=https://quay.io/cnr
 VCS_URL ?= https://github.com/IBM/ibm-mongodb-operator
 VCS_REF ?= $(shell git rev-parse HEAD)
 TESTARGS_DEFAULT := "-v"
@@ -132,10 +132,10 @@ build:
 	@CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o manager main.go
 
 build-test-image:
-	docker build -t icr.io/$(ICR_USERNAME)/my-mongodb-operator:test \
+	docker build -t quay.io/$(QUAY_USERNAME)/my-mongodb-operator:test \
 	--build-arg VCS_REF=$(VCS_REF) --build-arg VCS_URL=$(VCS_URL) \
 	--build-arg GOARCH="amd64" -f Dockerfile .
-	docker push icr.io/$(ICR_USERNAME)/my-mongodb-operator:test
+	docker push quay.io/$(QUAY_USERNAME)/my-mongodb-operator:test
 
 build-image: $(CONFIG_DOCKER_TARGET)
 	$(eval ARCH := $(shell uname -m|sed 's/x86_64/amd64/'))

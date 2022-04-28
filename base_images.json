@@ -23,7 +23,7 @@
     },
     {
         "imageType": "external",
-        "sourceRepo": "icr.io",
+        "sourceRepo": "quay.io",
         "sourceNamespace": "operator-framework",
         "sourceImage": "helm-operator",
         "destStage": "edge",
