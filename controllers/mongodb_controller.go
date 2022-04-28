@@ -19,9 +19,9 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"crypto/rand"
 	"fmt"
 	"math"
-	"math/rand"
 	"os"
 	"strconv"
 	"strings"
