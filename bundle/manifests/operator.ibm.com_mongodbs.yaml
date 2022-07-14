@@ -16,6 +16,7 @@ spec:
     plural: mongodbs
     singular: mongodb
   scope: Namespaced
+  x-kubernetes-preserve-unknown-fields: true
   versions:
   - name: v1alpha1
     schema:
