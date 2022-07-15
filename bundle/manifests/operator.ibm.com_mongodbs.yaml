@@ -31,6 +31,7 @@ spec:
           metadata:
             type: object
           spec:
+            x-kubernetes-preserve-unknown-fields: true
             description: MongoDBSpec defines the desired state of MongoDB
             properties:
               bootstrapImage:
