@@ -52,7 +52,7 @@ spec:
       {{ if eq .UserID 1000 }}
       securityContext:
         runAsUser: {{ .UserID }}
-        fsGroup: 0
+        fsGroupChangePolicy:OnRootMismatch
       {{ end }}
       terminationGracePeriodSeconds: 30
       hostNetwork: false
