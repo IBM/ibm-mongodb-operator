@@ -89,7 +89,7 @@ type mongoDBStatefulSetData struct {
 // +kubebuilder:rbac:groups=operator.ibm.com,namespace=ibm-common-services,resources=mongodbs;mongodbs/finalizers;mongodbs/status,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=certmanager.k8s.io,namespace=ibm-common-services,resources=certificates;certificaterequests;orders;challenges;issuers,verbs=get;list;watch;create;update;patch;delete
 
-func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
+func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	_ = context.Background()
 	_ = r.Log.WithValues("mongodb", request.NamespacedName)
 
