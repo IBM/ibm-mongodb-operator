@@ -20,6 +20,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -27,7 +28,7 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
@@ -65,17 +66,30 @@ func main() {
 		setupLog.Error(err, "unable to get WatchNamespace, "+
 			"the manager will watch and manage resources in all namespaces")
 	}
+	var ctrlOpt ctrl.Options
+	if strings.Contains(watchNamespace, ",") {
+		namespaces := strings.Split(watchNamespace, ",")
+		ctrlOpt = ctrl.Options{
+			Scheme:             scheme,
+			MetricsBindAddress: metricsAddr,
+			Port:               9443,
+			LeaderElection:     enableLeaderElection,
+			LeaderElectionID:   "9c0e1ee9.operator.ibm.com",
+			NewCache: cache.MultiNamespacedCacheBuilder(namespaces),
+		}
 
-	options := ctrl.Options{
-		Scheme:             scheme,
-		MetricsBindAddress: metricsAddr,
-		Port:               9443,
-		LeaderElection:     enableLeaderElection,
-		LeaderElectionID:   "9c0e1ee9.operator.ibm.com",
-		Namespace:          watchNamespace,
+	}else {
+		ctrlOpt = ctrl.Options{
+			Scheme:             scheme,
+			MetricsBindAddress: metricsAddr,
+			Port:               9443,
+			LeaderElection:     enableLeaderElection,
+			LeaderElectionID:   "9c0e1ee9.operator.ibm.com",
+			Namespace:          watchNamespace,
+		}
 	}
-
-	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), options)
+	
+	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrlOpt)
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
 		os.Exit(1)
