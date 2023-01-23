@@ -49,7 +49,7 @@ metadata:
     operators.operatorframework.io/internal-objects: '["mongodbs.operator.ibm.com"]'
     operators.operatorframework.io/operator-type: 'non-standalone'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
-    olm.skipRange: '<1.14.6'
+    olm.skipRange: '<1.14.7'
   labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
@@ -58,7 +58,7 @@ metadata:
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
-  name: ibm-mongodb-operator.v1.14.6
+  name: ibm-mongodb-operator.v1.14.7
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -202,7 +202,7 @@ spec:
                   value: icr.io/cpopen/cpfs/ibm-mongodb:3.19.6-mongodb.4.0.24
                 - name: IBM_MONGODB_EXPORTER_IMAGE
                   value: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.7
-                image: icr.io/cpopen/ibm-mongodb-operator:1.14.6
+                image: icr.io/cpopen/ibm-mongodb-operator:1.14.7
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator
                 resources:
@@ -339,12 +339,12 @@ spec:
     name: IBM
   relatedImages:
     - name: IBM_MONGODB_INSTALL_IMAGE
-      image: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.6
+      image: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.9
     - name: IBM_MONGODB_IMAGE
-      image: icr.io/cpopen/cpfs/ibm-mongodb:3.19.6-mongodb.4.0.24
+      image: icr.io/cpopen/cpfs/ibm-mongodb:3.19.9-mongodb.4.0.24
     - name: IBM_MONGODB_EXPORTER_IMAGE
-      image: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.6
+      image: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.9
     - name: IBM_MONGODB_OPERATOR_IMAGE
-      image: icr.io/cpopen/ibm-mongodb-operator:1.14.6
-  replaces: ibm-mongodb-operator.v1.14.5
-  version: 1.14.6
+      image: icr.io/cpopen/ibm-mongodb-operator:1.14.7
+  replaces: ibm-mongodb-operator.v1.14.6
+  version: 1.14.7
