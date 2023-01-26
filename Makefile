@@ -33,7 +33,7 @@ NAMESPACE=ibm-common-services
 # Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
 IMG ?= ibm-mongodb-operator
 BUNDLE_IMAGE_NAME=ibm-mongodb-operator-bundle
-REGISTRY ?= "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
+REGISTRY ?= "docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-integration-docker-local/ibmcom"
 CSV_VERSION ?= $(shell cat version/version.go | grep = | cut -d '"' -f2)
 
 # Options for 'bundle-build'
