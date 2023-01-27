@@ -56,7 +56,7 @@ spec:
             readOnlyRootFilesystem: true
             runAsNonRoot: true
           # Replace this with the built image name
-          image: icr.io/cpopen/ibm-mongodb-operator:1.18.0
+          image: icr.io/cpopen/ibm-mongodb-operator:1.18.1
           command:
           - '/manager'
           imagePullPolicy: Always
