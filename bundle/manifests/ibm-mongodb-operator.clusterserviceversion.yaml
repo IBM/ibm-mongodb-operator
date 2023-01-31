@@ -49,7 +49,7 @@ metadata:
     operators.operatorframework.io/internal-objects: '["mongodbs.operator.ibm.com"]'
     operators.operatorframework.io/operator-type: 'non-standalone'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
-    olm.skipRange: '<4.0.0'
+    olm.skipRange: '<1.18.1'
   labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
@@ -58,7 +58,7 @@ metadata:
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
-  name: ibm-mongodb-operator.v4.0.0
+  name: ibm-mongodb-operator.v1.18.1
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -202,7 +202,7 @@ spec:
                   value: icr.io/cpopen/cpfs/ibm-mongodb:3.19.6-mongodb.4.0.24
                 - name: IBM_MONGODB_EXPORTER_IMAGE
                   value: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.8
-                image: icr.io/cpopen/ibm-mongodb-operator:4.0.0
+                image: icr.io/cpopen/ibm-mongodb-operator:1.18.1
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator
                 resources:
@@ -345,5 +345,5 @@ spec:
     - name: IBM_MONGODB_EXPORTER_IMAGE
       image: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.8
     - name: IBM_MONGODB_OPERATOR_IMAGE
-      image: icr.io/cpopen/ibm-mongodb-operator:4.0.0
-  version: 4.0.0
+      image: icr.io/cpopen/ibm-mongodb-operator:1.18.1
+  version: 1.18.1
