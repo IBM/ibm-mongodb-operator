@@ -285,6 +285,22 @@ spec:
           - issuers
           verbs:
           - '*'
+        - apiGroups:
+          - cert-manager.io
+          resources:
+          - certificates
+          - certificaterequests
+          - orders
+          - challenges
+          - issuers
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         serviceAccountName: ibm-mongodb-operator
     strategy: deployment
   installModes:
@@ -292,7 +308,7 @@ spec:
     type: OwnNamespace
   - supported: true
     type: SingleNamespace
-  - supported: false
+  - supported: true
     type: MultiNamespace
   - supported: true
     type: AllNamespaces
