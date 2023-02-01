@@ -680,7 +680,7 @@ func (r *MongoDBReconciler) deletev1alpha1Issuers(ctx context.Context, instance 
 	}
 	reqLogger.Info("API version is: " + issuerv1alpha1.APIVersion)
 	if issuerv1alpha1.APIVersion == issuerv1alpha1APIVersion {
-		reqLogger.Info("deleting cert: " + issuerName)
+		reqLogger.Info("deleting issuer: " + issuerName)
 		err = r.Client.Delete(ctx, issuerv1alpha1)
 		if err != nil {
 			reqLogger.Error(err, "Failed to delete v1alpha1 Issuer")
