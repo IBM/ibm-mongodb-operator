@@ -172,6 +172,7 @@ spec:
                 productName: IBM Cloud Platform Common Services
               labels:
                 name: ibm-mongodb-operator
+                intent: projected
             spec:
               containers:
               - command:
