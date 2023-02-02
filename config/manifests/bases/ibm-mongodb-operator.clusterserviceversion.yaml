@@ -172,6 +172,7 @@ spec:
                 productName: IBM Cloud Platform Common Services
               labels:
                 name: ibm-mongodb-operator
+                intent: projected
             spec:
               containers:
               - command:
@@ -179,8 +180,9 @@ spec:
                 env:
                 - name: WATCH_NAMESPACE
                   valueFrom:
-                    fieldRef:
-                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                    configMapKeyRef:
+                      name: namespace-scope
+                      key: namespace
                 - name: POD_NAME
                   valueFrom:
                     fieldRef:
