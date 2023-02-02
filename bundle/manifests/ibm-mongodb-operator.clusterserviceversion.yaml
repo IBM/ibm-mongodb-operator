@@ -180,6 +180,7 @@ spec:
                 productMetric: FREE
                 productName: IBM Cloud Platform Common Services
               labels:
+                intent: projected
                 name: ibm-mongodb-operator
             spec:
               containers:
@@ -188,8 +189,9 @@ spec:
                 env:
                 - name: WATCH_NAMESPACE
                   valueFrom:
-                    fieldRef:
-                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                    configMapKeyRef:
+                      name: namespace-scope
+                      key: namespace
                 - name: POD_NAME
                   valueFrom:
                     fieldRef:
@@ -318,7 +320,7 @@ spec:
     type: OwnNamespace
   - supported: true
     type: SingleNamespace
-  - supported: false
+  - supported: true
     type: MultiNamespace
   - supported: true
     type: AllNamespaces
