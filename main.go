@@ -75,10 +75,10 @@ func main() {
 			Port:               9443,
 			LeaderElection:     enableLeaderElection,
 			LeaderElectionID:   "9c0e1ee9.operator.ibm.com",
-			NewCache: cache.MultiNamespacedCacheBuilder(namespaces),
+			NewCache:           cache.MultiNamespacedCacheBuilder(namespaces),
 		}
 
-	}else {
+	} else {
 		ctrlOpt = ctrl.Options{
 			Scheme:             scheme,
 			MetricsBindAddress: metricsAddr,
@@ -88,7 +88,7 @@ func main() {
 			Namespace:          watchNamespace,
 		}
 	}
-	
+
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrlOpt)
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
