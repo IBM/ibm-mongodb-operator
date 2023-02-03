@@ -647,7 +647,7 @@ func (r *MongoDBReconciler) deletev1alpha1Certs(ctx context.Context, instance *m
 
 	if err != nil {
 		if !errors.IsNotFound(err) {
-			reqLogger.Info("Unable to find v1alpha1 certificate, this can be ignored")
+			reqLogger.Info("Unable to load v1alpha1 certificate, this can be ignored")
 		}
 		return
 	}
@@ -674,7 +674,7 @@ func (r *MongoDBReconciler) deletev1alpha1Issuers(ctx context.Context, instance 
 
 	if err != nil {
 		if !errors.IsNotFound(err) {
-			reqLogger.Info("Unable to find v1alpha1 Issuer, this can be ignored")
+			reqLogger.Info("Unable to load v1alpha1 Issuer, this can be ignored")
 		}
 		return
 	}
