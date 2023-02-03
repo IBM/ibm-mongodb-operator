@@ -191,7 +191,7 @@ spec:
                   valueFrom:
                     configMapKeyRef:
                       name: namespace-scope
-                      key: namespace
+                      key: namespaces
                 - name: POD_NAME
                   valueFrom:
                     fieldRef:
