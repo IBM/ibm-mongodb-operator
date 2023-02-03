@@ -16,7 +16,7 @@
 package controllers
 
 const godIssuerYaml = `
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: god-issuer
@@ -29,7 +29,7 @@ spec:
 `
 
 const rootCertYaml = `
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: mongodb-root-ca-cert
@@ -50,7 +50,7 @@ spec:
 `
 
 const rootIssuerYaml = `
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: mongodb-root-ca-issuer
@@ -64,7 +64,7 @@ spec:
 `
 
 const clientCertYaml = `
-apiVersion: certmanager.k8s.io/v1alpha1
+apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: icp-mongodb-client-cert

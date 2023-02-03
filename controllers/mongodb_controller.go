@@ -44,10 +44,15 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/v1alpha1"
+	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 )
+
+var log = logf.Log.WithName("controller_mongodb")
 
 // MongoDBReconciler reconciles a MongoDB object
 type MongoDBReconciler struct {
@@ -87,15 +92,15 @@ type mongoDBStatefulSetData struct {
 // +kubebuilder:rbac:groups=monitoring.coreos.com,namespace=ibm-common-services,resources=servicemonitors,verbs=get;create
 // +kubebuilder:rbac:groups=apps,namespace=ibm-common-services,resourceNames=ibm-mongodb-operator,resources=deployments/finalizers,verbs=update
 // +kubebuilder:rbac:groups=operator.ibm.com,namespace=ibm-common-services,resources=mongodbs;mongodbs/finalizers;mongodbs/status,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=certmanager.k8s.io,namespace=ibm-common-services,resources=certificates;certificaterequests;orders;challenges;issuers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=certmanager.k8s.io,namespace=ibm-common-services,resources=certificates;certificaterequests;orders;challenges;issuers,verbs=get;list;watch;delete
+// +kubebuilder:rbac:groups=cert-manager.io,namespace=ibm-common-services,resources=certificates;certificaterequests;orders;challenges;issuers,verbs=get;list;watch;create;update;patch;delete
 
-func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
+func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	_ = r.Log.WithValues("mongodb", request.NamespacedName)
 
 	// Fetch the MongoDB instance
 	instance := &mongodbv1alpha1.MongoDB{}
-	err := r.Client.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.Client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -201,7 +206,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	// }
 
 	r.Log.Info("creating icp mongodb admin secret")
-	if err = r.Client.Create(context.TODO(), mongodbAdmin); err != nil && !errors.IsAlreadyExists(err) {
+	if err = r.Client.Create(ctx, mongodbAdmin); err != nil && !errors.IsAlreadyExists(err) {
 		return reconcile.Result{}, err
 	}
 
@@ -224,7 +229,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	}
 
 	r.Log.Info("creating icp mongodb metric secret")
-	if err = r.Client.Create(context.TODO(), mongodbMetric); err != nil && !errors.IsAlreadyExists(err) {
+	if err = r.Client.Create(ctx, mongodbMetric); err != nil && !errors.IsAlreadyExists(err) {
 		return reconcile.Result{}, err
 	}
 
@@ -246,7 +251,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	}
 
 	r.Log.Info("creating icp mongodb keyfile secret")
-	if err = r.Client.Create(context.TODO(), keyfileSecret); err != nil && !errors.IsAlreadyExists(err) {
+	if err = r.Client.Create(ctx, keyfileSecret); err != nil && !errors.IsAlreadyExists(err) {
 		return reconcile.Result{}, err
 	}
 
@@ -301,7 +306,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 
 	// If PVC already exist and the value does not match the PVCSizeRequest then log information that it cannot be changed.
 	pvc := &corev1.PersistentVolumeClaim{}
-	err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "mongodbdir-icp-mongodb-0", Namespace: instance.Namespace}, pvc)
+	err = r.Client.Get(ctx, types.NamespacedName{Name: "mongodbdir-icp-mongodb-0", Namespace: instance.Namespace}, pvc)
 	if err == nil {
 		PVCSizeRequest = pvc.Spec.Resources.Requests.Storage().String()
 		if instance.Spec.PVC.Resources.Requests.Storage().String() != "0" {
@@ -323,7 +328,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 
 	// Select User to use
 	cppConfig := &corev1.ConfigMap{}
-	err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "ibm-cpp-config", Namespace: instance.Namespace}, cppConfig)
+	err = r.Client.Get(ctx, types.NamespacedName{Name: "ibm-cpp-config", Namespace: instance.Namespace}, cppConfig)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -340,7 +345,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	var stsLabels map[string]string
 	var podLabels map[string]string
 
-	err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "icp-mongodb", Namespace: instance.Namespace}, sts)
+	err = r.Client.Get(ctx, types.NamespacedName{Name: "icp-mongodb", Namespace: instance.Namespace}, sts)
 	if err == nil {
 		r.Log.Info("succeeded to get statefulset check")
 		stsLabels = sts.ObjectMeta.Labels
@@ -366,7 +371,7 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	//Set Replicas
 	//Get current number of replicas in cluster based on number of PVCs
 	pvcs := &corev1.PersistentVolumeClaimList{}
-	err = r.Client.List(context.TODO(), pvcs, &client.ListOptions{
+	err = r.Client.List(ctx, pvcs, &client.ListOptions{
 		Namespace: instance.Namespace,
 	})
 	pvcCount := 0
@@ -420,35 +425,43 @@ func (r *MongoDBReconciler) Reconcile(request ctrl.Request) (ctrl.Result, error)
 	}
 
 	instance.Status.StorageClass = storageclass
-	if err := r.Client.Status().Update(context.TODO(), instance); err != nil {
+	if err := r.Client.Status().Update(ctx, instance); err != nil {
 		return reconcile.Result{}, err
 	}
 
-	// sign certificate
-	r.Log.Info("creating root-ca-cert")
-	if err := r.createFromYaml(instance, []byte(godIssuerYaml)); err != nil {
-		r.Log.Error(err, "create god-issuer fail")
+	// Check if v1alpha1 certificates exist, if yes. delete them
+	rootCert := "mongodb-root-ca-cert"
+	r.deletev1alpha1Certs(ctx, instance, rootCert)
+
+	clientCert := "icp-mongodb-client-cert"
+	r.deletev1alpha1Certs(ctx, instance, clientCert)
+
+	// Check if v1alpha1 Issuers exist, if yes. delete them
+	godIssuerName := "god-issuer"
+	r.deletev1alpha1Issuers(ctx, instance, godIssuerName)
+
+	rootIssuerName := "mongodb-root-ca-issuer"
+	r.deletev1alpha1Issuers(ctx, instance, rootIssuerName)
+
+	// create v1 issuers if they are not present
+	if err := r.createv1Issuers(ctx, instance, godIssuerName, godIssuerYaml); err != nil {
 		return reconcile.Result{}, err
 	}
-	r.Log.Info("creating root-ca-cert")
-	if err := r.createFromYaml(instance, []byte(rootCertYaml)); err != nil {
-		r.Log.Error(err, "create root-ca-cert fail")
-		return reconcile.Result{}, err
-	}
-	r.Log.Info("creating root-issuer")
-	if err := r.createFromYaml(instance, []byte(rootIssuerYaml)); err != nil {
-		r.Log.Error(err, "create root-issuer fail")
-		return reconcile.Result{}, err
-	}
-	r.Log.Info("creating icp-mongodb-client-cert")
-	if err := r.createFromYaml(instance, []byte(clientCertYaml)); err != nil {
-		r.Log.Error(err, "create icp-mongodb-client-cert fail")
+	if err := r.createv1Issuers(ctx, instance, rootIssuerName, rootIssuerYaml); err != nil {
 		return reconcile.Result{}, err
 	}
 
+	// create v1 certificates if they are not present
+	if err := r.createv1Certs(ctx, instance, rootCert, rootCertYaml); err != nil {
+		return reconcile.Result{}, err
+	}
+
+	if err := r.createv1Certs(ctx, instance, clientCert, clientCertYaml); err != nil {
+		return reconcile.Result{}, err
+	}
 	// Get the StatefulSet
 	sts = &appsv1.StatefulSet{}
-	if err = r.Client.Get(context.TODO(), types.NamespacedName{Name: "icp-mongodb", Namespace: instance.Namespace}, sts); err != nil {
+	if err = r.Client.Get(ctx, types.NamespacedName{Name: "icp-mongodb", Namespace: instance.Namespace}, sts); err != nil {
 		return reconcile.Result{}, err
 	}
 
@@ -585,6 +598,98 @@ func (r *MongoDBReconciler) addControlleronPVC(instance *mongodbv1alpha1.MongoDB
 		}
 	}
 	return nil
+}
+
+func (r *MongoDBReconciler) createv1Certs(ctx context.Context, instance *mongodbv1alpha1.MongoDB, certName string, certYaml string) error {
+	reqLogger := log.WithValues("func", "createv1Certs", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
+
+	certv1alpha1 := &certmgrv1.Certificate{}
+	err := r.Client.Get(ctx, types.NamespacedName{Name: certName, Namespace: instance.Namespace}, certv1alpha1)
+
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Creating a new v1 certificate", "Certificate.Namespace", instance.Namespace, "Certificate.Name", certName)
+		// create from yaml
+		if err := r.createFromYaml(instance, []byte(certYaml)); err != nil {
+			r.Log.Error(err, certName+" creation failed")
+			return err
+		}
+	} else if err != nil && !errors.IsNotFound(err) {
+		reqLogger.Error(err, "Failed to get v1 certificate", "Certificate.Namespace", instance.Namespace, "Certificate.Name", certName)
+	}
+	return nil
+}
+
+func (r *MongoDBReconciler) createv1Issuers(ctx context.Context, instance *mongodbv1alpha1.MongoDB, issuerName string, issuerYaml string) error {
+	reqLogger := log.WithValues("func", "createv1Issuers", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
+
+	issuerv1alpha1 := &certmgrv1alpha1.Issuer{}
+	err := r.Client.Get(ctx, types.NamespacedName{Name: issuerName, Namespace: instance.Namespace}, issuerv1alpha1)
+
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Creating a new v1 issuer", "Issuer.Namespace", instance.Namespace, "Issuer.Name", issuerName)
+		if err := r.createFromYaml(instance, []byte(issuerYaml)); err != nil {
+			r.Log.Error(err, issuerName+" creation failed")
+			return err
+		}
+		// create from yaml
+	} else if err != nil && !errors.IsNotFound(err) {
+		reqLogger.Error(err, "Failed to get v1 issuer", "Issuer.Namespace", instance.Namespace, "Issuer.Name", issuerName)
+	}
+	return nil
+}
+
+func (r *MongoDBReconciler) deletev1alpha1Certs(ctx context.Context, instance *mongodbv1alpha1.MongoDB, certName string) {
+	reqLogger := log.WithValues("func", "deletev1alpha1Certs", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
+
+	const certv1alpha1APIVersion = "certmanager.k8s.io/v1alpha1"
+	certv1alpha1 := &certmgrv1alpha1.Certificate{}
+	err := r.Client.Get(ctx, types.NamespacedName{Name: certName, Namespace: instance.Namespace}, certv1alpha1)
+
+	if err != nil {
+		if !errors.IsNotFound(err) {
+			reqLogger.Info("Unable to load v1alpha1 certificate, this can be ignored")
+		}
+		return
+	}
+	reqLogger.Info("API version is: " + certv1alpha1.APIVersion)
+	if certv1alpha1.APIVersion == certv1alpha1APIVersion {
+		reqLogger.Info("deleting cert: " + certName)
+		err = r.Client.Delete(ctx, certv1alpha1)
+		if err != nil {
+			reqLogger.Error(err, "Failed to delete v1alpha1 cert")
+		} else {
+			reqLogger.Info("Successfully deleted v1alpha1 cert")
+		}
+	} else {
+		reqLogger.Info("API version is NOT v1alpha1, returning..")
+	}
+}
+
+func (r *MongoDBReconciler) deletev1alpha1Issuers(ctx context.Context, instance *mongodbv1alpha1.MongoDB, issuerName string) {
+	reqLogger := log.WithValues("func", "deletev1alpha1Issuers", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
+
+	const issuerv1alpha1APIVersion = "certmanager.k8s.io/v1alpha1"
+	issuerv1alpha1 := &certmgrv1alpha1.Issuer{}
+	err := r.Client.Get(ctx, types.NamespacedName{Name: issuerName, Namespace: instance.Namespace}, issuerv1alpha1)
+
+	if err != nil {
+		if !errors.IsNotFound(err) {
+			reqLogger.Info("Unable to load v1alpha1 Issuer, this can be ignored")
+		}
+		return
+	}
+	reqLogger.Info("API version is: " + issuerv1alpha1.APIVersion)
+	if issuerv1alpha1.APIVersion == issuerv1alpha1APIVersion {
+		reqLogger.Info("deleting issuer: " + issuerName)
+		err = r.Client.Delete(ctx, issuerv1alpha1)
+		if err != nil {
+			reqLogger.Error(err, "Failed to delete v1alpha1 Issuer")
+		} else {
+			reqLogger.Info("Successfully deleted v1alpha1 issuer")
+		}
+	} else {
+		reqLogger.Info("API version is NOT v1alpha1, returning..")
+	}
 }
 
 // Create Random String

@@ -22,19 +22,21 @@ import (
 	"os"
 	"strings"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	storagev1 "k8s.io/api/storage/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/cache"
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	storagev1 "k8s.io/api/storage/v1"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/v1alpha1"
 	mongodbcontroller "github.com/IBM/ibm-mongodb-operator/controllers"
+	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -45,6 +47,10 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+
+	// add cert manager scheme to controller
+	utilruntime.Must(certmgr.AddToScheme(scheme))
+	utilruntime.Must(certmgrv1alpha1.AddToScheme(scheme))
 
 	utilruntime.Must(mongodbv1alpha1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
@@ -107,6 +113,12 @@ func main() {
 	}
 
 	if err := storagev1.AddToScheme(mgr.GetScheme()); err != nil {
+		setupLog.Error(err, "")
+		os.Exit(1)
+	}
+
+	// Setup Scheme for cert-manager
+	if err := certmgr.AddToScheme(mgr.GetScheme()); err != nil {
 		setupLog.Error(err, "")
 		os.Exit(1)
 	}

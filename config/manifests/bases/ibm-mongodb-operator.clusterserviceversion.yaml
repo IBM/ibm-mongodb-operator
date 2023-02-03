@@ -286,7 +286,26 @@ spec:
           - challenges
           - issuers
           verbs:
-          - '*'
+          - delete
+          - get
+          - list
+          - watch
+        - apiGroups:
+          - cert-manager.io
+          resources:
+          - certificates
+          - certificaterequests
+          - orders
+          - challenges
+          - issuers
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         serviceAccountName: ibm-mongodb-operator
     strategy: deployment
   installModes:
