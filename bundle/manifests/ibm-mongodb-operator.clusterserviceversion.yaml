@@ -312,7 +312,6 @@ spec:
           - challenges
           - issuers
           verbs:
-          - create
           - delete
           - get
           - list

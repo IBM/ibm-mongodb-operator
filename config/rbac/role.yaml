@@ -100,8 +100,6 @@ rules:
   - challenges
   - issuers
   verbs:
-  - create
-  - use
   - delete
   - get
   - list
