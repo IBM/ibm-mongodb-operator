@@ -623,7 +623,7 @@ func (r *MongoDBReconciler) createv1Certs(ctx context.Context, instance *mongodb
 func (r *MongoDBReconciler) createv1Issuers(ctx context.Context, instance *mongodbv1alpha1.MongoDB, issuerName string, issuerYaml string) error {
 	reqLogger := log.WithValues("func", "createv1Issuers", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
-	issuerv1alpha1 := &certmgrv1alpha1.Issuer{}
+	issuerv1alpha1 := &certmgrv1.Issuer{}
 	err := r.Client.Get(ctx, types.NamespacedName{Name: issuerName, Namespace: instance.Namespace}, issuerv1alpha1)
 
 	if err != nil && errors.IsNotFound(err) {
