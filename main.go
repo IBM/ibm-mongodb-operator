@@ -33,10 +33,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/v1alpha1"
-	mongodbcontroller "github.com/IBM/ibm-mongodb-operator/controllers"
 	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
+
+	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/v1alpha1"
+	mongodbcontroller "github.com/IBM/ibm-mongodb-operator/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
