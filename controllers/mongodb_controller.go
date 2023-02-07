@@ -47,9 +47,10 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/v1alpha1"
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
+
+	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/v1alpha1"
 )
 
 var log = logf.Log.WithName("controller_mongodb")
