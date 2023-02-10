@@ -47,9 +47,10 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/v1alpha1"
 	certmgrv1 "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
+
+	mongodbv1alpha1 "github.com/IBM/ibm-mongodb-operator/api/v1alpha1"
 )
 
 var log = logf.Log.WithName("controller_mongodb")
@@ -622,7 +623,7 @@ func (r *MongoDBReconciler) createv1Certs(ctx context.Context, instance *mongodb
 func (r *MongoDBReconciler) createv1Issuers(ctx context.Context, instance *mongodbv1alpha1.MongoDB, issuerName string, issuerYaml string) error {
 	reqLogger := log.WithValues("func", "createv1Issuers", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
-	issuerv1alpha1 := &certmgrv1alpha1.Issuer{}
+	issuerv1alpha1 := &certmgrv1.Issuer{}
 	err := r.Client.Get(ctx, types.NamespacedName{Name: issuerName, Namespace: instance.Namespace}, issuerv1alpha1)
 
 	if err != nil && errors.IsNotFound(err) {
