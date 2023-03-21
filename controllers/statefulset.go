@@ -93,7 +93,7 @@ spec:
           args:
             - --work-dir=/work-dir
             - --config-dir=/data/configdb
-          imagePullPolicy: "IfNotPresent"
+          imagePullPolicy: "Always"
           resources:
             limits:
               cpu: {{ .CPULimit }}
@@ -127,7 +127,7 @@ spec:
           args:
             - -on-start=/init/on-start.sh
             - "-service=icp-mongodb"
-          imagePullPolicy: "IfNotPresent"
+          imagePullPolicy: "Always"
           resources:
             limits:
               cpu: {{ .CPULimit }}
@@ -188,7 +188,7 @@ spec:
       containers:
         - name: icp-mongodb
           image: "{{ .BootstrapImage }}"
-          imagePullPolicy: "IfNotPresent"
+          imagePullPolicy: "Always"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -221,10 +221,10 @@ spec:
           livenessProbe:
             exec:
               command:
-                - mongo
-                - --ssl
-                - --sslCAFile=/data/configdb/tls.crt
-                - --sslPEMKeyFile=/work-dir/mongo.pem
+                - mongosh
+                - --tls
+                - --tlsCAFile=/data/configdb/tls.crt
+                - --tlsCertificateKeyFile=/work-dir/mongo.pem
                 - --eval
                 - "db.adminCommand('ping')"
             initialDelaySeconds: 30
@@ -235,10 +235,10 @@ spec:
           readinessProbe:
             exec:
               command:
-                - mongo
-                - --ssl
-                - --sslCAFile=/data/configdb/tls.crt
-                - --sslPEMKeyFile=/work-dir/mongo.pem
+                - mongosh
+                - --tls
+                - --tlsCAFile=/data/configdb/tls.crt
+                - --tlsCertificateKeyFile=/work-dir/mongo.pem
                 - --eval
                 - "db.adminCommand('ping')"
             initialDelaySeconds: 5
@@ -260,7 +260,7 @@ spec:
 
         - name: metrics
           image: "{{ .MetricsImage }}"
-          imagePullPolicy: "IfNotPresent"
+          imagePullPolicy: "Always"
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
