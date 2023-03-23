@@ -257,6 +257,32 @@ else
 KUSTOMIZE=$(shell which kustomize)
 endif
 
+dpl: ## Install all resources (CR/CRD's, RBCA and Operator)
+	@echo ....... Applying CRDs .......
+	- oc apply -f bundle/manifests/operator.ibm.com_mongodbs.yaml
+	@echo ....... Applying RBAC .......
+	- oc apply -f config/rbac/service_account.yaml -n ${NAMESPACE}
+	- oc apply -f config/rbac/role.yaml -n ${NAMESPACE}
+	- oc apply -f config/rbac/role_binding.yaml -n ${NAMESPACE}
+	@echo ....... Applying Operator .......
+	- oc apply -f config/manager/manager.yaml -n ${NAMESPACE}
+	@echo ....... Creating the Instance .......
+	- oc apply -f config/samples/mongodb_v1alpha1_mongodb.yaml -n ${NAMESPACE}
+
+un-dpl: ## Install all resources (CR/CRD's, RBCA and Operator)
+	@echo ....... Removing pvc .......
+	- oc delete pvc mongodbdir-icp-mongodb-0 -n ${NAMESPACE}
+	@echo ....... Removing MongoDB Instance .......
+	- oc delete -f config/samples/mongodb_v1alpha1_mongodb.yaml -n ${NAMESPACE}
+	@echo ....... Deleting Operator .......
+	- oc delete -f config/manager/manager.yaml -n ${NAMESPACE}
+	@echo ....... Deleting RBAC .......
+	- oc delete -f config/rbac/role_binding.yaml -n ${NAMESPACE}
+	- oc delete -f config/rbac/role.yaml -n ${NAMESPACE}
+	- oc delete -f config/rbac/service_account.yaml -n ${NAMESPACE}
+	@echo ....... Deleting CRDs .......
+	- oc delete -f bundle/manifests/operator.ibm.com_mongodbs.yaml
+
 ##@ Help
 help: ## Display this help
 	@echo "Usage:\n  make \033[36m<target>\033[0m"
