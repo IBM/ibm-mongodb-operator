@@ -17,8 +17,14 @@
 package v1alpha1
 
 import (
+	"context"
+	"reflect"
+	"sync"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
@@ -45,7 +51,8 @@ type MongoDBPVCSpec struct {
 
 // MongoDBStatus defines the observed state of MongoDB
 type MongoDBStatus struct {
-	StorageClass string `json:"storageClass,omitempty"`
+	StorageClass string        `json:"storageClass,omitempty"`
+	Service      ServiceStatus `json:"service,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -68,6 +75,46 @@ type MongoDBList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []MongoDB `json:"items"`
+}
+
+type ManagedResourceStatus struct {
+	ObjectName string `json:"objectName,omitempty"`
+	APIVersion string `json:"apiVersion,omitempty"`
+	Namespace  string `json:"namespace,omitempty"`
+	Kind       string `json:"kind,omitempty"`
+	Status     string `json:"status,omitempty"`
+}
+
+type ServiceStatus struct {
+	ObjectName       string                  `json:"objectName,omitempty"`
+	APIVersion       string                  `json:"apiVersion,omitempty"`
+	Namespace        string                  `json:"namespace,omitempty"`
+	Kind             string                  `json:"kind,omitempty"`
+	Status           string                  `json:"status,omitempty"`
+	ManagedResources []ManagedResourceStatus `json:"managedResources,omitempty"`
+}
+
+func (a *MongoDB) SetService(ctx context.Context, service ServiceStatus, statusClient client.StatusClient, mu sync.Locker) (err error) {
+	reqLogger := logf.FromContext(ctx).WithName("SetService")
+	mu.Lock()
+	defer mu.Unlock()
+
+	updatedServiceStatus := false
+	if !reflect.DeepEqual(service, a.Status.Service) {
+		a.Status.Service = service
+		updatedServiceStatus = true
+	}
+
+	if updatedServiceStatus {
+		reqLogger.Info("Status has changed; performing update")
+		err = statusClient.Status().Update(ctx, a)
+	} else {
+		reqLogger.Info("Status is the same; skipping update")
+	}
+	if err != nil {
+		reqLogger.Error(err, "Attempt to update failed")
+	}
+	return nil
 }
 
 func init() {

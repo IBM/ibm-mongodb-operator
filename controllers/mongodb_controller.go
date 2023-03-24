@@ -26,6 +26,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"text/template"
 	"time"
 
@@ -61,6 +62,7 @@ type MongoDBReconciler struct {
 	Reader client.Reader
 	Log    logr.Logger
 	Scheme *runtime.Scheme
+	Mutex  sync.Mutex
 }
 
 //
@@ -97,8 +99,8 @@ type mongoDBStatefulSetData struct {
 // +kubebuilder:rbac:groups=cert-manager.io,namespace=ibm-common-services,resources=certificates;certificaterequests;orders;challenges;issuers,verbs=get;list;watch;create;update;patch;delete
 
 func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
-	_ = r.Log.WithValues("mongodb", request.NamespacedName)
-
+	reqLogger := r.Log.WithValues("mongodb", request.NamespacedName)
+	reconcileCtx := logf.IntoContext(ctx, reqLogger)
 	// Fetch the MongoDB instance
 	instance := &mongodbv1alpha1.MongoDB{}
 	err := r.Client.Get(ctx, request.NamespacedName, instance)
@@ -112,6 +114,12 @@ func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request)
 		// Error reading the object - requeue the request.
 		return reconcile.Result{}, err
 	}
+	// Be sure to update status before returning if MongoDB is found
+	defer func() {
+		reqLogger.Info("Gather current service status")
+		currentServiceStatus := getCurrentServiceStatus(ctx, r.Client, instance)
+		instance.SetService(reconcileCtx, currentServiceStatus, r.Client, &r.Mutex)
+	}()
 
 	r.Log.Info("creating mongodb service account")
 	if err := r.createFromYaml(instance, []byte(mongoSA)); err != nil {
