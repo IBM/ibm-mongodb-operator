@@ -204,6 +204,7 @@ data:
     done
 
     log "Initialized."
+    sleep 36000
 
     if [[ "$AUTH" == "true" ]]; then
         update_creds_if_changed
@@ -237,7 +238,7 @@ data:
       
       mongosh "${tls_args[@]}" --eval "rs.status()" | grep "no replset config has been received"
       rsStatRetVal=$?
-      if [[ -z "${primary}" ]]  && [[ ${#peers[@]} -gt 1 ]] && [[ $rsStatRetVal -eq 0 ]]; then
+      if [[ -z "${primary}" ]]  && [[ ${#peers[@]} -gt 1 ]] && [[ $rsStatRetVal -eq 1 ]]; then
         log "waiting before creating a new replicaset, to avoid conflicts with other replicas"
         sleep 30
       else
@@ -253,7 +254,7 @@ data:
 
     elif [[ -n "${primary}" ]]; then
 
-        mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.conf().members.findIndex(m => m.host == '${service_name}:${port}')" |grep "-1"
+        mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.conf().members.findIndex(m => m.host == '${service_name}:${port}')" |grep "\-1"
         memRetVal=$?
         if [[ $memRetVal -eq 0 ]]; then
           log "Adding myself (${service_name}) to replica set..."
@@ -280,7 +281,7 @@ data:
     else
         mongosh "${tls_args[@]}" --eval "rs.status()" | grep "no replset config has been received"
         statRetVal=$?
-        if [[ $statRetVal -eq 0 ]]; then
+        if [[ $statRetVal -eq 1 ]]; then
 
             log "Initiating a new replica set with myself ($service_name)..."
 
