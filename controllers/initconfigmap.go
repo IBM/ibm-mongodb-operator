@@ -87,7 +87,7 @@ data:
           log "password has changed = $passwd_changed"
           log "checking if passwd  updated in mongo"
           mongosh admin  "${tls_args[@]}" --eval "db.auth({user: '$admin_user', pwd: '$ADMIN_PASSWORD'})" | grep "Authentication failed"
-          if [[ $? -eq 1 ]]; then
+          if [[ $? -ne 0 ]]; then
             log "New Password worked, update creds"
             echo $ADMIN_USER > $credentials_file
             echo $ADMIN_PASSWORD >> $credentials_file
@@ -257,7 +257,9 @@ data:
         memRetVal=$?
         if [[ $memRetVal -eq 0 ]]; then
           log "Adding myself (${service_name}) to replica set..."
-          if (mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --eval "rs.add('${service_name}')" | grep 'Quorum check failed'); then
+          mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --eval "rs.add('${service_name}')" | grep 'Quorum check failed'
+          rsAddRetVal=$?
+          if [[ $rsAddRetVal -eq 0 ]]; then
               log 'Quorum check failed, unable to join replicaset. Exiting.'
               exit 1
           fi
