@@ -33,6 +33,7 @@ metadata:
 data:
   on-start.sh: |
     #!/bin/bash
+    set -x
 
     ## workaround https://serverfault.com/questions/713325/openshift-unable-to-write-random-state
     export RANDFILE=/tmp/.rnd
@@ -81,25 +82,25 @@ data:
 
     #Check if Password has change and updated in mongo , if so update Creds
     function update_creds_if_changed() {
-        if [ "$admin_password" != "$ADMIN_PASSWORD" ]; then
-            passwd_changed=true
-            log "password has changed = $passwd_changed"
-            log "checking if passwd  updated in mongo"
-            mongosh admin  "${tls_args[@]}" --eval "db.auth({user: '$admin_user', pwd: '$ADMIN_PASSWORD'})" | grep "Authentication failed"
-            if [[ $? -eq 1 ]]; then
+      if [ "$admin_password" != "$ADMIN_PASSWORD" ]; then
+          passwd_changed=true
+          log "password has changed = $passwd_changed"
+          log "checking if passwd  updated in mongo"
+          mongosh admin  "${tls_args[@]}" --eval "db.auth({user: '$admin_user', pwd: '$ADMIN_PASSWORD'})" | grep "Authentication failed"
+          if [[ $? -eq 1 ]]; then
             log "New Password worked, update creds"
             echo $ADMIN_USER > $credentials_file
             echo $ADMIN_PASSWORD >> $credentials_file
             admin_password=$ADMIN_PASSWORD
             admin_auth=(-u "$admin_user" -p "$admin_password")
             passwd_updated=true
-            fi
-        fi
+          fi
+      fi
     }
 
     function update_mongo_password_if_changed() {
-        log "checking if mongo passwd needs to be  updated"
-        if [[ "$passwd_changed" == "true" ]] && [[ "$passwd_updated" != "true" ]]; then
+      log "checking if mongo passwd needs to be  updated"
+      if [[ "$passwd_changed" == "true" ]] && [[ "$passwd_updated" != "true" ]]; then
         log "Updating to new password "
         if [[ $# -eq 1 ]]; then
             mhost="--host $1"
@@ -112,7 +113,7 @@ data:
         sleep 10
         log "mongo passwd change attempted; check and update creds file if successful"
         update_creds_if_changed
-        fi
+      fi
     }
 
 
@@ -162,30 +163,29 @@ data:
     IP.1 = 127.0.0.1
     EOL
 
-    # Generate the certs
-    echo "cnf stuff" >> /work-dir/log.txt
-    echo "genrsa " >> /work-dir/log.txt
-    openssl genrsa -out mongo.key 2048 >> /work-dir/log.txt 2>&1
+        # Generate the certs
+        echo "cnf stuff" >> /work-dir/log.txt
+        echo "genrsa " >> /work-dir/log.txt
+        openssl genrsa -out mongo.key 2048 >> /work-dir/log.txt 2>&1
 
-    echo "req " >> /work-dir/log.txt
-    openssl req -new -key mongo.key -out mongo.csr -subj "/CN=$my_hostname" -config openssl.cnf >> /work-dir/log.txt 2>&1
+        echo "req " >> /work-dir/log.txt
+        openssl req -new -key mongo.key -out mongo.csr -subj "/CN=$my_hostname" -config openssl.cnf >> /work-dir/log.txt 2>&1
 
-    echo "x509 " >> /work-dir/log.txt
-    openssl x509 -req -in mongo.csr \
-        -CA $ca_crt -CAkey $ca_key -CAcreateserial \
-        -out mongo.crt -days 3650 -extensions v3_req -extfile openssl.cnf >> /work-dir/log.txt 2>&1
+        echo "x509 " >> /work-dir/log.txt
+        openssl x509 -req -in mongo.csr \
+            -CA $ca_crt -CAkey $ca_key -CAcreateserial \
+            -out mongo.crt -days 3650 -extensions v3_req -extfile openssl.cnf >> /work-dir/log.txt 2>&1
 
-    echo "mongo stuff" >> /work-dir/log.txt
+        echo "mongo stuff" >> /work-dir/log.txt
 
-    rm mongo.csr
+        rm mongo.csr
 
-    cat mongo.crt mongo.key > $pem
-    rm mongo.key mongo.crt
+        cat mongo.crt mongo.key > $pem
+        rm mongo.key mongo.crt
     fi
 
 
     log "Peers: ${peers[@]}"
-    echo "iam going to sleep proceed with your manual work"
 
     log "Starting a MongoDB instance..."
     mongod --config $config_dir/mongod.conf >> /work-dir/log.txt 2>&1 &
@@ -209,85 +209,42 @@ data:
         update_creds_if_changed
     fi
 
-    mongosh "${tls_args[@]}" --eval "rs.status()" | grep "no replset config has been received"
-    rsStatusVal=$?
-    if [[ $rsStatusVal -ne 0 ]]; then
-
-        log "Initiating a new replica set with myself ($service_name)..."
-
-        mongosh "${tls_args[@]}" --eval "rs.initiate({'_id': '$replica_set', 'members': [{'_id': 0, 'host': '$service_name'}]})"
-        mongosh "${tls_args[@]}" --eval "rs.status()"
-        sleep 3
-        log 'Waiting for replica to reach PRIMARY state...'
-
-        log ' Waiting for rs.status state to become 1'
-        mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" | grep "1"
-        stateVal=$?
-        until printf '.'  && [[ $stateVal -eq 0 ]]; do
-            sleep 1
-            mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" | grep "1"
-            stateVal=$?
-        done
-
-        log ' Waiting for master to complete primary catchup mode'
-        mongosh  "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" | grep "true"
-        masterVal=$?
-        until [[ $masterVal -eq 0 ]]; do
-            sleep 1
-            mongosh  "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" | grep "true"
-            masterVal=$?
-        done
-
-        primary="${service_name}"
-        log '✓ Replica reached PRIMARY state.'
-
-        if [[ "$AUTH" == "true" ]]; then
-            # sleep a little while just to be sure the initiation of the replica set has fully
-            # finished and we can create the user
-            sleep 3
-
-            log "Creating admin user..."
-            mongosh admin "${tls_args[@]}" --eval "db.createUser({user: '$admin_user', pwd: '$admin_password', roles: [{role: 'root', db: 'admin'}]})"
-        fi
-
-        log "Done initiating replicaset."
-    fi
-
     iter_counter=0
     while [  $iter_counter -lt 5 ]; do
-        log "primary check, iter_counter is $iter_counter"
-        # try to find a master and add yourself to its replica set.
-        for peer in "${peers[@]}"; do
-            log "Checking if ${peer} is primary"
-            mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status()"  >> log.txt
+      log "primary check, iter_counter is $iter_counter"
+      # try to find a master and add yourself to its replica set.
+      for peer in "${peers[@]}"; do
+          log "Checking if ${peer} is primary"
+          mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status()"  >> log.txt
 
-            # Check rs.status() first since it could be in primary catch up mode which db.isMaster() doesn't show
-            mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | grep "1"
-            rsStatVal=$?
-            if [[ $rsStatVal -eq 0 ]]; then
-                log "Found master ${peer}, wait while its in primary catch up mode "
-                mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" |grep "true"
-                isMasterRetVal=$?
-                until [[ $isMasterRetVal -eq 0 ]]; do
-                    sleep 1
-                    mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" |grep "true"
-                    isMasterRetVal=$?
-                done
-                primary="${peer}"
-                log "Found primary: ${primary}"
-                break
-            fi
-        done
-
-
-        if [[ -z "${primary}" ]]  && [[ ${#peers[@]} -gt 1 ]] && (mongosh "${tls_args[@]}" --eval "rs.status()" | grep "no replset config has been received"); then
+          # Check rs.status() first since it could be in primary catch up mode which db.isMaster() doesn't show
+          mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | grep "1"
+          rsStatVal=$?
+          if [[ $rsStatVal -eq 0 ]]; then
+              log "Found master ${peer}, wait while its in primary catch up mode "
+              mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" |grep "true"
+              isMasterRetVal=$?
+              until [[ $isMasterRetVal -eq 0 ]]; do
+                  sleep 1
+                  mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" |grep "true"
+                  isMasterRetVal=$?
+              done
+              primary="${peer}"
+              log "Found primary: ${primary}"
+              break
+          fi
+      done
+      
+      mongosh "${tls_args[@]}" --eval "rs.status()" | grep "no replset config has been received"
+      rsStatRetVal=$?
+      if [[ -z "${primary}" ]]  && [[ ${#peers[@]} -gt 1 ]] && [[ $rsStatRetVal -eq 0 ]]; then
         log "waiting before creating a new replicaset, to avoid conflicts with other replicas"
         sleep 30
-        else
+      else
         break
-        fi
+      fi
 
-        let iter_counter=iter_counter+1
+      let iter_counter=iter_counter+1
     done
 
 
@@ -299,11 +256,11 @@ data:
         mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.conf().members.findIndex(m => m.host == '${service_name}:${port}')" |grep "-1"
         memRetVal=$?
         if [[ $memRetVal -eq 0 ]]; then
-            log "Adding myself (${service_name}) to replica set..."
-            if (mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --eval "rs.add('${service_name}')" | grep 'Quorum check failed'); then
-                log 'Quorum check failed, unable to join replicaset. Exiting.'
-                exit 1
-            fi
+          log "Adding myself (${service_name}) to replica set..."
+          if (mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --eval "rs.add('${service_name}')" | grep 'Quorum check failed'); then
+              log 'Quorum check failed, unable to join replicaset. Exiting.'
+              exit 1
+          fi
         fi
         log "Done,  Added myself to replica set."
 
@@ -318,6 +275,52 @@ data:
         done
         log '✓ Replica reached SECONDARY state.'
 
+    else
+        mongosh "${tls_args[@]}" --eval "rs.status()" | grep "no replset config has been received"
+        statRetVal=$?
+        if [[ $statRetVal -eq 0 ]]; then
+
+            log "Initiating a new replica set with myself ($service_name)..."
+
+            mongosh "${tls_args[@]}" --eval "rs.initiate({'_id': '$replica_set', 'members': [{'_id': 0, 'host': '$service_name'}]})"
+            mongosh "${tls_args[@]}" --eval "rs.status()"
+
+            sleep 3
+
+            log 'Waiting for replica to reach PRIMARY state...'
+
+            log ' Waiting for rs.status state to become 1'
+            mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" | grep "1"
+            stateVal=$?
+            until printf '.'  && [[ $stateVal -eq 0 ]]; do
+                sleep 1
+            done
+
+            log ' Waiting for master to complete primary catchup mode'
+            mongosh  "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" | grep "true"
+            masterVal=$?
+            until [[ $masterVal -eq 0 ]]; do
+                sleep 1
+                mongosh  "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" | grep "true"
+                masterVal=$?
+            done
+
+            primary="${service_name}"
+            log '✓ Replica reached PRIMARY state.'
+
+
+            if [[ "$AUTH" == "true" ]]; then
+                # sleep a little while just to be sure the initiation of the replica set has fully
+                # finished and we can create the user
+                sleep 3
+
+                log "Creating admin user..."
+                mongosh admin "${tls_args[@]}" --eval "db.createUser({user: '$admin_user', pwd: '$admin_password', roles: [{role: 'root', db: 'admin'}]})"
+            fi
+
+        log "Done initiating replicaset."
+        fi
+
     fi
 
     log "Primary: ${primary}"
@@ -325,6 +328,7 @@ data:
     if [[  -n "${primary}"   && "$AUTH" == "true" ]]; then
         # you r master and passwd has changed.. then update passwd
         update_mongo_password_if_changed $primary
+
         if [[ "$METRICS" == "true" ]]; then
             log "Checking if metrics user is already created ..."
             metric_user_count=$(mongosh admin --host "${primary}" "${admin_auth[@]}" "${tls_args[@]}" --eval "db.system.users.find({user: '${metrics_user}'}).count()" --quiet)
