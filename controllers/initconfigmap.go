@@ -204,7 +204,6 @@ data:
     done
 
     log "Initialized."
-    sleep 36000
 
     if [[ "$AUTH" == "true" ]]; then
         update_creds_if_changed
