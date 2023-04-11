@@ -266,10 +266,10 @@ data:
 
         sleep 3
         log 'Waiting for replica to reach SECONDARY state...'
-        mystateVal=(mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
+        mystateVal=$(mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
         until printf '.'  && [[ $mystateVal -eq 2 ]]; do
             sleep 1
-            mystateVal=(mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
+            mystateVal=$(mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
         done
         log '✓ Replica reached SECONDARY state.'
 
