@@ -218,9 +218,8 @@ data:
           mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status()"  >> log.txt
 
           # Check rs.status() first since it could be in primary catch up mode which db.isMaster() doesn't show
-          mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | grep "1"
-          rsStatVal=$?
-          if [[ $rsStatVal -eq 0 ]]; then
+          rsStatVal=$(mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
+          if [[ $rsStatVal -eq 1 ]]; then
               log "Found master ${peer}, wait while its in primary catch up mode "
               mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" |grep "true"
               isMasterRetVal=$?
@@ -253,9 +252,8 @@ data:
 
     elif [[ -n "${primary}" ]]; then
 
-        mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.conf().members.findIndex(m => m.host == '${service_name}:${port}')" |grep "\-1"
-        memRetVal=$?
-        if [[ $memRetVal -eq 0 ]]; then
+        memRetVal=$(mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.conf().members.findIndex(m => m.host == '${service_name}:${port}')" |tail -1)
+        if [[ $memRetVal -eq -1 ]]; then
           log "Adding myself (${service_name}) to replica set..."
           mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --eval "rs.add('${service_name}')" | grep 'Quorum check failed'
           rsAddRetVal=$?
@@ -268,12 +266,10 @@ data:
 
         sleep 3
         log 'Waiting for replica to reach SECONDARY state...'
-        mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | grep "2"
-        mystateVal=$?
-        until printf '.'  && [[ $mystateVal -eq 0 ]]; do
+        mystateVal=(mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
+        until printf '.'  && [[ $mystateVal -eq 2 ]]; do
             sleep 1
-            mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | grep "2"
-            mystateVal=$?
+            mystateVal=(mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
         done
         log '✓ Replica reached SECONDARY state.'
 
@@ -292,10 +288,11 @@ data:
             log 'Waiting for replica to reach PRIMARY state...'
 
             log ' Waiting for rs.status state to become 1'
-            mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" | grep "1"
+            stateVal=$(mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
             stateVal=$?
-            until printf '.'  && [[ $stateVal -eq 0 ]]; do
+            until printf '.'  && [[ $stateVal -eq 1 ]]; do
                 sleep 1
+                stateVal=$(mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
             done
 
             log ' Waiting for master to complete primary catchup mode'
