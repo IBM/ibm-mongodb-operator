@@ -289,7 +289,6 @@ data:
 
             log ' Waiting for rs.status state to become 1'
             stateVal=$(mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
-            stateVal=$?
             until printf '.'  && [[ $stateVal -eq 1 ]]; do
                 sleep 1
                 stateVal=$(mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
