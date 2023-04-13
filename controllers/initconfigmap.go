@@ -86,7 +86,8 @@ data:
           passwd_changed=true
           log "password has changed = $passwd_changed"
           log "checking if passwd  updated in mongo"
-          mongosh admin  "${tls_args[@]}" --eval "db.auth({user: '$admin_user', pwd: '$ADMIN_PASSWORD'})" | grep "Authentication failed"
+          mongosh admin  "${tls_args[@]}" --eval "db.auth({user: '$admin_user', pwd: '$ADMIN_PASSWORD'})" > /work-dir/auth.txt 2>&1
+          cat /work-dir/auth.txt | grep "Authentication failed"
           if [[ $? -ne 0 ]]; then
             log "New Password worked, update creds"
             echo $ADMIN_USER > $credentials_file
@@ -218,25 +219,33 @@ data:
           mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status()"  >> log.txt
 
           # Check rs.status() first since it could be in primary catch up mode which db.isMaster() doesn't show
-          rsStatVal=$(mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
-          if [[ $rsStatVal -eq 1 ]]; then
-              log "Found master ${peer}, wait while its in primary catch up mode "
-              mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" |grep "true"
-              isMasterRetVal=$?
-              until [[ $isMasterRetVal -eq 0 ]]; do
-                  sleep 1
-                  mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" |grep "true"
-                  isMasterRetVal=$?
-              done
-              primary="${peer}"
-              log "Found primary: ${primary}"
-              break
+          mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState"
+          stateVal=$?
+          if [[ $stateVal -eq 0 ]]; then
+            mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" > /work-dir/myState.txt 2>&1
+            state=$(cat /work-dir/myState.txt | tail -c 2)
+            if [[ $state -eq 1 ]]; then
+                log "Found master ${peer}, wait while its in primary catch up mode "
+                mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" > /work-dir/isMaster1.txt 2>&1
+                cat /work-dir/isMaster1.txt |grep "true"
+                isMasterRetVal=$?
+                until [[ $isMasterRetVal -eq 0 ]]; do
+                    sleep 1
+                    mongosh admin --host "${peer}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" > /work-dir/isMaster11.txt 2>&1
+                    cat /work-dir/isMaster11.txt |grep "true"
+                    isMasterRetVal=$?
+                done
+                primary="${peer}"
+                log "Found primary: ${primary}"
+                break
+            fi
           fi
       done
       
-      mongosh "${tls_args[@]}" --eval "rs.status()" | grep "no replset config has been received"
+      mongosh "${tls_args[@]}" --eval "rs.status()" > /work-dir/rsStatus.txt 2>&1
+      cat /work-dir/rsStatus.txt |grep "no replset config has been received"
       rsStatRetVal=$?
-      if [[ -z "${primary}" ]]  && [[ ${#peers[@]} -gt 1 ]] && [[ $rsStatRetVal -eq 1 ]]; then
+      if [[ -z "${primary}" ]]  && [[ ${#peers[@]} -gt 1 ]] && [[ $rsStatRetVal -eq 0 ]]; then
         log "waiting before creating a new replicaset, to avoid conflicts with other replicas"
         sleep 30
       else
@@ -251,11 +260,13 @@ data:
         log "This replica is already PRIMARY"
 
     elif [[ -n "${primary}" ]]; then
-
-        memRetVal=$(mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.conf().members.findIndex(m => m.host == '${service_name}:${port}')" |tail -1)
-        if [[ $memRetVal -eq -1 ]]; then
+        mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.conf().members.findIndex(m => m.host == '${service_name}:${port}')" > /work-dir/mem.txt 2>&1
+        cat /work-dir/mem.txt | grep "\-1"
+        memRetVal=$?
+        if [[ $memRetVal -eq 0 ]]; then
           log "Adding myself (${service_name}) to replica set..."
-          mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --eval "rs.add('${service_name}')" | grep 'Quorum check failed'
+          mongosh admin --host "${primary}" --ipv6 "${admin_auth[@]}" "${tls_args[@]}" --eval "rs.add('${service_name}')" > /work-dir/rsAdd.txt 2>&1
+          cat /work-dir/rsAdd.txt | grep "Quorum check failed"
           rsAddRetVal=$?
           if [[ $rsAddRetVal -eq 0 ]]; then
               log 'Quorum check failed, unable to join replicaset. Exiting.'
@@ -266,17 +277,20 @@ data:
 
         sleep 3
         log 'Waiting for replica to reach SECONDARY state...'
-        mystateVal=$(mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
-        until printf '.'  && [[ $mystateVal -eq 2 ]]; do
+        mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" > /work-dir/myState2.txt 2>&1
+        state=$(cat /work-dir/myState2.txt | tail -c 2)
+        until printf '.'  && [[ $state -eq 2 ]]; do
             sleep 1
-            mystateVal=$(mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
+            mongosh admin "${admin_auth[@]}" "${tls_args[@]}" --quiet --eval "rs.status().myState" > /work-dir/myState22.txt 2>&1
+            state=$(cat /work-dir/myState22.txt | tail -c 2)
         done
         log '✓ Replica reached SECONDARY state.'
 
     else
-        mongosh "${tls_args[@]}" --eval "rs.status()" | grep "no replset config has been received"
+        mongosh "${tls_args[@]}" --eval "rs.status()" > /work-dir/rsStatus1.txt 2>&1
+        cat /work-dir/rsStatus1.txt | grep "no replset config has been received"
         statRetVal=$?
-        if [[ $statRetVal -eq 1 ]]; then
+        if [[ $statRetVal -eq 0 ]]; then
 
             log "Initiating a new replica set with myself ($service_name)..."
 
@@ -288,18 +302,22 @@ data:
             log 'Waiting for replica to reach PRIMARY state...'
 
             log ' Waiting for rs.status state to become 1'
-            stateVal=$(mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
-            until printf '.'  && [[ $stateVal -eq 1 ]]; do
+            mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" > /work-dir/myState3.txt 2>&1
+            mystatus=$(cat /work-dir/myState3.txt | tail -c 2)
+            until printf '.'  && [[ $mystatus -eq 1 ]]; do
                 sleep 1
-                stateVal=$(mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" | tail -1)
+                mongosh "${tls_args[@]}" --quiet --eval "rs.status().myState" > /work-dir/myState33.txt 2>&1
+                mystatus=$(cat /work-dir/myState33.txt | tail -c 2)
             done
 
             log ' Waiting for master to complete primary catchup mode'
-            mongosh  "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" | grep "true"
+            mongosh  "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster"  > /work-dir/isMaster2.txt 2>&1
+            cat /work-dir/isMaster2.txt |grep "true"
             masterVal=$?
             until [[ $masterVal -eq 0 ]]; do
                 sleep 1
-                mongosh  "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster" | grep "true"
+                mongosh  "${tls_args[@]}" --quiet --eval "db.isMaster().ismaster"  > /work-dir/isMaster22.txt 2>&1
+                cat /work-dir/isMaster22.txt |grep "true"
                 masterVal=$?
             done
 
