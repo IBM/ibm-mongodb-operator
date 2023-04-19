@@ -76,6 +76,15 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 90
+            podAffinityTerm:
+              topologyKey: topology.kubernetes.io/zone
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - icp-mongodb
           - weight: 50
             podAffinityTerm:
               topologyKey: kubernetes.io/hostname
