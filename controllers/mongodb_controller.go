@@ -76,7 +76,6 @@ type mongoDBStatefulSetData struct {
 	StorageClass   string
 	InitImage      string
 	BootstrapImage string
-	MetricsImage   string
 	CPULimit       string
 	CPURequest     string
 	MemoryLimit    string
@@ -216,29 +215,6 @@ func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request)
 
 	r.Log.Info("creating icp mongodb admin secret")
 	if err = r.Client.Create(ctx, mongodbAdmin); err != nil && !errors.IsAlreadyExists(err) {
-		return reconcile.Result{}, err
-	}
-
-	mongodbMetric := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels:    metadatalabel,
-			Name:      "icp-mongodb-metrics",
-			Namespace: instance.GetNamespace(),
-		},
-		Type: corev1.SecretTypeOpaque,
-		StringData: map[string]string{
-			"user":     "metrics",
-			"password": "icpmetrics",
-		},
-	}
-
-	// Set CommonServiceConfig instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, mongodbMetric, r.Scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	r.Log.Info("creating icp mongodb metric secret")
-	if err = r.Client.Create(ctx, mongodbMetric); err != nil && !errors.IsAlreadyExists(err) {
 		return reconcile.Result{}, err
 	}
 
@@ -410,7 +386,6 @@ func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request)
 		StorageClass:   storageclass,
 		InitImage:      os.Getenv("IBM_MONGODB_INSTALL_IMAGE"),
 		BootstrapImage: os.Getenv("IBM_MONGODB_IMAGE"),
-		MetricsImage:   os.Getenv("IBM_MONGODB_EXPORTER_IMAGE"),
 		CPULimit:       cpuLimit,
 		CPURequest:     cpuRequest,
 		MemoryLimit:    memoryLimit,

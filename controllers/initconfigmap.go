@@ -61,10 +61,6 @@ data:
         admin_password=$(tail -n 1 $credentials_file)
         admin_auth=(-u "$admin_user" -p "$admin_password")
         log "Original User: $admin_user"
-        if [[ "$METRICS" == "true" ]]; then
-            metrics_user="$METRICS_USER"
-            metrics_password="$METRICS_PASSWORD"
-        fi
     fi
 
     function shutdown_mongo() {
@@ -300,18 +296,6 @@ data:
         # you r master and passwd has changed.. then update passwd
         update_mongo_password_if_changed $primary
 
-        if [[ "$METRICS" == "true" ]]; then
-            log "Checking if metrics user is already created ..."
-            metric_user_count=$(mongo admin --host "${primary}" "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.system.users.find({user: '${metrics_user}'}).count()" --quiet)
-            log "User count is ${metric_user_count} "
-            if [[ "${metric_user_count}" == "0" ]]; then
-                log "Creating clusterMonitor user... user - ${metrics_user}  "
-                mongo admin --host "${primary}" "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.createUser({user: '${metrics_user}', pwd: '${metrics_password}', roles: [{role: 'clusterMonitor', db: 'admin'}, {role: 'read', db: 'local'}]})"
-                log "User creation return code is $? "
-                metric_user_count=$(mongo admin --host "${primary}" "${admin_auth[@]}" "${ssl_args[@]}" --eval "db.system.users.find({user: '${metrics_user}'}).count()" --quiet)
-                log "User count now is ${metric_user_count} "
-            fi
-        fi
     fi
 
     log "MongoDB bootstrap complete"
