@@ -47,12 +47,6 @@ spec:
                   tag:
                     type: string
                 type: object
-              metricsImage:
-                description: 'NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.'
-                properties:
-                  tag:
-                    type: string
-                type: object
               pvc:
                 description: MongoDBPVCSpec defines the desired state of the MongoDB PVCs
                 properties:

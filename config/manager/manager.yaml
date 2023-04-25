@@ -75,5 +75,3 @@ spec:
               value: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.11
             - name: IBM_MONGODB_IMAGE
               value: icr.io/cpopen/cpfs/ibm-mongodb:3.19.11-mongodb.4.0.24
-            - name: IBM_MONGODB_EXPORTER_IMAGE
-              value: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.11

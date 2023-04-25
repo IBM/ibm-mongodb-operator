@@ -43,9 +43,6 @@ spec:
         productName: "IBM Cloud Platform Common Services"
         productID: "068a62892a1e4db39641342e592daa25"
         productMetric: "FREE"
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9216"
-        prometheus.io/path: "/metrics"
         clusterhealth.ibm.com/dependencies: {{ .NamespaceName }}.cert-manager
     spec:
       serviceAccountName: ibm-mongodb-operand
@@ -158,18 +155,6 @@ spec:
                 secretKeyRef:
                   name: "icp-mongodb-admin"
                   key: password
-            - name: METRICS
-              value: "true"
-            - name: METRICS_USER
-              valueFrom:
-                secretKeyRef:
-                  name: "icp-mongodb-metrics"
-                  key: user
-            - name: METRICS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "icp-mongodb-metrics"
-                  key: password
             - name: NETWORK_IP_VERSION
               value: ipv4
           volumeMounts:
@@ -257,89 +242,6 @@ spec:
               mountPath: /work-dir
             - name: tmp-mongodb
               mountPath: /tmp
-
-        - name: metrics
-          image: "{{ .MetricsImage }}"
-          imagePullPolicy: "IfNotPresent"
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-          command:
-            - sh
-            - -ec
-            - >-
-              /bin/mongodb_exporter
-              --mongodb.uri mongodb://$METRICS_USER:$METRICS_PASSWORD@localhost:27017
-              --mongodb.tls
-              --mongodb.tls-ca=/data/configdb/tls.crt
-              --mongodb.tls-cert=/work-dir/mongo.pem
-              --mongodb.socket-timeout=3s
-              --mongodb.sync-timeout=1m
-              --web.telemetry-path=/metrics
-              --web.listen-address=:9216
-          volumeMounts:
-            - name: configdir
-              mountPath: /data/configdb
-            - name: mongodbdir
-              subPath: workdir
-              mountPath: /work-dir
-            - name: tmp-metrics
-              mountPath: /tmp
-          env:
-            - name: METRICS_USER
-              valueFrom:
-                secretKeyRef:
-                  name: "icp-mongodb-metrics"
-                  key: user
-            - name: METRICS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "icp-mongodb-metrics"
-                  key: password
-          ports:
-            - name: metrics
-              containerPort: 9216
-          resources:
-            requests:
-              cpu: 100m
-              memory: 300Mi
-            limits:
-              cpu: 1000m
-              memory: 350Mi
-          readinessProbe:
-            exec:
-              command:
-                - sh
-                - -ec
-                - >-
-                  /bin/mongodb_exporter
-                  --mongodb.uri mongodb://$METRICS_USER:$METRICS_PASSWORD@localhost:27017
-                  --mongodb.tls
-                  --mongodb.tls-ca=/data/configdb/tls.crt
-                  --mongodb.tls-cert=/work-dir/mongo.pem
-                  --test
-              initialDelaySeconds: 30
-              timeoutSeconds: 10
-              failureThreshold: 10
-              periodSeconds: 30
-              successThreshold: 1
-          livenessProbe:
-            exec:
-              command:
-                - sh
-                - -ec
-                - >-
-                  /bin/mongodb_exporter
-                  --mongodb.uri mongodb://$METRICS_USER:$METRICS_PASSWORD@localhost:27017
-                  --mongodb.tls
-                  --mongodb.tls-ca=/data/configdb/tls.crt
-                  --mongodb.tls-cert=/work-dir/mongo.pem
-                  --test
-            initialDelaySeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 10
-            periodSeconds: 30
-            successThreshold: 1
       tolerations:
         - effect: NoSchedule
           key: dedicated
@@ -375,8 +277,6 @@ spec:
         - name: configdir
           emptyDir: {}
         - name: tmp-mongodb
-          emptyDir: {}
-        - name: tmp-metrics
           emptyDir: {}
   volumeClaimTemplates:
     - metadata:

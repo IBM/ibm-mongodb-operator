@@ -39,7 +39,6 @@ type MongoDBSpec struct {
 	StorageClass   string                      `json:"storageClass,omitempty"`
 	InitImage      Image                       `json:"initImage,omitempty"`
 	BootstrapImage Image                       `json:"bootstrapImage,omitempty"`
-	MetricsImage   Image                       `json:"metricsImage,omitempty"`
 	Resources      corev1.ResourceRequirements `json:"resources,omitempty"`
 	PVC            MongoDBPVCSpec              `json:"pvc,omitempty"`
 }
