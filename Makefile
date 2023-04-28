@@ -81,7 +81,7 @@ endif
 
 ##@ Development
 
-check: lint-all ## Check all files lint error
+## check: lint-all ## Check all files lint error
 
 code-dev: ## Run the default dev commands which are the go tidy, fmt, vet then execute the $ make code-gen
 	@echo Running the common required commands for developments purposes
