@@ -86,11 +86,6 @@ spec:
         path: replicas
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:label'
-      - description: This image is used to export data of how MongoDB is running.
-        displayName: Metrics Image
-        path: metricsImage
-        x-descriptors:
-        - 'urn:alm:descriptor:com.tectonic.ui:label'
       - description: This image is used to initialize the envorinment for MongoDB.
         displayName: Install Image
         path: initImage
@@ -183,8 +178,6 @@ spec:
                   value: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.8
                 - name: IBM_MONGODB_IMAGE
                   value: icr.io/cpopen/cpfs/ibm-mongodb:3.19.6-mongodb.4.0.24
-                - name: IBM_MONGODB_EXPORTER_IMAGE
-                  value: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.8
                 image: icr.io/cpopen/ibm-mongodb-operator:4.0.0
                 imagePullPolicy: Always
                 name: ibm-mongodb-operator
@@ -344,8 +337,6 @@ spec:
       image: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.11
     - name: IBM_MONGODB_IMAGE
       image: icr.io/cpopen/cpfs/ibm-mongodb:3.19.11-mongodb.4.0.24
-    - name: IBM_MONGODB_EXPORTER_IMAGE
-      image: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.11
     - name: IBM_MONGODB_OPERATOR_IMAGE
       image: icr.io/cpopen/ibm-mongodb-operator:4.0.0
   version: 4.0.0

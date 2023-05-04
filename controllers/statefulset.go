@@ -43,9 +43,6 @@ spec:
         productName: "IBM Cloud Platform Common Services"
         productID: "068a62892a1e4db39641342e592daa25"
         productMetric: "FREE"
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "9216"
-        prometheus.io/path: "/metrics"
         clusterhealth.ibm.com/dependencies: {{ .NamespaceName }}.cert-manager
     spec:
       serviceAccountName: ibm-mongodb-operand
@@ -157,18 +154,6 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: "icp-mongodb-admin"
-                  key: password
-            - name: METRICS
-              value: "true"
-            - name: METRICS_USER
-              valueFrom:
-                secretKeyRef:
-                  name: "icp-mongodb-metrics"
-                  key: user
-            - name: METRICS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: "icp-mongodb-metrics"
                   key: password
             - name: NETWORK_IP_VERSION
               value: ipv4
@@ -292,8 +277,6 @@ spec:
         - name: configdir
           emptyDir: {}
         - name: tmp-mongodb
-          emptyDir: {}
-        - name: tmp-metrics
           emptyDir: {}
   volumeClaimTemplates:
     - metadata:

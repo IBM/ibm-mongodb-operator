@@ -101,7 +101,6 @@ func (in *MongoDBSpec) DeepCopyInto(out *MongoDBSpec) {
 	*out = *in
 	out.InitImage = in.InitImage
 	out.BootstrapImage = in.BootstrapImage
-	out.MetricsImage = in.MetricsImage
 	in.Resources.DeepCopyInto(&out.Resources)
 }
 

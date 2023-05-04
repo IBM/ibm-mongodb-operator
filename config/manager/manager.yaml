@@ -75,5 +75,3 @@ spec:
               value: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.11
             - name: IBM_MONGODB_IMAGE
               value: docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-scratch-docker-local/ibmcom/ibm-mongodb-amd64:4.0.0-mongodb.6.0.4
-            - name: IBM_MONGODB_EXPORTER_IMAGE
-              value: docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-scratch-docker-local/ibmcom/ibm-mongodb-exporter-amd64:4.0.0-exporter.0.37.0
