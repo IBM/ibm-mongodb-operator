@@ -179,7 +179,7 @@ spec:
                 - name: IBM_MONGODB_IMAGE
                   value: icr.io/cpopen/cpfs/ibm-mongodb:3.19.6-mongodb.4.0.24
                 image: icr.io/cpopen/ibm-mongodb-operator:4.0.0
-                imagePullPolicy: Always
+                imagePullPolicy: IfNotPresent
                 name: ibm-mongodb-operator
                 resources:
                   limits:
