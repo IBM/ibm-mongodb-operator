@@ -205,7 +205,7 @@ spec:
                 - name: IBM_MONGODB_EXPORTER_IMAGE
                   value: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.14
                 image: icr.io/cpopen/ibm-mongodb-operator:1.18.4
-                imagePullPolicy: Always
+                imagePullPolicy: IfNotPresent
                 name: ibm-mongodb-operator
                 resources:
                   limits:
