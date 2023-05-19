@@ -325,11 +325,11 @@ spec:
                   --mongodb.tls-ca=/data/configdb/tls.crt
                   --mongodb.tls-cert=/work-dir/mongo.pem
                   --test
-              initialDelaySeconds: 30
-              timeoutSeconds: 10
-              failureThreshold: 10
-              periodSeconds: 30
-              successThreshold: 1
+            initialDelaySeconds: 25
+            timeoutSeconds: 10
+            failureThreshold: 10
+            periodSeconds: 30
+            successThreshold: 1
           livenessProbe:
             exec:
               command:
