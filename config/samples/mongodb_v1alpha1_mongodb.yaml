@@ -1,9 +1,9 @@
 apiVersion: operator.ibm.com/v1alpha1
 kind: MongoDB
 metadata:
-  name: mongodb-sample
+  name: ibm-mongodb
 spec:
-  replicas: 3
+  replicas: 1
   resources:
     limits:
       cpu: 1000m

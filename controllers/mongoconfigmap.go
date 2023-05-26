@@ -41,10 +41,10 @@ data:
     net:
       bindIpAll: true
       port: 27017
-      ssl:
-        mode: requireSSL
+      tls:
+        mode: requireTLS
         CAFile: /data/configdb/tls.crt
-        PEMKeyFile: /work-dir/mongo.pem
+        certificateKeyFile: /work-dir/mongo.pem
     replication:
       replSetName: rs0
     # Uncomment for TLS support or keyfile access control without TLS

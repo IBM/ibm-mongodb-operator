@@ -282,7 +282,6 @@ un-dpl: ## Install all resources (CR/CRD's, RBCA and Operator)
 	- oc delete -f config/rbac/service_account.yaml -n ${NAMESPACE}
 	@echo ....... Deleting CRDs .......
 	- oc delete -f bundle/manifests/operator.ibm.com_mongodbs.yaml
-
 ##@ Help
 help: ## Display this help
 	@echo "Usage:\n  make \033[36m<target>\033[0m"
