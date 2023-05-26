@@ -306,6 +306,14 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - operator.ibm.com
+          resources:
+          - operandrequests
+          verbs:
+          - delete
+          - get
+          - list
         serviceAccountName: ibm-mongodb-operator
     strategy: deployment
   installModes:
