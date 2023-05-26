@@ -460,6 +460,8 @@ func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request)
 	}
 	r.Log.Info("Mongodb is ready")
 
+	//Delete the mongodb operand request that may have been created by odlm prior to upgrade to cp 3.0
+	DeleteGenericResource(ctx, "ibm-mongodb-request", instance.Namespace, "operator.ibm.com", "v1alpha1", "operandrequests")
 	return ctrl.Result{}, nil
 }
 

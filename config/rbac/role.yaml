@@ -120,3 +120,11 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - operator.ibm.com
+  resources:
+  - operandrequests
+  verbs:
+  - delete
+  - get
+  - list
