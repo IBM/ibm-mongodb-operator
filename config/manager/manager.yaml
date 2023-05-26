@@ -72,6 +72,6 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-mongodb-operator"
             - name: IBM_MONGODB_INSTALL_IMAGE
-              value: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.11
+              value: icr.io/cpopen/cpfs/ibm-mongodb-install:4.0.0
             - name: IBM_MONGODB_IMAGE
-              value: icr.io/cpopen/cpfs/ibm-mongodb:3.19.11-mongodb.4.0.24
+              value: icr.io/cpopen/cpfs/ibm-mongodb:4.0.0-mongodb.4.0.25

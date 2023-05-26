@@ -175,9 +175,9 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-mongodb-operator
                 - name: IBM_MONGODB_INSTALL_IMAGE
-                  value: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.8
+                  value: icr.io/cpopen/cpfs/ibm-mongodb-install:4.0.0
                 - name: IBM_MONGODB_IMAGE
-                  value: icr.io/cpopen/cpfs/ibm-mongodb:3.19.6-mongodb.4.0.24
+                  value: icr.io/cpopen/cpfs/ibm-mongodb:4.0.0-mongodb.4.0.25
                 image: icr.io/cpopen/ibm-mongodb-operator:4.0.0
                 imagePullPolicy: IfNotPresent
                 name: ibm-mongodb-operator
@@ -342,9 +342,9 @@ spec:
     name: IBM
   relatedImages:
     - name: IBM_MONGODB_INSTALL_IMAGE
-      image: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.11
+      image: icr.io/cpopen/cpfs/ibm-mongodb-install:4.0.0
     - name: IBM_MONGODB_IMAGE
-      image: icr.io/cpopen/cpfs/ibm-mongodb:3.19.11-mongodb.4.0.24
+      image: icr.io/cpopen/cpfs/ibm-mongodb:4.0.0-mongodb.4.0.25
     - name: IBM_MONGODB_OPERATOR_IMAGE
       image: icr.io/cpopen/ibm-mongodb-operator:4.0.0
   version: 4.0.0
