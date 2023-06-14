@@ -64,18 +64,25 @@ spec:
         whenUnsatisfiable: ScheduleAnyway
         labelSelector:
           matchLabels:
-            key: app
-            values: icp-mongodb
+            app: icp-mongodb
       - maxSkew: 1
         topologyKey: topology.kubernetes.io/region
         whenUnsatisfiable: ScheduleAnyway
         labelSelector:
           matchLabels:
-            key: app
-            values: icp-mongodb
+            app: icp-mongodb
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 90
+            podAffinityTerm:
+              topologyKey: topology.kubernetes.io/zone
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - icp-mongodb
           - weight: 50
             podAffinityTerm:
               topologyKey: kubernetes.io/hostname
@@ -318,11 +325,11 @@ spec:
                   --mongodb.tls-ca=/data/configdb/tls.crt
                   --mongodb.tls-cert=/work-dir/mongo.pem
                   --test
-              initialDelaySeconds: 30
-              timeoutSeconds: 10
-              failureThreshold: 10
-              periodSeconds: 30
-              successThreshold: 1
+            initialDelaySeconds: 25
+            timeoutSeconds: 10
+            failureThreshold: 10
+            periodSeconds: 30
+            successThreshold: 1
           livenessProbe:
             exec:
               command:
