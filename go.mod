@@ -9,7 +9,7 @@ require (
 	github.com/go-logr/zapr v1.2.0 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/ibm/ibm-cert-manager-operator v0.0.0-20220602233809-3a62073266c7
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.23.4
 	k8s.io/apiextensions-apiserver v0.23.4 // indirect
 	k8s.io/apimachinery v0.23.4
