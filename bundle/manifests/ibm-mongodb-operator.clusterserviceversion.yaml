@@ -19,6 +19,7 @@ metadata:
             "requests": {
               "cpu": "1000m",
               "memory": "2Gi"
+              "ephemeral-storage": "280Mi"
             }
           }
         }
