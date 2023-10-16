@@ -65,7 +65,6 @@ type MongoDBReconciler struct {
 	Mutex  sync.Mutex
 }
 
-//
 const mongodbOperatorURI = `mongodbs.operator.ibm.com`
 const defaultPVCSize = `20Gi`
 
@@ -353,6 +352,8 @@ func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request)
 		return reconcile.Result{}, err
 	}
 
+	stsLabels = MergeMap(instance.Spec.Labels, stsLabels)
+	podLabels = MergeMap(instance.Spec.Labels, podLabels)
 	//Set Replicas
 	//Get current number of replicas in cluster based on number of PVCs
 	pvcs := &corev1.PersistentVolumeClaimList{}
@@ -699,4 +700,16 @@ func (r *MongoDBReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&appsv1.StatefulSet{}).Owns(&corev1.ConfigMap{}).Owns(&corev1.ServiceAccount{}).
 		Owns(&corev1.Service{}).
 		Complete(r)
+}
+
+//  merge two label maps into one
+
+func MergeMap(in map[string]string, mergeMap map[string]string) map[string]string {
+	if in == nil {
+		in = make(map[string]string)
+	}
+	for k, v := range mergeMap {
+		in[k] = v
+	}
+	return in
 }

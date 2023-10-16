@@ -36,6 +36,7 @@ type Image struct {
 type MongoDBSpec struct {
 	ImageRegistry  string                      `json:"imageRegistry,omitempty"`
 	Replicas       int                         `json:"replicas,omitempty"`
+	Labels         map[string]string           `json:"labels,omitempty"`
 	StorageClass   string                      `json:"storageClass,omitempty"`
 	InitImage      Image                       `json:"initImage,omitempty"`
 	BootstrapImage Image                       `json:"bootstrapImage,omitempty"`
