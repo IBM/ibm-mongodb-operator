@@ -19,6 +19,7 @@ metadata:
             "requests": {
               "cpu": "1000m",
               "memory": "2Gi"
+              "ephemeral-storage": "280Mi"
             }
           }
         }
@@ -188,6 +189,7 @@ spec:
                   requests:
                     cpu: 40m
                     memory: 200Mi
+                    ephemeral-storage: 256Mi
                 securityContext:
                   allowPrivilegeEscalation: false
                   capabilities:

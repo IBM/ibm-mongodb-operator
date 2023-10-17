@@ -1,4 +1,3 @@
-//
 // Copyright 2021 IBM Corporation
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
 package controllers
 
 const statefulset = `
@@ -105,6 +103,7 @@ spec:
             requests:
               cpu: {{ .CPURequest }}
               memory: {{ .MemoryRequest }}
+              ephemeral-storage: {{ .EphemeralStorage }}
           volumeMounts:
             - name: mongodbdir
               subPath: workdir
@@ -139,6 +138,7 @@ spec:
             requests:
               cpu: {{ .CPURequest }}
               memory: {{ .MemoryRequest }}
+              ephemeral-storage: {{ .EphemeralStorage }}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -194,6 +194,7 @@ spec:
             requests:
               cpu: {{ .CPURequest }}
               memory: {{ .MemoryRequest }}
+              ephemeral-storage: {{ .EphemeralStorage }}
           command:
             - mongod
             - --config=/data/configdb/mongod.conf
@@ -282,9 +283,11 @@ spec:
             defaultMode: 0755
             secretName: icp-mongodb-keyfile
         - name: configdir
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: "150Mi"
         - name: tmp-mongodb
-          emptyDir: {}
+          emptyDir:
+            sizeLimit: "100Mi"
   volumeClaimTemplates:
     - metadata:
         name: mongodbdir

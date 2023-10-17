@@ -65,26 +65,26 @@ type MongoDBReconciler struct {
 	Mutex  sync.Mutex
 }
 
-//
 const mongodbOperatorURI = `mongodbs.operator.ibm.com`
 const defaultPVCSize = `20Gi`
 
 // MongoDB StatefulSet Data
 type mongoDBStatefulSetData struct {
-	Replicas       int
-	ImageRepo      string
-	StorageClass   string
-	InitImage      string
-	BootstrapImage string
-	CPULimit       string
-	CPURequest     string
-	MemoryLimit    string
-	MemoryRequest  string
-	NamespaceName  string
-	StsLabels      map[string]string
-	PodLabels      map[string]string
-	PVCSize        string
-	UserID         int
+	Replicas         int
+	ImageRepo        string
+	StorageClass     string
+	InitImage        string
+	BootstrapImage   string
+	CPULimit         string
+	CPURequest       string
+	MemoryLimit      string
+	MemoryRequest    string
+	NamespaceName    string
+	StsLabels        map[string]string
+	PodLabels        map[string]string
+	PVCSize          string
+	UserID           int
+	EphemeralStorage string
 }
 
 // +kubebuilder:rbac:groups=mongodb.operator.ibm.com,namespace=ibm-common-services,resources=mongodbs,verbs=get;list;watch;create;update;patch;delete
@@ -265,6 +265,7 @@ func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request)
 	memoryRequest := "5Gi"
 	cpuLimit := "2000m"
 	memoryLimit := "5Gi"
+	ephemeralStorage := "280Mi"
 
 	// Check cpu request values and default if not there
 	if instance.Spec.Resources.Requests.Cpu().String() != "0" {
@@ -276,6 +277,10 @@ func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request)
 		memoryRequest = instance.Spec.Resources.Requests.Memory().String()
 	}
 
+	// Check ephemeral storge request values and default if not there
+	if instance.Spec.Resources.Requests.StorageEphemeral().String() != "0" {
+		ephemeralStorage = instance.Spec.Resources.Requests.StorageEphemeral().String()
+	}
 	// Check cpu limit values and default if not there
 	if instance.Spec.Resources.Limits.Cpu().String() != "0" {
 		cpuLimit = instance.Spec.Resources.Limits.Cpu().String()
@@ -381,20 +386,21 @@ func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request)
 		r.Log.Info("PVC count: " + strconv.Itoa(pvcCount))
 	}
 	stsData := mongoDBStatefulSetData{
-		Replicas:       replicas,
-		ImageRepo:      instance.Spec.ImageRegistry,
-		StorageClass:   storageclass,
-		InitImage:      os.Getenv("IBM_MONGODB_INSTALL_IMAGE"),
-		BootstrapImage: os.Getenv("IBM_MONGODB_IMAGE"),
-		CPULimit:       cpuLimit,
-		CPURequest:     cpuRequest,
-		MemoryLimit:    memoryLimit,
-		MemoryRequest:  memoryRequest,
-		NamespaceName:  instance.Namespace,
-		StsLabels:      stsLabels,
-		PodLabels:      podLabels,
-		PVCSize:        PVCSizeRequest,
-		UserID:         uid,
+		Replicas:         replicas,
+		ImageRepo:        instance.Spec.ImageRegistry,
+		StorageClass:     storageclass,
+		InitImage:        os.Getenv("IBM_MONGODB_INSTALL_IMAGE"),
+		BootstrapImage:   os.Getenv("IBM_MONGODB_IMAGE"),
+		CPULimit:         cpuLimit,
+		CPURequest:       cpuRequest,
+		MemoryLimit:      memoryLimit,
+		MemoryRequest:    memoryRequest,
+		NamespaceName:    instance.Namespace,
+		StsLabels:        stsLabels,
+		PodLabels:        podLabels,
+		PVCSize:          PVCSizeRequest,
+		UserID:           uid,
+		EphemeralStorage: ephemeralStorage,
 	}
 
 	var stsYaml bytes.Buffer
