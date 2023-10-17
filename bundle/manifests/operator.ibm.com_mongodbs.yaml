@@ -74,6 +74,10 @@ spec:
                         type: object
                     type: object
                 type: object
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
               replicas:
                 type: integer
               resources:
