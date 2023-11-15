@@ -119,7 +119,7 @@ spec:
         x-descriptors:
         - 'urn:alm:descriptor:com.tectonic.ui:podStatuses'
   description: |-
-      **Important:** Do not install this operator directly. Only install this operator by using the IBM Common Services Operator. For more information about installing this operator and other Common Services operators, see [Installer documentation](https://ibm.biz/cpfs_4-3_install). Additionally, you can exit this panel and navigate to the IBM Common Services tile in OperatorHub to learn more about the operator. If you are using this operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak to learn more about how to install and use the operator service. For more information about IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](https://www.ibm.com/docs/en/cloud-paks).
+      **Important:** Do not install this operator directly. Only install this operator by using the IBM Common Services Operator. For more information about installing this operator and other Common Services operators, see [Installer documentation](https://ibm.biz/cpfs_4-3_install). Additionally, you can exit this panel and navigate to the IBM Common Services tile in OperatorHub to learn more about the operator. If you are using this operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak to learn more about how to install and use the operator service. For more information about IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](https://ibm.biz/cp_welcome).
 
       The MongoDB operator provides a simple Kubernetes CRD-Based API to manage the lifecycle of MongoDB. You can use the operator to deploy and upgrade MongoDB.
 
@@ -143,7 +143,7 @@ spec:
 
       To install the operator with the IBM Common Services Operator follow the the installation and configuration instructions within the IBM Knowledge Center.
 
-      - If you are using the operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak. For a list of IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](https://www.ibm.com/docs/en/cloud-paks).
+      - If you are using the operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak. For a list of IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](https://ibm.biz/cp_welcome).
       - If you are using the operator with an IBM Containerized Software, see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](https://ibm.biz/cpfs_4-3_install).
   displayName: IBM MongoDB Operator
   icon:
