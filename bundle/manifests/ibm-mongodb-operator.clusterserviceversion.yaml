@@ -49,7 +49,7 @@ metadata:
     operators.operatorframework.io/internal-objects: '["mongodbs.operator.ibm.com"]'
     operators.operatorframework.io/operator-type: 'non-standalone'
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v2
-    olm.skipRange: '<1.18.7'
+    olm.skipRange: '<1.18.10'
   labels:
     app.kubernetes.io/instance: mongodbs.operator.ibm.com
     app.kubernetes.io/managed-by: mongodbs.operator.ibm.com
@@ -58,7 +58,7 @@ metadata:
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
-  name: ibm-mongodb-operator.v1.18.7
+  name: ibm-mongodb-operator.v1.18.10
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -199,12 +199,12 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-mongodb-operator
                 - name: IBM_MONGODB_INSTALL_IMAGE
-                  value: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.17
+                  value: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.20
                 - name: IBM_MONGODB_IMAGE
-                  value: icr.io/cpopen/cpfs/ibm-mongodb:3.19.17-mongodb.4.0.24
+                  value: icr.io/cpopen/cpfs/ibm-mongodb:3.19.20-mongodb.4.0.24
                 - name: IBM_MONGODB_EXPORTER_IMAGE
-                  value: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.17
-                image: icr.io/cpopen/ibm-mongodb-operator:1.18.7
+                  value: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.20
+                image: icr.io/cpopen/ibm-mongodb-operator:1.18.10
                 imagePullPolicy: IfNotPresent
                 name: ibm-mongodb-operator
                 resources:
@@ -360,11 +360,11 @@ spec:
     name: IBM
   relatedImages:
     - name: IBM_MONGODB_INSTALL_IMAGE
-      image: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.17
+      image: icr.io/cpopen/cpfs/ibm-mongodb-install:3.19.20
     - name: IBM_MONGODB_IMAGE
-      image: icr.io/cpopen/cpfs/ibm-mongodb:3.19.17-mongodb.4.0.24
+      image: icr.io/cpopen/cpfs/ibm-mongodb:3.19.20-mongodb.4.0.24
     - name: IBM_MONGODB_EXPORTER_IMAGE
-      image: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.17
+      image: icr.io/cpopen/cpfs/ibm-mongodb-exporter:3.19.20
     - name: IBM_MONGODB_OPERATOR_IMAGE
-      image: icr.io/cpopen/ibm-mongodb-operator:1.18.7
-  version: 1.18.7
+      image: icr.io/cpopen/ibm-mongodb-operator:1.18.10
+  version: 1.18.10
