@@ -57,7 +57,7 @@ spec:
             readOnlyRootFilesystem: true
             runAsNonRoot: true
           # Replace this with the built image name
-          image: icr.io/cpopen/ibm-mongodb-operator:4.2.1
+          image: icr.io/cpopen/ibm-mongodb-operator:4.2.2
           command:
           - '/manager'
           imagePullPolicy: Always
@@ -73,6 +73,6 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-mongodb-operator"
             - name: IBM_MONGODB_INSTALL_IMAGE
-              value: icr.io/cpopen/cpfs/ibm-mongodb-install:4.2.1
+              value: icr.io/cpopen/cpfs/ibm-mongodb-install:4.2.2
             - name: IBM_MONGODB_IMAGE
-              value: icr.io/cpopen/cpfs/ibm-mongodb:4.2.1-mongodb.4.0.24
+              value: icr.io/cpopen/cpfs/ibm-mongodb:4.2.2-mongodb.4.0.24
