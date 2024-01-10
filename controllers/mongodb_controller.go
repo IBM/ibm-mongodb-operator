@@ -19,10 +19,9 @@ package controllers
 import (
 	"bytes"
 	"context"
-	"crypto/rand"
 	"fmt"
 	"math"
-	"math/big"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -63,7 +62,6 @@ type MongoDBReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//
 const mongodbOperatorURI = `mongodbs.operator.ibm.com`
 const defaultPVCSize = `20Gi`
 
@@ -185,7 +183,7 @@ func (r *MongoDBReconciler) Reconcile(ctx context.Context, request ctrl.Request)
 	// TODO: allow user to give a Secret
 	var pass, user string
 	user = createRandomAlphaNumeric(8)
-	pass = createRandomAlphaNumeric(13)
+	pass = createRandomAlphaNumeric(15)
 	mongodbAdmin := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Labels: map[string]string{
@@ -695,15 +693,15 @@ func (r *MongoDBReconciler) deletev1alpha1Issuers(ctx context.Context, instance 
 
 // Create Random String
 func createRandomAlphaNumeric(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyz" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	nbig, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
-	n := int(nbig.Int64())
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	seed := rand.NewSource(time.Now().UnixNano())
+	random := rand.New(seed)
 
-	byteString := make([]byte, length)
-	for i := range byteString {
-		byteString[i] = charset[n]
+	result := make([]byte, length)
+	for i := range result {
+		result[i] = charset[random.Intn(len(charset))]
 	}
-	return string(byteString)
+	return string(result)
 }
 
 // Move to separate file?
