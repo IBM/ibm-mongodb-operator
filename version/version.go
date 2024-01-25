@@ -17,5 +17,5 @@ package version
 
 var (
 	// Version for MongoDB operator
-	Version = "4.2.2"
+	Version = "4.2.3"
 )
