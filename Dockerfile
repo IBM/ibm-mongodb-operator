@@ -1,5 +1,5 @@
 # Build the manager binary
-FROM golang:1.20.12-bullseye as builder
+FROM golang:1.21.8-bullseye as builder
 
 
 WORKDIR /workspace
